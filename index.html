@@ -1022,7 +1022,7 @@
                 <input type="text" id="playerName" placeholder="✍️ Nom de la machine">
                 <button id="addPlayerBtn" onclick="addPlayer()" class="btn-add">
                     <span class="add-icon">
-    			<img src="https://cdn.discordapp.com/attachments/530153978244235271/1353076668100513872/slot-machine_2.png?ex=67e05658&is=67df04d8&hm=92abb15d786bce3f7290db713da8ab735dc935cc193d21fe9ad8bbacff1b48f7&" 
+    			<img src="./slot.png" 
          		alt="Slot Machine" width="20" height="20">
 		    </span> 
 		    Ajouter la Slot
@@ -1033,7 +1033,7 @@
             
             <button id="launchDraw" onclick="launchDraw()" style="display: none; width: 100%;">
                 <span class="shuffle-icon">
-    		<img src="https://cdn.discordapp.com/attachments/530153978244235271/1353065618215145522/casino_1.png?ex=67e04c0e&is=67defa8e&hm=3ba37b5b270b43b6d6dc32e4c8f6bd25108daf80622f9a0f480dd1700a02d972&" 
+    		<img src="./de.png" 
          	alt="Dé" class="dice-icon">
 		</span> 
 		Lancer le tirage
@@ -1050,7 +1050,7 @@
             
             <!-- Bouton pour effacer toutes les données -->
             <button id="clearDataBtn" onclick="showConfirmDialog('Effacer toutes les données', 'Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.', clearAllData)" class="btn-outline" style="width: 100%; margin-top: 1rem;">
-                <img src="https://cdn.discordapp.com/attachments/530153978244235271/1353031941095559178/bin.png?ex=67e02cb0&is=67dedb30&hm=dba68e3b30478ad23d85819b9ccd044a77e484de0ae22c90a8af702cb589f121&" alt="Poubelle" width="16" height="16" style="margin-right: 0.5rem;"> Effacer toutes les données
+                <img src="./poubelle.png" alt="Poubelle" width="16" height="16" style="margin-right: 0.5rem;"> Effacer toutes les données
             </button>
             
             <!-- Bouton pour afficher les résultats des tournois précédents -->
@@ -1277,10 +1277,10 @@
 	function updateThemeToggleIcon() {
     	    const themeToggle = document.getElementById('themeToggle');
     	    if (document.documentElement.className === 'dark') {
-        	themeToggle.innerHTML = '<img src="https://cdn.discordapp.com/attachments/530153978244235271/1353034945878163466/contrast.png?ex=67e02f7d&is=67deddfd&hm=3d797803d4610569884c0c8817664153df62ae5ebccf316c443b73264dc989af&" alt="Soleil" width="20" height="20">';
+        	themeToggle.innerHTML = '<img src="./soleil.png" alt="Soleil" width="20" height="20">';
         	themeToggle.setAttribute('aria-label', 'Passer au thème clair');
     	    } else {
-        	themeToggle.innerHTML = '<img src="https://cdn.discordapp.com/attachments/530153978244235271/1353035792725049354/moon_1.png?ex=67e03047&is=67dedec7&hm=a9fcd79bb97d5bd59067854f7da0a8ea3c717b48cb8d0aa103c2e7b5ec337a0c&" alt="Lune" width="20" height="20">';
+        	themeToggle.innerHTML = '<img src="./lune.png" alt="Lune" width="20" height="20">';
         	themeToggle.setAttribute('aria-label', 'Passer au thème sombre');
     	    }
 	}
@@ -1537,7 +1537,7 @@
                 }
                 
                 const removeButton = document.createElement('button');
-                removeButton.innerHTML = '<img src="https://cdn.discordapp.com/attachments/530153978244235271/1353036184284303453/close.png?ex=67e030a4&is=67dedf24&hm=d01d5ed35aa3f0057f1681b136ae1c02c0c09ab10b9e187f3b7f54b1c91ed9ba&" alt="Supprimer" width="16" height="16">';
+                removeButton.innerHTML = '<img src="./croix.png" alt="Supprimer" width="16" height="16">';
                 removeButton.className = 'remove-btn';
                 removeButton.title = 'Retirer ce joueur';
                 removeButton.onclick = function() { removePlayer(index); };
