@@ -198,20 +198,22 @@
 
         .match { 
             border: 1px solid var(--border-color); 
-            padding: 0.75rem; /* Reduced from 1rem */
+            padding: 0.5rem; /* Reduced from 0.75rem */
             display: flex; 
             flex-direction: column; 
-            gap: 0.5rem; 
+            gap: 0.25rem; /* Reduced from 0.5rem */
             border-radius: 0.5rem; 
             background: var(--card-bg); 
             box-shadow: 0 2px 8px var(--shadow-color);
             position: relative;
             z-index: 2;
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+            min-width: 150px; /* Added to ensure minimum width */
+            max-width: 220px; /* Added to limit maximum width */
         }
 
         .player-btn { 
-            padding: 0.5rem; 
+            padding: 0.4rem; /* Reduced from 0.5rem */
             cursor: pointer; 
             background: var(--btn-bg); 
             color: var(--btn-text); 
@@ -222,6 +224,7 @@
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
+            font-size: 0.9rem; /* Added to make text slightly smaller */
         }
 
         .player-btn:hover { 
@@ -995,6 +998,69 @@
     background-color: #e69009;
 }
 
+.score-inputs {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    justify-content: center;
+}
+
+.score-inputs input {
+    padding: 0.25rem;
+    width: 40px;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-bottom: 0;
+}
+
+.score-separator {
+    display: flex;
+    align-items: center;
+    color: var(--muted-text);
+}
+
+.score-display {
+    font-size: 0.9rem;
+    color: var(--muted-text);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.score-note {
+    font-size: 0.75rem;
+    color: var(--muted-text);
+    text-align: center;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    font-style: italic;
+}
+
+.score-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    background-color: var(--item-bg);
+    border-radius: 0.25rem;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.score-box-label {
+    font-size: 0.8rem;
+    color: var(--muted-text);
+    margin-bottom: 0.25rem;
+}
+
+.score-box-value {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
     </style>
 </head>
 <body>
@@ -1290,7 +1356,7 @@
             for (let i = 0; i < 4; i++) {
                 matches[i] = [];
                 for (let j = 0; j < Math.pow(2, 4 - i - 1); j++) {
-                    matches[i][j] = { p1: '', p2: '' };
+                    matches[i][j] = { p1: '', p2: '', score1: '', score2: '' };
                 }
             }
             renderBracket();
@@ -1376,74 +1442,186 @@
             }
         }
 
-        // Rendre les boutons de match
-        function renderMatchButtons(i, j) {
-            const match = matches[i][j];
-            const p1HasCheckmark = match.p1 && match.p1.includes(' ✓');
-            const p2HasCheckmark = match.p2 && match.p2.includes(' ✓');
-            const p1Name = match.p1 ? match.p1.replace(' ✓', '') : '';
-            const p2Name = match.p2 ? match.p2.replace(' ✓', '') : '';
-            
-            // Vérifier si les deux joueurs sont présents
-            const bothPlayersPresent = match.p1 && match.p2;
-            const matchCompleted = p1HasCheckmark || p2HasCheckmark;
-            
-            // Classes et attributs pour le joueur 1
-            let p1Classes = 'player-btn';
-            let p1Disabled = 'disabled';
-            if (match.p1) {
-                if (p1HasCheckmark) {
-                    p1Classes += ' winner';
-                } else if (!bothPlayersPresent) {
-                    p1Classes += ' waiting';
-                } else if (!matchCompleted && !tournamentCompleted) {
-                    p1Disabled = '';
-                }
-            }
-            
-            // Classes et attributs pour le joueur 2
-            let p2Classes = 'player-btn';
-            let p2Disabled = 'disabled';
-            if (match.p2) {
-                if (p2HasCheckmark) {
-                    p2Classes += ' winner';
-                } else if (!bothPlayersPresent) {
-                    p2Classes += ' waiting';
-                } else if (!matchCompleted && !tournamentCompleted) {
-                    p2Disabled = '';
-                }
-            }
-            
-            // Ajouter le checkmark pour le gagnant
-            const p1Display = p1HasCheckmark ? `${p1Name} <span class="checkmark">✓</span>` : match.p1;
-            const p2Display = p2HasCheckmark ? `${p2Name} <span class="checkmark">✓</span>` : match.p2;
-            
-            const btn1 = match.p1 
-                ? `<button class="${p1Classes}" ${p1Disabled} 
-                    onclick="setWinner(${i}, ${j}, '${p1Name}')">${p1Display}</button>` 
-                : `<button class="player-btn" disabled>---</button>`;
-                
-            const btn2 = match.p2 
-                ? `<button class="${p2Classes}" ${p2Disabled} 
-                    onclick="setWinner(${i}, ${j}, '${p2Name}')">${p2Display}</button>` 
-                : `<button class="player-btn" disabled>---</button>`;
-            
-            let matchHtml = `${btn1}${btn2}`;
-            
-            // Ajouter un message d'information si un seul joueur est présent
-            if ((match.p1 && !match.p2) || (!match.p1 && match.p2)) {
-                matchHtml += `<div class="match-info">En attente du second joueur</div>`;
-            }
-            
-            // Ajouter un bouton d'annulation si le match est terminé et que le tournoi n'est pas terminé
-            if (matchCompleted && !tournamentCompleted) {
-                matchHtml += `<button class="undo-match-btn" onclick="showUndoConfirmDialog(${i}, ${j})">
-                    <span class="undo-icon">↺</span> Annuler ce match
-                </button>`;
-            }
-            
-            return matchHtml;
+/* Now update the renderMatchButtons function to improve the score display */
+function renderMatchButtons(i, j) {
+    const match = matches[i][j];
+    const p1HasCheckmark = match.p1 && match.p1.includes(' ✓');
+    const p2HasCheckmark = match.p2 && match.p2.includes(' ✓');
+    const p1Name = match.p1 ? match.p1.replace(' ✓', '') : '';
+    const p2Name = match.p2 ? match.p2.replace(' ✓', '') : '';
+    
+    // Vérifier si les deux joueurs sont présents
+    const bothPlayersPresent = match.p1 && match.p2;
+    const matchCompleted = p1HasCheckmark || p2HasCheckmark;
+    
+    // Classes et attributs pour le joueur 1
+    let p1Classes = 'player-btn';
+    let p1Disabled = 'disabled';
+    if (match.p1) {
+        if (p1HasCheckmark) {
+            p1Classes += ' winner';
+        } else if (!bothPlayersPresent) {
+            p1Classes += ' waiting';
+        } else if (!matchCompleted && !tournamentCompleted) {
+            p1Disabled = '';
         }
+    }
+    
+    // Classes et attributs pour le joueur 2
+    let p2Classes = 'player-btn';
+    let p2Disabled = 'disabled';
+    if (match.p2) {
+        if (p2HasCheckmark) {
+            p2Classes += ' winner';
+        } else if (!bothPlayersPresent) {
+            p2Classes += ' waiting';
+        } else if (!matchCompleted && !tournamentCompleted) {
+            p2Disabled = '';
+        }
+    }
+    
+    // Ajouter le checkmark pour le gagnant
+    const p1Display = p1HasCheckmark ? `${p1Name} <span class="checkmark">✓</span>` : match.p1;
+    const p2Display = p2HasCheckmark ? `${p2Name} <span class="checkmark">✓</span>` : match.p2;
+    
+    const btn1 = match.p1 
+        ? `<button class="${p1Classes}" ${p1Disabled} 
+            onclick="setWinner(${i}, ${j}, '${p1Name}')">${p1Display}</button>` 
+        : `<button class="player-btn" disabled>---</button>`;
+        
+    const btn2 = match.p2 
+        ? `<button class="${p2Classes}" ${p2Disabled} 
+            onclick="setWinner(${i}, ${j}, '${p2Name}')">${p2Display}</button>` 
+        : `<button class="player-btn" disabled>---</button>`;
+    
+    let matchHtml = `${btn1}${btn2}`;
+    
+    // Ajouter un message d'information si un seul joueur est présent
+    if ((match.p1 && !match.p2) || (!match.p1 && match.p2)) {
+        matchHtml += `<div class="match-info">En attente du second joueur</div>`;
+    }
+    
+    // Ajouter les champs de score si les deux joueurs sont présents
+    if (bothPlayersPresent) {
+        // Si le match est terminé, afficher les scores dans une boîte de score
+        if (matchCompleted) {
+            if (match.score1 !== '' || match.score2 !== '') {
+                matchHtml += `
+                <div class="score-box">
+                    <div class="score-box-value">
+                        <span>${match.score1 || '0'}</span>
+                        <span>-</span>
+                        <span>${match.score2 || '0'}</span>
+                    </div>
+                </div>`;
+            }
+        } else {
+            // Sinon, afficher les champs de saisie de score
+            matchHtml += `
+            <div class="score-inputs">
+                <input type="number" min="0" class="score-input" id="score1-${i}-${j}" 
+                    value="${match.score1}" placeholder="0" 
+                    onchange="updateScore(${i}, ${j}, 'score1', this.value)">
+                <span class="score-separator">-</span>
+                <input type="number" min="0" class="score-input" id="score2-${i}-${j}" 
+                    value="${match.score2}" placeholder="0" 
+                    onchange="updateScore(${i}, ${j}, 'score2', this.value)">
+            </div>`;
+        }
+    }
+    
+    // Ajouter un bouton d'annulation si le match est terminé et que le tournoi n'est pas terminé
+    if (matchCompleted && !tournamentCompleted) {
+        matchHtml += `<button class="undo-match-btn" onclick="showUndoConfirmDialog(${i}, ${j})">
+            <span class="undo-icon">↺</span> Annuler ce match
+        </button>`;
+    }
+    
+    return matchHtml;
+}
+
+// Fix the setWinner function to properly advance players to the next round
+function setWinner(roundIndex, matchIndex, winnerName) {
+    // Vérifier si le tournoi est déjà terminé
+    if (tournamentCompleted) {
+        showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error");
+        return;
+    }
+    
+    const match = matches[roundIndex][matchIndex];
+    
+    // Vérifier si les deux joueurs sont présents
+    if (!match.p1 || !match.p2) {
+        showToast("Action impossible", "Impossible de déterminer un gagnant tant que les deux joueurs ne sont pas présents !", "error");
+        return;
+    }
+    
+    // Nettoyer les noms des joueurs (enlever les checkmarks s'ils existent)
+    const p1Name = match.p1.replace(' ✓', '');
+    const p2Name = match.p2.replace(' ✓', '');
+    
+    // Déterminer le perdant
+    let loserName = p1Name === winnerName ? p2Name : p1Name;
+    
+    // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
+    if (!eliminated.includes(loserName)) {
+        eliminated.push(loserName);
+        const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
+        if (playerElement) playerElement.classList.add('eliminated');
+        
+        // Ajouter à l'historique des éliminations
+        const roundNames = ["Huitièmes", "Quarts", "Demi-finales", "Finale"];
+        eliminationHistory.push({
+            winner: winnerName,
+            loser: loserName,
+            round: roundIndex,
+            roundName: roundNames[roundIndex],
+            time: new Date()
+        });
+        
+        // Afficher le bouton d'historique des éliminations s'il n'est pas déjà visible
+        document.getElementById('eliminationHistoryBtn').style.display = 'block';
+        
+        showToast(`${loserName} éliminé !`, `${winnerName} remporte le match et avance au prochain tour.`, "success");
+    }
+
+    // Marquer le match actuel comme terminé
+    if (p1Name === winnerName) {
+        matches[roundIndex][matchIndex].p1 = winnerName + ' ✓';
+        matches[roundIndex][matchIndex].p2 = loserName;
+    } else {
+        matches[roundIndex][matchIndex].p2 = winnerName + ' ✓';
+        matches[roundIndex][matchIndex].p1 = loserName;
+    }
+    
+    const nextRound = roundIndex + 1;
+    const nextMatchIndex = Math.floor(matchIndex / 2);
+    
+    // Faire avancer le gagnant au prochain tour
+    if (nextRound < 4) {
+        const nextMatch = matches[nextRound][nextMatchIndex];
+        
+        // Déterminer si le joueur doit être placé en position p1 ou p2
+        // Si le match actuel a un index pair, le gagnant va en p1, sinon en p2
+        if (matchIndex % 2 === 0) {
+            nextMatch.p1 = winnerName;
+            nextMatch.score1 = '';
+        } else {
+            nextMatch.p2 = winnerName;
+            nextMatch.score2 = '';
+        }
+        
+        renderBracket();
+    } else {
+        // C'est la finale, nous avons un gagnant du tournoi
+        winner = winnerName;
+        tournamentCompleted = true; // Marquer le tournoi comme terminé
+        showVictoryMessage(winnerName);
+    }
+    
+    // Sauvegarder les données
+    saveDataToLocalStorage();
+}
 
         // Ajouter un joueur
         function addPlayer() {
@@ -1634,14 +1812,16 @@
                 const matchIndex = Math.floor(i / 2);
                 if (i % 2 === 0) {
                     matches[0][matchIndex].p1 = players[i];
+                    matches[0][matchIndex].score1 = '';
                 } else {
                     matches[0][matchIndex].p2 = players[i];
+                    matches[0][matchIndex].score2 = '';
                 }
             }
             renderBracket();
         }
 
-        // Définir le gagnant d'un match
+        // Modifier la fonction setWinner pour que les scores n'influencent pas le vainqueur
         function setWinner(roundIndex, matchIndex, winnerName) {
             // Vérifier si le tournoi est déjà terminé
             if (tournamentCompleted) {
@@ -1695,6 +1875,9 @@
                 matches[roundIndex][matchIndex].p1 = loserName;
             }
             
+            // Conserver les scores existants (ne pas les réinitialiser)
+            // Les scores sont maintenant purement informatifs
+            
             const nextRound = roundIndex + 1;
             const nextMatchIndex = Math.floor(matchIndex / 2);
             
@@ -1706,8 +1889,12 @@
                 // Si le match actuel a un index pair, le gagnant va en p1, sinon en p2
                 if (matchIndex % 2 === 0) {
                     nextMatch.p1 = winnerName;
+                    // Ne pas réinitialiser le score1, juste le définir s'il n'existe pas
+                    if (nextMatch.score1 === undefined) nextMatch.score1 = '';
                 } else {
                     nextMatch.p2 = winnerName;
+                    // Ne pas réinitialiser le score2, juste le définir s'il n'existe pas
+                    if (nextMatch.score2 === undefined) nextMatch.score2 = '';
                 }
                 
                 renderBracket();
@@ -1722,146 +1909,103 @@
             saveDataToLocalStorage();
         }
 
-        // Afficher la boîte de dialogue de confirmation d'annulation
-        function showUndoConfirmDialog(roundIndex, matchIndex) {
-            const match = matches[roundIndex][matchIndex];
+        // Ajouter une note explicative dans la fonction renderMatchButtons
+        function renderMatchButtons(i, j) {
+            const match = matches[i][j];
+            const p1HasCheckmark = match.p1 && match.p1.includes(' ✓');
+            const p2HasCheckmark = match.p2 && match.p2.includes(' ✓');
+            const p1Name = match.p1 ? match.p1.replace(' ✓', '') : '';
+            const p2Name = match.p2 ? match.p2.replace(' ✓', '') : '';
             
-            // Déterminer le gagnant et le perdant
-            let winnerName, loserName;
-            if (match.p1 && match.p1.includes(' ✓')) {
-                winnerName = match.p1.replace(' ✓', '');
-                loserName = match.p2;
-            } else if (match.p2 && match.p2.includes(' ✓')) {
-                winnerName = match.p2.replace(' ✓', '');
-                loserName = match.p1;
-            } else {
-                showToast("Erreur", "Impossible de déterminer le gagnant de ce match.", "error");
-                return;
-            }
+            // Vérifier si les deux joueurs sont présents
+            const bothPlayersPresent = match.p1 && match.p2;
+            const matchCompleted = p1HasCheckmark || p2HasCheckmark;
             
-            // Vérifier si ce match a des conséquences sur les tours suivants
-            const nextRound = roundIndex + 1;
-            const nextMatchIndex = Math.floor(matchIndex / 2);
-            let hasConsequences = false;
-            let consequenceMessage = "";
-            
-            if (nextRound < 4) {
-                const nextMatch = matches[nextRound][nextMatchIndex];
-                if (nextMatch.p1 === winnerName || nextMatch.p2 === winnerName) {
-                    hasConsequences = true;
-                    
-                    // Vérifier si le match suivant est déjà joué
-                    if ((nextMatch.p1 && nextMatch.p1.includes(' ✓')) || 
-                        (nextMatch.p2 && nextMatch.p2.includes(' ✓'))) {
-                        consequenceMessage = `<strong>Attention :</strong> Le joueur ${winnerName} a déjà participé au tour suivant. Annuler ce match réinitialisera également le résultat du match suivant.`;
-                    } else {
-                        consequenceMessage = `<strong>Note :</strong> Le joueur ${winnerName} sera retiré du match suivant.`;
-                    }
+            // Classes et attributs pour le joueur 1
+            let p1Classes = 'player-btn';
+            let p1Disabled = 'disabled';
+            if (match.p1) {
+                if (p1HasCheckmark) {
+                    p1Classes += ' winner';
+                } else if (!bothPlayersPresent) {
+                    p1Classes += ' waiting';
+                } else if (!matchCompleted && !tournamentCompleted) {
+                    p1Disabled = '';
                 }
             }
             
-            // Mettre à jour le message de confirmation
-            const messageElement = document.getElementById('undoConfirmMessage');
-            messageElement.innerHTML = `Êtes-vous sûr de vouloir annuler le résultat du match entre <strong>${match.p1.replace(' ✓', '')}</strong> et <strong>${match.p2.replace(' ✓', '')}</strong> ?`;
-            
-            if (hasConsequences) {
-                messageElement.innerHTML += `<br><br>${consequenceMessage}`;
-            }
-            
-            // Configurer le bouton de confirmation
-            const confirmButton = document.getElementById('undoConfirmBtn');
-            confirmButton.onclick = function() {
-                undoMatch(roundIndex, matchIndex);
-                closeUndoConfirmDialog();
-            };
-            
-            // Afficher la boîte de dialogue
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('undoConfirmDialog').style.display = 'block';
-        }
-
-        // Fermer la boîte de dialogue de confirmation d'annulation
-        function closeUndoConfirmDialog() {
-            document.getElementById('undoConfirmDialog').style.display = 'none';
-            document.getElementById('overlay').style.display = 'none';
-        }
-
-        // Annuler le résultat d'un match
-        function undoMatch(roundIndex, matchIndex) {
-            const match = matches[roundIndex][matchIndex];
-            
-            // Déterminer le gagnant et le perdant
-            let winnerName, loserName;
-            if (match.p1 && match.p1.includes(' ✓')) {
-                winnerName = match.p1.replace(' ✓', '');
-                loserName = match.p2;
-            } else if (match.p2 && match.p2.includes(' ✓')) {
-                winnerName = match.p2.replace(' ✓', '');
-                loserName = match.p1;
-            } else {
-                showToast("Erreur", "Impossible de déterminer le gagnant de ce match.", "error");
-                return;
-            }
-            
-            // Retirer le checkmark du gagnant
-            match.p1 = match.p1.replace(' ✓', '');
-            match.p2 = match.p2.replace(' ✓', '');
-            
-            // Retirer le perdant de la liste des éliminés
-            const eliminatedIndex = eliminated.indexOf(loserName);
-            if (eliminatedIndex !== -1) {
-                eliminated.splice(eliminatedIndex, 1);
-                
-                // Mettre à jour l'affichage du joueur
-                const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
-                if (playerElement) playerElement.classList.remove('eliminated');
-            }
-            
-            // Retirer l'entrée correspondante de l'historique des éliminations
-            eliminationHistory = eliminationHistory.filter(item => 
-                !(item.winner === winnerName && item.loser === loserName && item.round === roundIndex)
-            );
-            
-            // Vérifier si ce match a des conséquences sur les tours suivants
-            const nextRound = roundIndex + 1;
-            const nextMatchIndex = Math.floor(matchIndex / 2);
-            
-            if (nextRound < 4) {
-                const nextMatch = matches[nextRound][nextMatchIndex];
-                
-                // Déterminer si le joueur est en position p1 ou p2
-                if (matchIndex % 2 === 0 && nextMatch.p1 === winnerName) {
-                    nextMatch.p1 = '';
-                    
-                    // Si le match suivant a déjà un résultat, l'annuler récursivement
-                    if ((nextMatch.p1 && nextMatch.p1.includes(' ✓')) || 
-                        (nextMatch.p2 && nextMatch.p2.includes(' ✓'))) {
-                        undoMatch(nextRound, nextMatchIndex);
-                    }
-                } else if (matchIndex % 2 === 1 && nextMatch.p2 === winnerName) {
-                    nextMatch.p2 = '';
-                    
-                    // Si le match suivant a déjà un résultat, l'annuler récursivement
-                    if ((nextMatch.p1 && nextMatch.p1.includes(' ✓')) || 
-                        (nextMatch.p2 && nextMatch.p2.includes(' ✓'))) {
-                        undoMatch(nextRound, nextMatchIndex);
-                    }
+            // Classes et attributs pour le joueur 2
+            let p2Classes = 'player-btn';
+            let p2Disabled = 'disabled';
+            if (match.p2) {
+                if (p2HasCheckmark) {
+                    p2Classes += ' winner';
+                } else if (!bothPlayersPresent) {
+                    p2Classes += ' waiting';
+                } else if (!matchCompleted && !tournamentCompleted) {
+                    p2Disabled = '';
                 }
             }
             
-            // Si c'était la finale, réinitialiser le gagnant du tournoi
-            if (roundIndex === 3 && matchIndex === 0) {
-                winner = "";
-                tournamentCompleted = false;
+            // Ajouter le checkmark pour le gagnant
+            const p1Display = p1HasCheckmark ? `${p1Name} <span class="checkmark">✓</span>` : match.p1;
+            const p2Display = p2HasCheckmark ? `${p2Name} <span class="checkmark">✓</span>` : match.p2;
+            
+            const btn1 = match.p1 
+                ? `<button class="${p1Classes}" ${p1Disabled} 
+                    onclick="setWinner(${i}, ${j}, '${p1Name}')">${p1Display}</button>` 
+                : `<button class="player-btn" disabled>---</button>`;
+                
+            const btn2 = match.p2 
+                ? `<button class="${p2Classes}" ${p2Disabled} 
+                    onclick="setWinner(${i}, ${j}, '${p2Name}')">${p2Display}</button>` 
+                : `<button class="player-btn" disabled>---</button>`;
+            
+            let matchHtml = `${btn1}${btn2}`;
+            
+            // Ajouter un message d'information si un seul joueur est présent
+            if ((match.p1 && !match.p2) || (!match.p1 && match.p2)) {
+                matchHtml += `<div class="match-info">En attente du second joueur</div>`;
             }
             
-            // Mettre à jour l'affichage
-            renderBracket();
+            // Ajouter les champs de score si les deux joueurs sont présents
+            if (bothPlayersPresent) {
+                // Si le match est terminé, afficher les scores dans une boîte de score
+                if (matchCompleted) {
+                    if (match.score1 !== '' || match.score2 !== '') {
+                        matchHtml += `
+                        <div class="score-box">
+                            <div class="score-box-value">
+                                <span>${match.score1 || '0'}</span>
+                                <span>-</span>
+                                <span>${match.score2 || '0'}</span>
+                            </div>
+                        </div>`;
+                    }
+                } else {
+                    // Sinon, afficher les champs de saisie de score
+                    matchHtml += `
+                    <div class="score-inputs">
+                        <input type="number" min="0" class="score-input" id="score1-${i}-${j}" 
+                            value="${match.score1 || ''}" placeholder="0" 
+                            onchange="updateScore(${i}, ${j}, 'score1', this.value)">
+                        <span class="score-separator">-</span>
+                        <input type="number" min="0" class="score-input" id="score2-${i}-${j}" 
+                            value="${match.score2 || ''}" placeholder="0" 
+                            onchange="updateScore(${i}, ${j}, 'score2', this.value)">
+                    </div>
+                    <div class="score-note">Les scores sont informatifs uniquement</div>`;
+                }
+            }
             
-            // Sauvegarder les données
-            saveDataToLocalStorage();
+            // Ajouter un bouton d'annulation si le match est terminé et que le tournoi n'est pas terminé
+            if (matchCompleted && !tournamentCompleted) {
+                matchHtml += `<button class="undo-match-btn" onclick="showUndoConfirmDialog(${i}, ${j})">
+                    <span class="undo-icon">↺</span> Annuler ce match
+                </button>`;
+            }
             
-            showToast("Match annulé", `Le résultat du match a été annulé avec succès.`, "success");
+            return matchHtml;
         }
 
         // Afficher le message de victoire
@@ -2113,8 +2257,121 @@
         initTheme();
         // Initialiser le bracket au chargement
         initBracket();
+
+        // Fermer la boîte de dialogue d'annulation de match
+        function closeUndoConfirmDialog() {
+            document.getElementById('undoConfirmDialog').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        // Mettre à jour le score d'un match
+        function updateScore(roundIndex, matchIndex, scoreType, scoreValue) {
+            matches[roundIndex][matchIndex][scoreType] = scoreValue;
+            saveDataToLocalStorage();
+            renderBracket();
+        }
+
+        // Afficher la boîte de dialogue de confirmation d'annulation de match
+        function showUndoConfirmDialog(roundIndex, matchIndex) {
+            const match = matches[roundIndex][matchIndex];
+            
+            // Obtenir les noms des joueurs sans les checkmarks
+            const p1Name = match.p1.replace(' ✓', '');
+            const p2Name = match.p2.replace(' ✓', '');
+            
+            // Déterminer le gagnant et le perdant
+            const winnerName = match.p1.includes(' ✓') ? p1Name : p2Name;
+            const loserName = match.p1.includes(' ✓') ? p2Name : p1Name;
+            
+            // Définir le message de confirmation
+            document.getElementById('undoConfirmMessage').innerHTML = 
+                `Êtes-vous sûr de vouloir annuler le résultat de ce match entre <strong>${p1Name}</strong> et <strong>${p2Name}</strong> ?<br><br>` +
+                `<strong>${winnerName}</strong> ne sera plus considéré comme le vainqueur et <strong>${loserName}</strong> sera retiré de la liste des éliminés.`;
+            
+            // Configurer le bouton de confirmation pour appeler undoMatch avec les bons paramètres
+            document.getElementById('undoConfirmBtn').onclick = function() {
+                undoMatch(roundIndex, matchIndex);
+                closeUndoConfirmDialog();
+            };
+            
+            // Afficher la boîte de dialogue
+            document.getElementById('undoConfirmDialog').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        // Fonction pour annuler un match
+        function undoMatch(roundIndex, matchIndex) {
+            const match = matches[roundIndex][matchIndex];
+            
+            // Obtenir les noms des joueurs sans les checkmarks
+            const p1Name = match.p1.replace(' ✓', '');
+            const p2Name = match.p2.replace(' ✓', '');
+            
+            // Déterminer le gagnant et le perdant
+            const winnerName = match.p1.includes(' ✓') ? p1Name : p2Name;
+            const loserName = match.p1.includes(' ✓') ? p2Name : p1Name;
+            
+            // Retirer le checkmark du gagnant
+            match.p1 = p1Name;
+            match.p2 = p2Name;
+            
+            // Retirer le perdant de la liste des éliminés
+            const eliminatedIndex = eliminated.indexOf(loserName);
+            if (eliminatedIndex !== -1) {
+                eliminated.splice(eliminatedIndex, 1);
+            }
+            
+            // Retirer de l'historique des éliminations
+            eliminationHistory = eliminationHistory.filter(item => 
+                !(item.winner === winnerName && item.loser === loserName && item.round === roundIndex)
+            );
+            
+            // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
+            const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
+            if (playerElement) playerElement.classList.remove('eliminated');
+            
+            // Vérifier si nous devons retirer le joueur des tours suivants
+            if (roundIndex < 3) { // Pas la finale
+                const nextRound = roundIndex + 1;
+                const nextMatchIndex = Math.floor(matchIndex / 2);
+                const nextMatch = matches[nextRound][nextMatchIndex];
+                
+                // Déterminer si le joueur était en position p1 ou p2 dans le match suivant
+                if ((matchIndex % 2 === 0 && nextMatch.p1 === winnerName) || 
+                    (matchIndex % 2 === 1 && nextMatch.p2 === winnerName)) {
+                    
+                    // Retirer le joueur du match suivant
+                    if (matchIndex % 2 === 0) {
+                        nextMatch.p1 = '';
+                        nextMatch.score1 = '';
+                    } else {
+                        nextMatch.p2 = '';
+                        nextMatch.score2 = '';
+                    }
+                    
+                    // Si le match suivant a déjà un gagnant, annuler récursivement ce match aussi
+                    if (nextMatch.p1.includes(' ✓') || nextMatch.p2.includes(' ✓')) {
+                        undoMatch(nextRound, nextMatchIndex);
+                    }
+                }
+            } else {
+                // Si c'était la finale, réinitialiser le gagnant et le drapeau tournamentCompleted
+                if (winner === winnerName) {
+                    winner = "";
+                    tournamentCompleted = false;
+                }
+            }
+            
+            // Mettre à jour l'affichage du bracket
+            renderBracket();
+            
+            // Sauvegarder les données
+            saveDataToLocalStorage();
+            
+            // Afficher un message de succès
+            showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success");
+        }
     </script>
 
 </body>
 </html>
-
