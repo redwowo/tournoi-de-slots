@@ -41,7 +41,7 @@
             
             /* Nouvelles variables pour le dialogue de sélection aléatoire */
             --primary-color: #3b82f6;
-            --primary-hover: #2563eb;
+            --primary_hover: #2563eb;
             --card-radius: 0.75rem;
             --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             --animation-duration: 0.3s;
@@ -1340,7 +1340,7 @@
 }
 
 .btn-primary:hover {
-    background-color: var(--primary-hover);
+    background-color: var(--primary_hover);
 }
 
 .btn-primary:disabled {
@@ -1396,6 +1396,80 @@ input[type=number] {
     -moz-appearance: textfield;
     appearance: textfield;
 }
+
+/* Ajouter ce style CSS dans la section des styles */
+.suggestions-container {
+    position: absolute;
+    width: 100%;
+    max-height: 200px;
+    overflow-y: auto;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px var(--shadow-color);
+    z-index: 100;
+    margin-top: 2px;
+    display: none;
+}
+
+.suggestion-item {
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.suggestion-item:hover {
+    background-color: var(--item-bg);
+}
+
+.suggestion-name {
+    font-weight: 500;
+}
+
+.suggestion-category {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 9999px;
+    color: white;
+    margin-left: 0.5rem;
+}
+
+.suggestion-category.hacksaw {
+    background-color: var(--hacksaw-category-bg);
+}
+
+.suggestion-category.nolimit {
+    background-color: var(--nolimit-category-bg);
+}
+
+.no-suggestions {
+    padding: 0.75rem;
+    color: var(--muted-text);
+    font-style: italic;
+    text-align: center;
+}
+
+/* Style pour la mention légale */
+.legal-notice {
+    position: fixed;
+    bottom: 15px;
+    left: 15px;
+    background-color: var(--card-bg);
+    color: var(--muted-text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 5px var(--shadow-color);
+    z-index: 50;
+    border: 1px solid var(--border-color);
+    max-width: 200px;
+    text-align: center;
+    line-height: 1.4;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
     </style>
 </head>
 <body>
@@ -1421,6 +1495,7 @@ input[type=number] {
             
             <div id="addPlayerContainer" class="input-container">
                 <input type="text" id="playerName" placeholder="✍️ Nom de la machine">
+		<div class="suggestions-container" id="suggestionsList"></div>
                 <button id="addPlayerBtn" onclick="addPlayer()" class="btn-add">
                     <span class="add-icon">
     			<img src="./slot.png" 
@@ -1785,6 +1860,7 @@ input[type=number] {
                 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.documentElement.className = 'dark';
                 } else {
+                    // Si aucune préférence n'est définie, utiliser le thème clair par défaut
                     document.documentElement.className = 'light';
                 }
             }
@@ -2896,8 +2972,108 @@ input[type=number] {
             randomSlotSelected = "";
             randomSlotCategory = "";
         }
+
+// Fonction pour afficher les suggestions de machines
+function showSuggestions(input) {
+    const inputValue = input.value.trim().toLowerCase();
+    const suggestionsContainer = document.getElementById('suggestionsList');
+    
+    // Vider le conteneur de suggestions
+    suggestionsContainer.innerHTML = '';
+    
+    // Si l'entrée est vide, cacher les suggestions
+    if (inputValue.length < 2) {
+        suggestionsContainer.style.display = 'none';
+        return;
+    }
+    
+    // Rechercher des correspondances dans les deux listes
+    const hacksawMatches = slotMachines.filter(machine => 
+        machine.toLowerCase().includes(inputValue) && 
+        !players.some(player => player.name === machine)
+    );
+    
+    const nolimitMatches = nolimitCityMachines.filter(machine => 
+        machine.toLowerCase().includes(inputValue) && 
+        !players.some(player => player.name === machine)
+    );
+    
+    // Combiner les résultats et limiter à 10 suggestions
+    const allMatches = [...hacksawMatches, ...nolimitMatches].slice(0, 10);
+    
+    // Si aucune correspondance, afficher un message
+    if (allMatches.length === 0) {
+        const noSuggestions = document.createElement('div');
+        noSuggestions.className = 'no-suggestions';
+        noSuggestions.textContent = 'Aucune machine correspondante trouvée';
+        suggestionsContainer.appendChild(noSuggestions);
+    } else {
+        // Créer un élément pour chaque suggestion
+        allMatches.forEach(machine => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'suggestion-name';
+            nameSpan.textContent = machine;
+            
+            const categorySpan = document.createElement('span');
+            categorySpan.className = 'suggestion-category';
+            
+            if (slotMachines.includes(machine)) {
+                categorySpan.textContent = 'Hacksaw';
+                categorySpan.classList.add('hacksaw');
+            } else if (nolimitCityMachines.includes(machine)) {
+                categorySpan.textContent = 'Nolimit';
+                categorySpan.classList.add('nolimit');
+            }
+            
+            item.appendChild(nameSpan);
+            item.appendChild(categorySpan);
+            
+            // Ajouter un événement de clic pour sélectionner cette suggestion
+            item.addEventListener('click', function() {
+                input.value = machine;
+                suggestionsContainer.style.display = 'none';
+                // Optionnel : ajouter automatiquement la machine après sélection
+                // addPlayer();
+            });
+            
+            suggestionsContainer.appendChild(item);
+        });
+    }
+    
+    // Afficher le conteneur de suggestions
+    suggestionsContainer.style.display = 'block';
+}
+
+// Ajouter un événement d'entrée au champ de saisie
+document.getElementById('playerName').addEventListener('input', function() {
+    showSuggestions(this);
+});
+
+// Fermer les suggestions lorsqu'on clique ailleurs
+document.addEventListener('click', function(e) {
+    const suggestionsContainer = document.getElementById('suggestionsList');
+    const playerNameInput = document.getElementById('playerName');
+    
+    if (e.target !== playerNameInput && e.target !== suggestionsContainer && !suggestionsContainer.contains(e.target)) {
+        suggestionsContainer.style.display = 'none';
+    }
+});
+
+// Fermer les suggestions avec la touche Échap
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        document.getElementById('suggestionsList').style.display = 'none';
+    }
+});
     </script>
 
+    <!-- Mention légale -->
+    <div class="legal-notice">
+        Site créé avec IA.<br>Appartenant à JC.<br>Patouche Lamouche
+    </div>
 </body>
 </html>
 
