@@ -1030,9 +1030,9 @@
 }
 
 .score-inputs input {
-    padding: 0.25rem;
-    width: 40px;
-    font-size: 0.85rem;
+    padding: 0.35rem;
+    width: 45px;
+    font-size: 1rem;
     text-align: center;
     margin-bottom: 0;
 }
@@ -1044,7 +1044,7 @@
 }
 
 .score-display {
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     color: var(--muted-text);
     text-align: center;
     margin-top: 0.5rem;
@@ -1067,7 +1067,7 @@
     margin-bottom: 0.25rem;
     background-color: var(--item-bg);
     border-radius: 0.25rem;
-    padding: 0.15rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     border: 1px solid var(--border-color);
 }
 
@@ -1080,7 +1080,7 @@
 .score-box-value {
     display: flex;
     gap: 0.5rem;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     font-weight: bold;
 }
 
@@ -1380,6 +1380,20 @@
     font-size: 1.25rem;
     animation: slotMachine 0.2s ease-in-out;
     opacity: 0;
+}
+
+/* Ajouter ce bloc CSS dans la section des styles pour supprimer les flèches des champs numériques */
+/* Masquer les flèches pour Chrome, Safari, Edge et Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Masquer les flèches pour Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
 }
     </style>
 </head>
@@ -1974,11 +1988,15 @@
                     <div class="score-inputs">
                         <input type="number" min="0" class="score-input" id="score1-${i}-${j}" 
                             value="${match.score1}" placeholder="0" 
-                            onchange="updateScore(${i}, ${j}, 'score1', this.value)">
+                            style="${match.score1 ? 'width: ' + Math.max(45, (match.score1.toString().length * 10) + 25) + 'px' : ''}"
+                            onchange="updateScore(${i}, ${j}, 'score1', this.value)"
+                            oninput="this.style.width = Math.max(45, (this.value.length * 10) + 25) + 'px'">
                         <span class="score-separator">-</span>
                         <input type="number" min="0" class="score-input" id="score2-${i}-${j}" 
                             value="${match.score2}" placeholder="0" 
-                            onchange="updateScore(${i}, ${j}, 'score2', this.value)">
+                            style="${match.score2 ? 'width: ' + Math.max(45, (match.score2.toString().length * 10) + 25) + 'px' : ''}"
+                            onchange="updateScore(${i}, ${j}, 'score2', this.value)"
+                            oninput="this.style.width = Math.max(45, (this.value.length * 10) + 25) + 'px'">
                     </div>`;
                 }
             }
@@ -2578,6 +2596,13 @@
         // Mettre à jour le score d'un match
         function updateScore(roundIndex, matchIndex, scoreType, scoreValue) {
             matches[roundIndex][matchIndex][scoreType] = scoreValue;
+            
+            // Conserver la largeur du champ après la mise à jour
+            const inputElement = document.getElementById(`${scoreType}-${roundIndex}-${matchIndex}`);
+            if (inputElement && scoreValue) {
+                inputElement.style.width = Math.max(45, (scoreValue.toString().length * 10) + 25) + 'px';
+            }
+            
             saveDataToLocalStorage();
             renderBracket();
         }
