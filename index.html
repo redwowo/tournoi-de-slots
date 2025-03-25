@@ -1727,7 +1727,7 @@
                     
                     // Mettre à jour l'interface utilisateur
                     updatePlayersDisplay();
-                    document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+                    document.getElementById('count').innerText = `Slot ajoutés : ${players.length}/16`;
                     
                     // Afficher/masquer les éléments appropriés
                     if (tournamentStarted) {
@@ -2041,7 +2041,7 @@
                     category: category
                 });
                 nameInput.value = '';
-                document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+                document.getElementById('count').innerText = `Slot ajoutés : ${players.length}/16`;
                 updatePlayersDisplay();
                 
                 // Sauvegarder les données
@@ -2072,7 +2072,7 @@
             
             const playerName = players[index].name;
             players.splice(index, 1);
-            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+            document.getElementById('count').innerText = `Slot ajoutés : ${players.length}/16`;
             updatePlayersDisplay();
             
             // Sauvegarder les données
@@ -2398,7 +2398,7 @@
             document.getElementById('resetButton').style.display = 'none';
             document.getElementById('launchDraw').style.display = keepPlayers && players.length === 16 ? 'block' : 'none';
             document.getElementById('eliminationHistoryBtn').style.display = eliminationHistory.length > 0 ? 'block' : 'none';
-            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+            document.getElementById('count').innerText = `Slot ajoutés : ${players.length}/16`;
             
             // Mettre à jour l'affichage des joueurs
             updatePlayersDisplay();
@@ -2845,7 +2845,7 @@
                 name: randomSlotSelected,
                 category: randomSlotCategory
             });
-            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+            document.getElementById('count').innerText = `Slot ajoutés : ${players.length}/16`;
             updatePlayersDisplay();
             
             // Sauvegarder les données
