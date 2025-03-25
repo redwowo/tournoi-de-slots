@@ -33,6 +33,22 @@
             --warning-color: #f59e0b;
             --warning-bg: #fef3c7;
             --warning-text: #92400e;
+            --category-bg: #3b82f6;
+            --category-text: white;
+            --nolimit-category-bg: #ef4444;
+            --hacksaw-category-bg: #3b82f6;
+            
+            /* Nouvelles variables pour le dialogue de sélection aléatoire */
+            --primary-color: #3b82f6;
+            --primary-hover: #2563eb;
+            --card-radius: 0.75rem;
+            --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --animation-duration: 0.3s;
+            --slot-result-bg: rgba(59, 130, 246, 0.1);
+            --slot-result-border: rgba(59, 130, 246, 0.3);
+            --radio-size: 1.25rem;
+            --radio-checked-bg: #3b82f6;
+            --radio-border: #d1d5db;
         }
 
         .dark {
@@ -63,6 +79,13 @@
             --warning-color: #fbbf24;
             --warning-bg: rgba(245, 158, 11, 0.2);
             --warning-text: #fef3c7;
+            --nolimit-category-bg: #ef4444;
+            --hacksaw-category-bg: #3b82f6;
+            
+            /* Nouvelles variables pour le dialogue de sélection aléatoire en mode sombre */
+            --slot-result-bg: rgba(59, 130, 246, 0.15);
+            --slot-result-border: rgba(59, 130, 246, 0.4);
+            --radio-border: #555;
         }
 
         body { 
@@ -1061,6 +1084,303 @@
     font-weight: bold;
 }
 
+/* Styles pour la catégorie */
+.category-badge {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border-radius: 9999px;
+    color: var(--category-text);
+    margin-left: 0.5rem;
+}
+
+.category-badge.hacksaw {
+    background-color: var(--hacksaw-category-bg);
+}
+
+.category-badge.nolimit {
+    background-color: var(--nolimit-category-bg);
+}
+
+/* Styles améliorés pour le modal de sélection aléatoire */
+.random-slot-dialog {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card-bg);
+    padding: 0;
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    z-index: 9999;
+    max-width: 500px;
+    width: 90%;
+    overflow: hidden;
+}
+
+.random-slot-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.random-slot-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--heading-color);
+}
+
+.random-slot-title-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--primary-color);
+}
+
+.random-slot-close {
+    background: none;
+    border: none;
+    color: var(--muted-text);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.random-slot-close:hover {
+    background-color: var(--item-bg);
+}
+
+.random-slot-content {
+    padding: 1.5rem;
+}
+
+.random-slot-description {
+    margin-bottom: 1.5rem;
+    color: var(--muted-text);
+    line-height: 1.5;
+}
+
+.slot-type-selection {
+    margin: 1.5rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.slot-type-option {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all var(--animation-duration) ease;
+}
+
+.slot-type-option:hover {
+    background-color: var(--item-bg);
+}
+
+.slot-type-option.selected {
+    border-color: var(--primary-color);
+    background-color: rgba(59, 130, 246, 0.05);
+}
+
+.slot-type-radio {
+    position: relative;
+    width: var(--radio-size);
+    height: var(--radio-size);
+    border: 2px solid var(--radio-border);
+    border-radius: 50%;
+    margin-right: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slot-type-option.selected .slot-type-radio {
+    border-color: var(--primary-color);
+}
+
+.slot-type-radio::after {
+    content: '';
+    position: absolute;
+    width: calc(var(--radio-size) - 10px);
+    height: calc(var(--radio-size) - 10px);
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    opacity: 0;
+    transform: scale(0);
+    transition: all var(--animation-duration) ease;
+}
+
+.slot-type-option.selected .slot-type-radio::after {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.slot-type-label {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.slot-type-name {
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.slot-type-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.5rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.slot-type-badge.hacksaw {
+    background-color: var(--hacksaw-category-bg);
+    color: white;
+}
+
+.slot-type-badge.nolimit {
+    background-color: var(--nolimit-category-bg);
+    color: white;
+}
+
+.random-slot-result {
+    margin: 1.5rem 0;
+    padding: 1.5rem;
+    background-color: var(--slot-result-bg);
+    border: 1px solid var(--slot-result-border);
+    border-radius: 0.75rem;
+    text-align: center;
+    display: none;
+    animation: fadeInScale var(--animation-duration) ease;
+}
+
+@keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slotMachine {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { transform: translateY(0); opacity: 1; }
+    90% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(20px); opacity: 0; }
+}
+
+.random-slot-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 1rem;
+    color: var(--primary-color);
+}
+
+.random-slot-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--heading-color);
+    margin-bottom: 0.5rem;
+}
+
+.random-slot-category {
+    display: inline-flex;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-top: 0.5rem;
+}
+
+.random-slot-category.hacksaw {
+    background-color: var(--hacksaw-category-bg);
+    color: white;
+}
+
+.random-slot-category.nolimit {
+    background-color: var(--nolimit-category-bg);
+    color: white;
+}
+
+.random-slot-footer {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color var(--animation-duration) ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn-primary .spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.btn-add-slot {
+    background-color: var(--success-color);
+    display: none;
+}
+
+.btn-add-slot:hover {
+    background-color: #0d9488;
+}
+
+.slot-selecting {
+    position: relative;
+    height: 2rem;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.slot-item {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.25rem;
+    animation: slotMachine 0.2s ease-in-out;
+    opacity: 0;
+}
     </style>
 </head>
 <body>
@@ -1096,6 +1416,14 @@
             </div>
             
             <p id="count">Joueurs ajoutés : 0/16</p>
+            
+            <button id="randomSlotBtn" onclick="showRandomSlotDialog()" class="btn-outline" style="width: 100%; margin-bottom: 1rem;">
+                <span class="shuffle-icon">
+    		<img src="./de.png" 
+         	alt="Dé" class="dice-icon">
+		</span> 
+		Choisir une slot aléatoire
+            </button>
             
             <button id="launchDraw" onclick="launchDraw()" style="display: none; width: 100%;">
                 <span class="shuffle-icon">
@@ -1214,6 +1542,74 @@
             <button class="btn-warning" id="undoConfirmBtn">Confirmer l'annulation</button>
         </div>
     </div>
+    
+    <!-- Modal amélioré de sélection aléatoire de slot -->
+    <div class="random-slot-dialog" id="randomSlotDialog">
+        <div class="random-slot-header">
+            <div class="random-slot-title">
+                <img src="./de.png" alt="Dé" class="random-slot-title-icon">
+                Sélection aléatoire de machine
+            </div>
+            <button class="random-slot-close" onclick="closeRandomSlotDialog()">
+                <img src="./croix.png" alt="Fermer" width="16" height="16">
+            </button>
+        </div>
+        
+        <div class="random-slot-content">
+            <div class="random-slot-description">
+                Sélectionnez le type de machine à sous que vous souhaitez choisir aléatoirement.
+            </div>
+            
+            <div class="slot-type-selection" id="slotTypeSelection">
+                <div class="slot-type-option selected" data-value="all" onclick="selectSlotType(this, 'all')">
+                    <div class="slot-type-radio"></div>
+                    <div class="slot-type-label">
+                        <span class="slot-type-name">Toutes les machines</span>
+                    </div>
+                </div>
+                
+                <div class="slot-type-option" data-value="hacksaw" onclick="selectSlotType(this, 'hacksaw')">
+                    <div class="slot-type-radio"></div>
+                    <div class="slot-type-label">
+                        <span class="slot-type-name">Uniquement Hacksaw Gaming</span>
+                        <span class="slot-type-badge hacksaw">Hacksaw</span>
+                    </div>
+                </div>
+                
+                <div class="slot-type-option" data-value="nolimit" onclick="selectSlotType(this, 'nolimit')">
+                    <div class="slot-type-radio"></div>
+                    <div class="slot-type-label">
+                        <span class="slot-type-name">Uniquement Nolimit City</span>
+                        <span class="slot-type-badge nolimit">Nolimit</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="slot-selecting" id="slotSelecting" style="display: none;">
+                <!-- Les éléments seront ajoutés dynamiquement pendant l'animation -->
+            </div>
+            
+            <div class="random-slot-result" id="randomSlotResult">
+                <img src="./slot.png" alt="Slot Machine" class="random-slot-icon">
+                <div class="random-slot-name" id="randomSlotName"></div>
+                <div class="random-slot-category" id="randomSlotCategory"></div>
+            </div>
+        </div>
+        
+        <div class="random-slot-footer">
+            <button class="btn-outline" onclick="closeRandomSlotDialog()">Annuler</button>
+            <div>
+                <button class="btn-primary" id="selectRandomBtn" onclick="selectRandomSlot()">
+                    <img src="./de.png" alt="Dé" width="16" height="16">
+                    Sélectionner aléatoirement
+                </button>
+                <button class="btn-primary btn-add-slot" id="addRandomSlotBtn" onclick="addRandomSlot()">
+                    <img src="./slot.png" alt="Slot Machine" width="16" height="16">
+                    Ajouter cette machine
+                </button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Déclaration des variables globales avec let pour permettre leur réassignation
@@ -1225,6 +1621,61 @@
         let eliminationHistory = [];
         let previousWinners = [];
         let tournamentCompleted = false;
+        let randomSlotSelected = "";
+        let randomSlotCategory = "";
+        let selectedSlotType = "all";
+        
+        // Liste des machines à sous Hacksaw Gaming
+        const slotMachines = [
+            "Dorks of the Deep", "Strength of Hercules", "Hounds of Hell", "FRKN Bananas", 
+            "Marlin Masters", "Phoenix DuelReels", "Le Viking", "Klowns", "Fire my Laser", 
+            "Donut Division", "Shaolin Master", "Snow Slingers", "Duel at Dawn", "Wings of Horus", 
+            "Rise of Ymir", "Get the CHEESE", "Cloud Princess", "Le Pharaoh", "Evil Eyes", 
+            "Octo Attack", "Donny Dough", "Dragon's Domain", "SixSixSix", "Tai the Toad", 
+            "Twisted Lab", "Ze Zeus", "Cursed Crypt", "Slayers Inc", "Jelly Slice", "Keep'em", 
+            "Divine Drop", "Orb of Destiny", "Cash Crew", "Rusty & Curly", "Bouncy Bombs", 
+            "Dawn of Kings", "Fist of Destruction", "Beam Boys", "Feel the Beat", "2 Wild 2 Die", 
+            "Dark Summoning", "Xmas Drop", "Immortal Desire", "Eye of the Panda", "Benny the Beer", 
+            "Chaos Crew 2", "Densho", "Le Bandit", "Ronin Stackways", "Drop'em", "Vending Machine", 
+            "Beast Below", "Freds Food Truck", "Mighty Masks", "Temple of Torment", "Mayan Stackways", 
+            "Cursed Seas", "Fear the Dark", "Stormforged", "Keep 'em Cool", "Magic Piggy", 
+            "Bloodthirst", "Frank's Farm", "Rip City", "Rotten", "Gronk's Gems", "Book of Time", 
+            "Pug Life", "Undead Fortune", "Break Bones", "Alpha Eagle", "Forest Fortune", 
+            "Time Spinners", "Fruit Duel", "Dork Unit", "Born Wild", "Outlaws Inc.", 
+            "Buffalo Stack'n'Sync", "Itero", "Hand Of Anubis", "Gladiator Legends", "Warrior Ways", 
+            "Double Rainbow", "The Bowery Boys", "Harvest Wilds", "King Carrot", "Joker Bombs", 
+            "Tasty Treats", "Cash Quest", "Wanted Dead Or a Wild", "Rocket Reels", "Toshi Video Club", 
+            "Xpander", "Hop'N'Pop", "Stack'Em", "Frutz", "Aztec Twist", "Cubes 2", "Let It Snow", 
+            "Mystery Motel", "Chaos Crew", "The Respinners", "Cash Compass", "Cubes", 
+            "Miami Multiplier", "OmNom", "Stick'Em"
+        ];
+
+        // Liste des machines à sous Nolimit City
+        const nolimitCityMachines = [
+            "Mental II", "Home of the Brave", "Dead, Dead Or Deader", "Duck Hunters",
+            "Tombstone Slaughter: El Gordo's Revenge", "xWays Hoarder 2", "Outsourced: Payday",
+            "Tanked", "Munchies", "Outsourced: Slash Game", "Blood & Shadow 2", "Brute Force",
+            "San Quentin 2: Death Row", "Skate or Die", "Stockholm Syndrome", "Outsourced",
+            "Apocalypse Super xNudge®", "Punk Rocker 2", "Beheaded", "Deadwood R.I.P",
+            "Loner", "Kenneth Must Die", "Tombstone: No Mercy", "BRICK SNAKE 2000",
+            "Possessed", "Fire in the Hole 2", "D-Day", "Land Of The Free",
+            "Devil's Crossroad", "Jingle Balls", "Nine To Five", "Roadkill",
+            "Ugliest Catch", "Space Donkey", "The Crypt", "DJ Psycho",
+            "True Kult", "Bounty Hunters", "The Cage", "Gluttony",
+            "Whacked!", "Disturbed", "Kiss My Chainsaw", "Blood & Shadow",
+            "Benji Killed In Vegas", "Walk of Shame", "Dead Canary", "Pearl Harbor",
+            "Rock Bottom", "Serial", "Little Bighorn", "The Border",
+            "Road Rage", "The Rave", "Folsom Prison", "Karen Maneater",
+            "Remember Gulag", "Misery Mining", "Punk Toilet", "Tombstone R.I.P",
+            "True Grit Redemption", "Legion X", "Evil Goblins xBomb®", "Das xBoot",
+            "Mental", "xWays Hoarder xSplit", "Infectious 5 xWays®", "El Paso Gunfight xNudge®",
+            "Bushido Ways xNudge®", "Fire In The Hole", "East Coast VS West Coast", "San Quentin xWays®",
+            "Tomb of Akhenaten", "Warrior Graveyard xNudge", "Monkey's Gold xPays", "Buffalo Hunter",
+            "Book of Shadows", "Immortal Fruits", "Golden Genie And The Walking Wilds", "Milky Ways",
+            "Bonus Bunnies", "Deadwood xNudge®", "Harlequin Carnival", "Gaelic Gold",
+            "Barbarian Fury", "Punk Rocker", "Poison Eve", "Dragon Tribe",
+            "Tomb of Néfertiti", "Manhattan Goes Wild"
+        ];
 
         // Fonction pour sauvegarder les données dans localStorage
         function saveDataToLocalStorage() {
@@ -1284,6 +1735,7 @@
                         document.getElementById('resetButton').style.display = 'block';
                         document.getElementById('launchDraw').style.display = 'none';
                         document.getElementById('addPlayerContainer').style.display = 'none';
+                        document.getElementById('randomSlotBtn').style.display = 'none';
                         
                         if (eliminationHistory.length > 0) {
                             document.getElementById('eliminationHistoryBtn').style.display = 'block';
@@ -1293,6 +1745,7 @@
                     } else {
                         if (players.length === 16) {
                             document.getElementById('addPlayerContainer').style.display = 'none';
+                            document.getElementById('randomSlotBtn').style.display = 'none';
                             document.getElementById('launchDraw').style.display = 'block';
                         }
                     }
@@ -1442,474 +1895,7 @@
             }
         }
 
-/* Now update the renderMatchButtons function to improve the score display */
-function renderMatchButtons(i, j) {
-    const match = matches[i][j];
-    const p1HasCheckmark = match.p1 && match.p1.includes(' ✓');
-    const p2HasCheckmark = match.p2 && match.p2.includes(' ✓');
-    const p1Name = match.p1 ? match.p1.replace(' ✓', '') : '';
-    const p2Name = match.p2 ? match.p2.replace(' ✓', '') : '';
-    
-    // Vérifier si les deux joueurs sont présents
-    const bothPlayersPresent = match.p1 && match.p2;
-    const matchCompleted = p1HasCheckmark || p2HasCheckmark;
-    
-    // Classes et attributs pour le joueur 1
-    let p1Classes = 'player-btn';
-    let p1Disabled = 'disabled';
-    if (match.p1) {
-        if (p1HasCheckmark) {
-            p1Classes += ' winner';
-        } else if (!bothPlayersPresent) {
-            p1Classes += ' waiting';
-        } else if (!matchCompleted && !tournamentCompleted) {
-            p1Disabled = '';
-        }
-    }
-    
-    // Classes et attributs pour le joueur 2
-    let p2Classes = 'player-btn';
-    let p2Disabled = 'disabled';
-    if (match.p2) {
-        if (p2HasCheckmark) {
-            p2Classes += ' winner';
-        } else if (!bothPlayersPresent) {
-            p2Classes += ' waiting';
-        } else if (!matchCompleted && !tournamentCompleted) {
-            p2Disabled = '';
-        }
-    }
-    
-    // Ajouter le checkmark pour le gagnant
-    const p1Display = p1HasCheckmark ? `${p1Name} <span class="checkmark">✓</span>` : match.p1;
-    const p2Display = p2HasCheckmark ? `${p2Name} <span class="checkmark">✓</span>` : match.p2;
-    
-    const btn1 = match.p1 
-        ? `<button class="${p1Classes}" ${p1Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p1Name}')">${p1Display}</button>` 
-        : `<button class="player-btn" disabled>---</button>`;
-        
-    const btn2 = match.p2 
-        ? `<button class="${p2Classes}" ${p2Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p2Name}')">${p2Display}</button>` 
-        : `<button class="player-btn" disabled>---</button>`;
-    
-    let matchHtml = `${btn1}${btn2}`;
-    
-    // Ajouter un message d'information si un seul joueur est présent
-    if ((match.p1 && !match.p2) || (!match.p1 && match.p2)) {
-        matchHtml += `<div class="match-info">En attente du second joueur</div>`;
-    }
-    
-    // Ajouter les champs de score si les deux joueurs sont présents
-    if (bothPlayersPresent) {
-        // Si le match est terminé, afficher les scores dans une boîte de score
-        if (matchCompleted) {
-            if (match.score1 !== '' || match.score2 !== '') {
-                matchHtml += `
-                <div class="score-box">
-                    <div class="score-box-value">
-                        <span>${match.score1 || '0'}</span>
-                        <span>-</span>
-                        <span>${match.score2 || '0'}</span>
-                    </div>
-                </div>`;
-            }
-        } else {
-            // Sinon, afficher les champs de saisie de score
-            matchHtml += `
-            <div class="score-inputs">
-                <input type="number" min="0" class="score-input" id="score1-${i}-${j}" 
-                    value="${match.score1}" placeholder="0" 
-                    onchange="updateScore(${i}, ${j}, 'score1', this.value)">
-                <span class="score-separator">-</span>
-                <input type="number" min="0" class="score-input" id="score2-${i}-${j}" 
-                    value="${match.score2}" placeholder="0" 
-                    onchange="updateScore(${i}, ${j}, 'score2', this.value)">
-            </div>`;
-        }
-    }
-    
-    // Ajouter un bouton d'annulation si le match est terminé et que le tournoi n'est pas terminé
-    if (matchCompleted && !tournamentCompleted) {
-        matchHtml += `<button class="undo-match-btn" onclick="showUndoConfirmDialog(${i}, ${j})">
-            <span class="undo-icon">↺</span> Annuler ce match
-        </button>`;
-    }
-    
-    return matchHtml;
-}
-
-// Fix the setWinner function to properly advance players to the next round
-function setWinner(roundIndex, matchIndex, winnerName) {
-    // Vérifier si le tournoi est déjà terminé
-    if (tournamentCompleted) {
-        showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error");
-        return;
-    }
-    
-    const match = matches[roundIndex][matchIndex];
-    
-    // Vérifier si les deux joueurs sont présents
-    if (!match.p1 || !match.p2) {
-        showToast("Action impossible", "Impossible de déterminer un gagnant tant que les deux joueurs ne sont pas présents !", "error");
-        return;
-    }
-    
-    // Nettoyer les noms des joueurs (enlever les checkmarks s'ils existent)
-    const p1Name = match.p1.replace(' ✓', '');
-    const p2Name = match.p2.replace(' ✓', '');
-    
-    // Déterminer le perdant
-    let loserName = p1Name === winnerName ? p2Name : p1Name;
-    
-    // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
-    if (!eliminated.includes(loserName)) {
-        eliminated.push(loserName);
-        const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
-        if (playerElement) playerElement.classList.add('eliminated');
-        
-        // Ajouter à l'historique des éliminations
-        const roundNames = ["Huitièmes", "Quarts", "Demi-finales", "Finale"];
-        eliminationHistory.push({
-            winner: winnerName,
-            loser: loserName,
-            round: roundIndex,
-            roundName: roundNames[roundIndex],
-            time: new Date()
-        });
-        
-        // Afficher le bouton d'historique des éliminations s'il n'est pas déjà visible
-        document.getElementById('eliminationHistoryBtn').style.display = 'block';
-        
-        showToast(`${loserName} éliminé !`, `${winnerName} remporte le match et avance au prochain tour.`, "success");
-    }
-
-    // Marquer le match actuel comme terminé
-    if (p1Name === winnerName) {
-        matches[roundIndex][matchIndex].p1 = winnerName + ' ✓';
-        matches[roundIndex][matchIndex].p2 = loserName;
-    } else {
-        matches[roundIndex][matchIndex].p2 = winnerName + ' ✓';
-        matches[roundIndex][matchIndex].p1 = loserName;
-    }
-    
-    const nextRound = roundIndex + 1;
-    const nextMatchIndex = Math.floor(matchIndex / 2);
-    
-    // Faire avancer le gagnant au prochain tour
-    if (nextRound < 4) {
-        const nextMatch = matches[nextRound][nextMatchIndex];
-        
-        // Déterminer si le joueur doit être placé en position p1 ou p2
-        // Si le match actuel a un index pair, le gagnant va en p1, sinon en p2
-        if (matchIndex % 2 === 0) {
-            nextMatch.p1 = winnerName;
-            nextMatch.score1 = '';
-        } else {
-            nextMatch.p2 = winnerName;
-            nextMatch.score2 = '';
-        }
-        
-        renderBracket();
-    } else {
-        // C'est la finale, nous avons un gagnant du tournoi
-        winner = winnerName;
-        tournamentCompleted = true; // Marquer le tournoi comme terminé
-        showVictoryMessage(winnerName);
-    }
-    
-    // Sauvegarder les données
-    saveDataToLocalStorage();
-}
-
-        // Ajouter un joueur
-        function addPlayer() {
-            const nameInput = document.getElementById('playerName');
-            const name = nameInput.value.trim();
-            
-            // Vérifier si le nom est vide
-            if (!name) {
-                showToast("Nom invalide", "Veuillez entrer un nom de joueur valide.", "error");
-                return;
-            }
-            
-            // Vérifier si le joueur existe déjà (insensible à la casse)
-            const playerExists = players.some(player => 
-                player.toLowerCase() === name.toLowerCase()
-            );
-            
-            if (playerExists) {
-                showToast("Joueur déjà inscrit", "Ce joueur est déjà inscrit au tournoi !", "error");
-                // Mettre en surbrillance le champ de saisie
-                nameInput.focus();
-                nameInput.classList.add('input-error');
-                // Retirer la classe après un délai
-                setTimeout(() => {
-                    nameInput.classList.remove('input-error');
-                }, 2000);
-                return;
-            }
-            
-            // Ajouter le joueur si la limite n'est pas atteinte
-            if (players.length < 16) {
-                players.push(name);
-                nameInput.value = '';
-                document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
-                updatePlayersDisplay();
-                
-                // Sauvegarder les données
-                saveDataToLocalStorage();
-                
-                // Vérifier si on a atteint 16 joueurs
-                if (players.length === 16) {
-                    // Cacher le conteneur d'ajout de joueurs
-                    document.getElementById('addPlayerContainer').style.display = 'none';
-                    // Afficher le bouton de tirage
-                    document.getElementById('launchDraw').style.display = 'block';
-                }
-                
-                showToast("Joueur ajouté", `${name} a été ajouté au tournoi.`, "success");
-            } else if (players.length >= 16) {
-                showToast("Limite atteinte", "Le tournoi est limité à 16 joueurs !", "error");
-            }
-        }
-
-        // Retirer un joueur
-        function removePlayer(index) {
-            // Ne pas permettre de retirer des joueurs une fois le tournoi commencé
-            if (tournamentStarted) {
-                showToast("Action impossible", "Impossible de retirer un joueur une fois le tournoi commencé !", "error");
-                return;
-            }
-            
-            const playerName = players[index];
-            players.splice(index, 1);
-            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
-            updatePlayersDisplay();
-            
-            // Sauvegarder les données
-            saveDataToLocalStorage();
-            
-            // Si on avait 16 joueurs et qu'on en retire un, réafficher le conteneur d'ajout
-            if (players.length < 16) {
-                document.getElementById('addPlayerContainer').style.display = 'block';
-                document.getElementById('launchDraw').style.display = 'none';
-            }
-            
-            showToast("Joueur retiré", `${playerName} a été retiré du tournoi.`, "success");
-        }
-
-        // Mettre à jour l'affichage des joueurs
-        function updatePlayersDisplay() {
-            const ul = document.getElementById('playersDisplay');
-            ul.innerHTML = '';
-            players.forEach((player, index) => {
-                const li = document.createElement('li');
-                li.id = `player-list-${player.replace(/\s+/g, '-')} `;
-                
-                const playerSpan = document.createElement('span');
-                playerSpan.textContent = player;
-                if (eliminated.includes(player)) {
-                    playerSpan.classList.add('eliminated');
-                }
-                
-                const removeButton = document.createElement('button');
-                removeButton.innerHTML = '<img src="./croix.png" alt="Supprimer" width="16" height="16">';
-                removeButton.className = 'remove-btn';
-                removeButton.title = 'Retirer ce joueur';
-                removeButton.onclick = function() { removePlayer(index); };
-                
-                // Désactiver le bouton de suppression si le tournoi a commencé
-                if (tournamentStarted) {
-                    removeButton.disabled = true;
-                    removeButton.style.opacity = '0.5';
-                    removeButton.style.cursor = 'not-allowed';
-                }
-                
-                const playerItem = document.createElement('div');
-                playerItem.className = 'player-item';
-                playerItem.appendChild(playerSpan);
-                playerItem.appendChild(removeButton);
-                
-                li.appendChild(playerItem);
-                ul.appendChild(li);
-            });
-        }
-
-        // Mettre à jour l'affichage des gagnants précédents
-        function updateWinnersDisplay() {
-            const winnersList = document.getElementById('winnersList');
-            winnersList.innerHTML = '';
-            
-            if (previousWinners.length > 0) {
-                previousWinners.sort((a, b) => b.date - a.date); // Trier par date décroissante
-                
-                previousWinners.forEach(winner => {
-                    const li = document.createElement('li');
-                    li.className = 'winner-item';
-                    
-                    const trophy = document.createElement('div');
-                    trophy.className = 'winner-trophy';
-                    trophy.textContent = '🏆';
-                    
-                    const info = document.createElement('div');
-                    info.className = 'winner-info';
-                    
-                    const name = document.createElement('div');
-                    name.className = 'winner-name';
-                    name.textContent = winner.name;
-                    
-                    const date = document.createElement('div');
-                    date.className = 'winner-date';
-                    date.textContent = winner.date.toLocaleDateString();
-                    
-                    info.appendChild(name);
-                    info.appendChild(date);
-                    
-                    li.appendChild(trophy);
-                    li.appendChild(info);
-                    
-                    winnersList.appendChild(li);
-                });
-            } else {
-                const noWinners = document.createElement('li');
-                noWinners.className = 'no-winners';
-                noWinners.textContent = 'Aucun gagnant enregistré';
-                winnersList.appendChild(noWinners);
-            }
-        }
-
-        // Lancer le tirage
-        function launchDraw() {
-            tournamentStarted = true;
-            shufflePlayers();
-            placePlayersRandomly();
-            document.getElementById('bracket').style.display = 'flex';
-            document.getElementById('launchDraw').style.display = 'none';
-            document.getElementById('resetButton').style.display = 'block';
-            
-            // Mettre à jour l'affichage pour désactiver les boutons de suppression
-            updatePlayersDisplay();
-            
-            // Sauvegarder les données
-            saveDataToLocalStorage();
-            
-            showToast("Tournoi lancé !", "Le tirage au sort a été effectué. Que le meilleur gagne !", "success");
-        }
-
-        // Mélanger les joueurs
-        function shufflePlayers() {
-            for (let i = players.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [players[i], players[j]] = [players[j], players[i]];
-            }
-        }
-
-        // Placer les joueurs aléatoirement
-        function placePlayersRandomly() {
-            for (let i = 0; i < players.length; i++) {
-                const matchIndex = Math.floor(i / 2);
-                if (i % 2 === 0) {
-                    matches[0][matchIndex].p1 = players[i];
-                    matches[0][matchIndex].score1 = '';
-                } else {
-                    matches[0][matchIndex].p2 = players[i];
-                    matches[0][matchIndex].score2 = '';
-                }
-            }
-            renderBracket();
-        }
-
-        // Modifier la fonction setWinner pour que les scores n'influencent pas le vainqueur
-        function setWinner(roundIndex, matchIndex, winnerName) {
-            // Vérifier si le tournoi est déjà terminé
-            if (tournamentCompleted) {
-                showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error");
-                return;
-            }
-            
-            const match = matches[roundIndex][matchIndex];
-            
-            // Vérifier si les deux joueurs sont présents
-            if (!match.p1 || !match.p2) {
-                showToast("Action impossible", "Impossible de déterminer un gagnant tant que les deux joueurs ne sont pas présents !", "error");
-                return;
-            }
-            
-            // Nettoyer les noms des joueurs (enlever les checkmarks s'ils existent)
-            const p1Name = match.p1.replace(' ✓', '');
-            const p2Name = match.p2.replace(' ✓', '');
-            
-            // Déterminer le perdant
-            let loserName = p1Name === winnerName ? p2Name : p1Name;
-            
-            // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
-            if (!eliminated.includes(loserName)) {
-                eliminated.push(loserName);
-                const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
-                if (playerElement) playerElement.classList.add('eliminated');
-                
-                // Ajouter à l'historique des éliminations
-                const roundNames = ["Huitièmes", "Quarts", "Demi-finales", "Finale"];
-                eliminationHistory.push({
-                    winner: winnerName,
-                    loser: loserName,
-                    round: roundIndex,
-                    roundName: roundNames[roundIndex],
-                    time: new Date()
-                });
-                
-                // Afficher le bouton d'historique des éliminations s'il n'est pas déjà visible
-                document.getElementById('eliminationHistoryBtn').style.display = 'block';
-                
-                showToast(`${loserName} éliminé !`, `${winnerName} remporte le match et avance au prochain tour.`, "success");
-            }
-
-            // Marquer le match actuel comme terminé
-            if (p1Name === winnerName) {
-                matches[roundIndex][matchIndex].p1 = winnerName + ' ✓';
-                matches[roundIndex][matchIndex].p2 = loserName;
-            } else {
-                matches[roundIndex][matchIndex].p2 = winnerName + ' ✓';
-                matches[roundIndex][matchIndex].p1 = loserName;
-            }
-            
-            // Conserver les scores existants (ne pas les réinitialiser)
-            // Les scores sont maintenant purement informatifs
-            
-            const nextRound = roundIndex + 1;
-            const nextMatchIndex = Math.floor(matchIndex / 2);
-            
-            // Faire avancer le gagnant au prochain tour
-            if (nextRound < 4) {
-                const nextMatch = matches[nextRound][nextMatchIndex];
-                
-                // Déterminer si le joueur doit être placé en position p1 ou p2
-                // Si le match actuel a un index pair, le gagnant va en p1, sinon en p2
-                if (matchIndex % 2 === 0) {
-                    nextMatch.p1 = winnerName;
-                    // Ne pas réinitialiser le score1, juste le définir s'il n'existe pas
-                    if (nextMatch.score1 === undefined) nextMatch.score1 = '';
-                } else {
-                    nextMatch.p2 = winnerName;
-                    // Ne pas réinitialiser le score2, juste le définir s'il n'existe pas
-                    if (nextMatch.score2 === undefined) nextMatch.score2 = '';
-                }
-                
-                renderBracket();
-            } else {
-                // C'est la finale, nous avons un gagnant du tournoi
-                winner = winnerName;
-                tournamentCompleted = true; // Marquer le tournoi comme terminé
-                showVictoryMessage(winnerName);
-            }
-            
-            // Sauvegarder les données
-            saveDataToLocalStorage();
-        }
-
-        // Ajouter une note explicative dans la fonction renderMatchButtons
+        // Rendre les boutons de match
         function renderMatchButtons(i, j) {
             const match = matches[i][j];
             const p1HasCheckmark = match.p1 && match.p1.includes(' ✓');
@@ -1987,14 +1973,13 @@ function setWinner(roundIndex, matchIndex, winnerName) {
                     matchHtml += `
                     <div class="score-inputs">
                         <input type="number" min="0" class="score-input" id="score1-${i}-${j}" 
-                            value="${match.score1 || ''}" placeholder="0" 
+                            value="${match.score1}" placeholder="0" 
                             onchange="updateScore(${i}, ${j}, 'score1', this.value)">
                         <span class="score-separator">-</span>
                         <input type="number" min="0" class="score-input" id="score2-${i}-${j}" 
-                            value="${match.score2 || ''}" placeholder="0" 
+                            value="${match.score2}" placeholder="0" 
                             onchange="updateScore(${i}, ${j}, 'score2', this.value)">
-                    </div>
-                    <div class="score-note">Les scores sont informatifs uniquement</div>`;
+                    </div>`;
                 }
             }
             
@@ -2008,9 +1993,337 @@ function setWinner(roundIndex, matchIndex, winnerName) {
             return matchHtml;
         }
 
+        // Ajouter un joueur
+        function addPlayer() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+            
+            // Vérifier si le nom est vide
+            if (!name) {
+                showToast("Nom invalide", "Veuillez entrer un nom de machine valide.", "error");
+                return;
+            }
+            
+            // Vérifier si le joueur existe déjà (insensible à la casse)
+            const playerExists = players.some(player => 
+                player.name.toLowerCase() === name.toLowerCase()
+            );
+            
+            if (playerExists) {
+                showToast("Machine déjà inscrite", "Cette machine est déjà inscrite au tournoi !", "error");
+                // Mettre en surbrillance le champ de saisie
+                nameInput.focus();
+                nameInput.classList.add('input-error');
+                // Retirer la classe après un délai
+                setTimeout(() => {
+                    nameInput.classList.remove('input-error');
+                }, 2000);
+                return;
+            }
+            
+            // Ajouter le joueur si la limite n'est pas atteinte
+            if (players.length < 16) {
+                // Vérifier si la machine est dans l'une des listes
+                const isHacksawGaming = slotMachines.includes(name);
+                const isNolimitCity = nolimitCityMachines.includes(name);
+                
+                // Déterminer la catégorie
+                let category = "";
+                if (isHacksawGaming) {
+                    category = "Hacksaw Gaming";
+                } else if (isNolimitCity) {
+                    category = "Nolimit City";
+                }
+                
+                // Ajouter le joueur avec sa catégorie
+                players.push({
+                    name: name,
+                    category: category
+                });
+                nameInput.value = '';
+                document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+                updatePlayersDisplay();
+                
+                // Sauvegarder les données
+                saveDataToLocalStorage();
+                
+                // Vérifier si on a atteint 16 joueurs
+                if (players.length === 16) {
+                    // Cacher le conteneur d'ajout de joueurs
+                    document.getElementById('addPlayerContainer').style.display = 'none';
+                    document.getElementById('randomSlotBtn').style.display = 'none';
+                    // Afficher le bouton de tirage
+                    document.getElementById('launchDraw').style.display = 'block';
+                }
+                
+                showToast("Machine ajoutée", `${name} a été ajoutée au tournoi.`, "success");
+            } else if (players.length >= 16) {
+                showToast("Limite atteinte", "Le tournoi est limité à 16 machines !", "error");
+            }
+        }
+
+        // Retirer un joueur
+        function removePlayer(index) {
+            // Ne pas permettre de retirer des joueurs une fois le tournoi commencé
+            if (tournamentStarted) {
+                showToast("Action impossible", "Impossible de retirer une machine une fois le tournoi commencé !", "error");
+                return;
+            }
+            
+            const playerName = players[index].name;
+            players.splice(index, 1);
+            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+            updatePlayersDisplay();
+            
+            // Sauvegarder les données
+            saveDataToLocalStorage();
+            
+            // Si on avait 16 joueurs et qu'on en retire un, réafficher le conteneur d'ajout
+            if (players.length < 16) {
+                document.getElementById('addPlayerContainer').style.display = 'block';
+                document.getElementById('randomSlotBtn').style.display = 'block';
+                document.getElementById('launchDraw').style.display = 'none';
+            }
+            
+            showToast("Machine retirée", `${playerName} a été retirée du tournoi.`, "success");
+        }
+
+        // Mettre à jour l'affichage des joueurs
+        function updatePlayersDisplay() {
+            const ul = document.getElementById('playersDisplay');
+            ul.innerHTML = '';
+            players.forEach((player, index) => {
+                const li = document.createElement('li');
+                li.id = `player-list-${player.name.replace(/\s+/g, '-')} `;
+                
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                
+                const playerInfo = document.createElement('div');
+                playerInfo.style.display = 'flex';
+                playerInfo.style.alignItems = 'center';
+                
+                const playerSpan = document.createElement('span');
+                playerSpan.textContent = player.name;
+                if (eliminated.includes(player.name)) {
+                    playerSpan.classList.add('eliminated');
+                }
+                
+                playerInfo.appendChild(playerSpan);
+                
+                // Ajouter le badge de catégorie seulement si la machine a une catégorie
+                if (player.category) {
+                    const categoryBadge = document.createElement('span');
+                    categoryBadge.className = 'category-badge';
+                    
+                    // Ajouter une classe spécifique selon la catégorie
+                    if (player.category === "Hacksaw Gaming") {
+                        categoryBadge.classList.add('hacksaw');
+                    } else if (player.category === "Nolimit City") {
+                        categoryBadge.classList.add('nolimit');
+                    }
+                    
+                    categoryBadge.textContent = player.category;
+                    playerInfo.appendChild(categoryBadge);
+                }
+                
+                const removeButton = document.createElement('button');
+                removeButton.innerHTML = '<img src="./croix.png" alt="Supprimer" width="16" height="16">';
+                removeButton.className = 'remove-btn';
+                removeButton.title = 'Retirer cette machine';
+                removeButton.onclick = function() { removePlayer(index); };
+                
+                // Désactiver le bouton de suppression si le tournoi a commencé
+                if (tournamentStarted) {
+                    removeButton.disabled = true;
+                    removeButton.style.opacity = '0.5';
+                    removeButton.style.cursor = 'not-allowed';
+                }
+                
+                playerItem.appendChild(playerInfo);
+                playerItem.appendChild(removeButton);
+                
+                li.appendChild(playerItem);
+                ul.appendChild(li);
+            });
+        }
+
+        // Mettre à jour l'affichage des gagnants précédents
+        function updateWinnersDisplay() {
+            const winnersList = document.getElementById('winnersList');
+            winnersList.innerHTML = '';
+            
+            if (previousWinners.length > 0) {
+                previousWinners.sort((a, b) => b.date - a.date); // Trier par date décroissante
+                
+                previousWinners.forEach(winner => {
+                    const li = document.createElement('li');
+                    li.className = 'winner-item';
+                    
+                    const trophy = document.createElement('div');
+                    trophy.className = 'winner-trophy';
+                    trophy.textContent = '🏆';
+                    
+                    const info = document.createElement('div');
+                    info.className = 'winner-info';
+                    
+                    const name = document.createElement('div');
+                    name.className = 'winner-name';
+                    name.textContent = winner.name;
+                    
+                    const date = document.createElement('div');
+                    date.className = 'winner-date';
+                    date.textContent = winner.date.toLocaleDateString();
+                    
+                    info.appendChild(name);
+                    info.appendChild(date);
+                    
+                    li.appendChild(trophy);
+                    li.appendChild(info);
+                    
+                    winnersList.appendChild(li);
+                });
+            } else {
+                const noWinners = document.createElement('li');
+                noWinners.className = 'no-winners';
+                noWinners.textContent = 'Aucun gagnant enregistré';
+                winnersList.appendChild(noWinners);
+            }
+        }
+
+        // Lancer le tirage
+        function launchDraw() {
+            tournamentStarted = true;
+            shufflePlayers();
+            placePlayersRandomly();
+            document.getElementById('bracket').style.display = 'flex';
+            document.getElementById('launchDraw').style.display = 'none';
+            document.getElementById('resetButton').style.display = 'block';
+            document.getElementById('randomSlotBtn').style.display = 'none';
+            
+            // Mettre à jour l'affichage pour désactiver les boutons de suppression
+            updatePlayersDisplay();
+            
+            // Sauvegarder les données
+            saveDataToLocalStorage();
+            
+            showToast("Tournoi lancé !", "Le tirage au sort a été effectué. Que la meilleure machine gagne !", "success");
+        }
+
+        // Mélanger les joueurs
+        function shufflePlayers() {
+            for (let i = players.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [players[i], players[j]] = [players[j], players[i]];
+            }
+        }
+
+        // Placer les joueurs aléatoirement
+        function placePlayersRandomly() {
+            for (let i = 0; i < players.length; i++) {
+                const matchIndex = Math.floor(i / 2);
+                if (i % 2 === 0) {
+                    matches[0][matchIndex].p1 = players[i].name;
+                    matches[0][matchIndex].score1 = '';
+                } else {
+                    matches[0][matchIndex].p2 = players[i].name;
+                    matches[0][matchIndex].score2 = '';
+                }
+            }
+            renderBracket();
+        }
+
+        // Définir le gagnant d'un match
+        function setWinner(roundIndex, matchIndex, winnerName) {
+            // Vérifier si le tournoi est déjà terminé
+            if (tournamentCompleted) {
+                showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error");
+                return;
+            }
+            
+            const match = matches[roundIndex][matchIndex];
+            
+            // Vérifier si les deux joueurs sont présents
+            if (!match.p1 || !match.p2) {
+                showToast("Action impossible", "Impossible de déterminer un gagnant tant que les deux machines ne sont pas présentes !", "error");
+                return;
+            }
+            
+            // Nettoyer les noms des joueurs (enlever les checkmarks s'ils existent)
+            const p1Name = match.p1.replace(' ✓', '');
+            const p2Name = match.p2.replace(' ✓', '');
+            
+            // Déterminer le perdant
+            let loserName = p1Name === winnerName ? p2Name : p1Name;
+            
+            // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
+            if (!eliminated.includes(loserName)) {
+                eliminated.push(loserName);
+                const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
+                if (playerElement) playerElement.classList.add('eliminated');
+                
+                // Ajouter à l'historique des éliminations
+                const roundNames = ["Huitièmes", "Quarts", "Demi-finales", "Finale"];
+                eliminationHistory.push({
+                    winner: winnerName,
+                    loser: loserName,
+                    round: roundIndex,
+                    roundName: roundNames[roundIndex],
+                    time: new Date()
+                });
+                
+                // Afficher le bouton d'historique des éliminations s'il n'est pas déjà visible
+                document.getElementById('eliminationHistoryBtn').style.display = 'block';
+                
+                showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success");
+            }
+
+            // Marquer le match actuel comme terminé
+            if (p1Name === winnerName) {
+                matches[roundIndex][matchIndex].p1 = winnerName + ' ✓';
+                matches[roundIndex][matchIndex].p2 = loserName;
+            } else {
+                matches[roundIndex][matchIndex].p2 = winnerName + ' ✓';
+                matches[roundIndex][matchIndex].p1 = loserName;
+            }
+            
+            // Conserver les scores existants (ne pas les réinitialiser)
+            // Les scores sont maintenant purement informatifs
+            
+            const nextRound = roundIndex + 1;
+            const nextMatchIndex = Math.floor(matchIndex / 2);
+            
+            // Faire avancer le gagnant au prochain tour
+            if (nextRound < 4) {
+                const nextMatch = matches[nextRound][nextMatchIndex];
+                
+                // Déterminer si le joueur doit être placé en position p1 ou p2
+                // Si le match actuel a un index pair, le gagnant va en p1, sinon en p2
+                if (matchIndex % 2 === 0) {
+                    nextMatch.p1 = winnerName;
+                    // Ne pas réinitialiser le score1, juste le définir s'il n'existe pas
+                    if (nextMatch.score1 === undefined) nextMatch.score1 = '';
+                } else {
+                    nextMatch.p2 = winnerName;
+                    // Ne pas réinitialiser le score2, juste le définir s'il n'existe pas
+                    if (nextMatch.score2 === undefined) nextMatch.score2 = '';
+                }
+                
+                renderBracket();
+            } else {
+                // C'est la finale, nous avons un gagnant du tournoi
+                winner = winnerName;
+                tournamentCompleted = true; // Marquer le tournoi comme terminé
+                showVictoryMessage(winnerName);
+            }
+            
+            // Sauvegarder les données
+            saveDataToLocalStorage();
+        }
+
         // Afficher le message de victoire
         function showVictoryMessage(winnerName) {
-            document.getElementById('winnerText').innerHTML = `🏆 Félicitations <strong>${winnerName}</strong>, grand gagnant du tournoi ! 🎉`;
+            document.getElementById('winnerText').innerHTML = `🏆 Félicitations <strong>${winnerName}</strong>, grande gagnante du tournoi ! 🎉`;
             document.getElementById('victoryMessage').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
         }
@@ -2029,7 +2342,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
                 
                 // Afficher un message indiquant que le tournoi est terminé
                 if (tournamentCompleted) {
-                    showToast("Tournoi terminé", `${winner} est le grand gagnant ! Pour commencer un nouveau tournoi, utilisez le bouton "Réinitialiser le tournoi".`, "success");
+                    showToast("Tournoi terminé", `${winner} est la grande gagnante ! Pour commencer un nouveau tournoi, utilisez le bouton "Réinitialiser le tournoi".`, "success");
                 }
                 
                 // Sauvegarder les données
@@ -2092,6 +2405,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
             
             // Réafficher le conteneur d'ajout de joueurs si nécessaire
             document.getElementById('addPlayerContainer').style.display = keepPlayers && players.length === 16 ? 'none' : 'block';
+            document.getElementById('randomSlotBtn').style.display = keepPlayers && players.length === 16 ? 'none' : 'block';
             
             // Initialiser un nouveau bracket
             initBracket();
@@ -2099,7 +2413,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
             // Sauvegarder les données
             saveDataToLocalStorage();
             
-            showToast("Tournoi réinitialisé", keepPlayers ? "Le tournoi a été réinitialisé en conservant la liste des joueurs." : "Toutes les données du tournoi ont été effacées.", "success");
+            showToast("Tournoi réinitialisé", keepPlayers ? "Le tournoi a été réinitialisé en conservant la liste des machines." : "Toutes les données du tournoi ont été effacées.", "success");
             
             // Fermer la boîte de dialogue
             closeResetDialog();
@@ -2107,12 +2421,8 @@ function setWinner(roundIndex, matchIndex, winnerName) {
 
         // Effacer toutes les données
         function clearAllData() {
-            if (confirm("Êtes-vous sûr de vouloir effacer TOUTES les données, y compris l'historique des gagnants précédents ?")) {
-                localStorage.removeItem('tournamentData');
-                location.reload(); // Recharger la page pour repartir de zéro
-            } else {
-                closeConfirmDialog();
-            }
+            localStorage.removeItem('tournamentData');
+            location.reload(); // Recharger la page pour repartir de zéro
         }
 
         // Afficher une notification toast
@@ -2194,7 +2504,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
                     
                     const details = document.createElement('div');
                     details.className = 'elimination-details';
-                    details.textContent = `Éliminé par ${elimination.winner}`;
+                    details.textContent = `Éliminée par ${elimination.winner}`;
                     
                     const time = document.createElement('div');
                     time.className = 'elimination-time';
@@ -2239,6 +2549,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
                 closeEliminationHistory();
                 toggleWinnersPanel();
                 closeUndoConfirmDialog();
+                closeRandomSlotDialog();
             }
         });
 
@@ -2371,7 +2682,196 @@ function setWinner(roundIndex, matchIndex, winnerName) {
             // Afficher un message de succès
             showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success");
         }
+        
+        // Sélectionner un type de slot
+        function selectSlotType(element, type) {
+            // Mettre à jour la variable globale
+            selectedSlotType = type;
+            
+            // Mettre à jour l'interface utilisateur
+            const options = document.querySelectorAll('.slot-type-option');
+            options.forEach(option => {
+                option.classList.remove('selected');
+            });
+            element.classList.add('selected');
+        }
+        
+        // Afficher la boîte de dialogue de sélection aléatoire améliorée
+        function showRandomSlotDialog() {
+            // Réinitialiser l'état
+            document.getElementById('randomSlotResult').style.display = 'none';
+            document.getElementById('addRandomSlotBtn').style.display = 'none';
+            document.getElementById('slotSelecting').style.display = 'none';
+            document.getElementById('selectRandomBtn').disabled = false;
+            
+            // Sélectionner l'option "Toutes les machines" par défaut
+            const allOption = document.querySelector('.slot-type-option[data-value="all"]');
+            selectSlotType(allOption, 'all');
+            
+            // Afficher la boîte de dialogue
+            document.getElementById('randomSlotDialog').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+        
+        // Fermer la boîte de dialogue de sélection aléatoire
+        function closeRandomSlotDialog() {
+            document.getElementById('randomSlotDialog').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+        
+        // Sélectionner une machine à sous aléatoire avec animation
+        function selectRandomSlot() {
+            // Désactiver le bouton pendant l'animation
+            document.getElementById('selectRandomBtn').disabled = true;
+            
+            // Récupérer le type de machine sélectionné
+            const slotType = selectedSlotType;
+            
+            let availableSlots = [];
+            
+            if (slotType === "all") {
+                // Combiner les deux listes
+                const allSlots = [...slotMachines, ...nolimitCityMachines];
+                // Filtrer les machines qui ne sont pas déjà dans la liste des joueurs
+                availableSlots = allSlots.filter(slot => 
+                    !players.some(player => player.name === slot)
+                );
+            } else if (slotType === "hacksaw") {
+                // Filtrer uniquement les machines Hacksaw Gaming
+                availableSlots = slotMachines.filter(slot => 
+                    !players.some(player => player.name === slot)
+                );
+            } else if (slotType === "nolimit") {
+                // Filtrer uniquement les machines Nolimit City
+                availableSlots = nolimitCityMachines.filter(slot => 
+                    !players.some(player => player.name === slot)
+                );
+            }
+            
+            if (availableSlots.length === 0) {
+                showToast("Aucune machine disponible", "Toutes les machines de cette catégorie sont déjà ajoutées au tournoi.", "error");
+                document.getElementById('selectRandomBtn').disabled = false;
+                return;
+            }
+            
+            // Préparer la zone d'animation
+            const slotSelecting = document.getElementById('slotSelecting');
+            slotSelecting.innerHTML = '';
+            slotSelecting.style.display = 'block';
+            
+            // Sélectionner une machine aléatoire
+            const randomIndex = Math.floor(Math.random() * availableSlots.length);
+            const finalSlot = availableSlots[randomIndex];
+            
+            // Déterminer la catégorie de la machine sélectionnée
+            let category = "";
+            if (slotMachines.includes(finalSlot)) {
+                category = "Hacksaw Gaming";
+            } else if (nolimitCityMachines.includes(finalSlot)) {
+                category = "Nolimit City";
+            }
+            
+            // Animer la sélection
+            let count = 0;
+            const maxCount = 15; // Nombre d'étapes d'animation
+            const interval = setInterval(() => {
+                // Sélectionner une machine aléatoire pour l'animation
+                const animIndex = Math.floor(Math.random() * availableSlots.length);
+                const animSlot = availableSlots[animIndex];
+                
+                // Créer un élément pour l'animation
+                const slotItem = document.createElement('div');
+                slotItem.className = 'slot-item';
+                slotItem.textContent = count === maxCount - 1 ? finalSlot : animSlot;
+                slotSelecting.appendChild(slotItem);
+                
+                // Supprimer les anciens éléments
+                setTimeout(() => {
+                    if (slotItem.parentNode === slotSelecting) {
+                        slotSelecting.removeChild(slotItem);
+                    }
+                }, 200);
+                
+                count++;
+                if (count >= maxCount) {
+                    clearInterval(interval);
+                    
+                    // Cacher la zone d'animation
+                    setTimeout(() => {
+                        slotSelecting.style.display = 'none';
+                        
+                        // Afficher le résultat final
+                        randomSlotSelected = finalSlot;
+                        randomSlotCategory = category;
+                        
+                        document.getElementById('randomSlotName').textContent = finalSlot;
+                        
+                        const categoryElement = document.getElementById('randomSlotCategory');
+                        if (category) {
+                            categoryElement.textContent = category;
+                            categoryElement.className = 'random-slot-category';
+                            if (category === "Hacksaw Gaming") {
+                                categoryElement.classList.add('hacksaw');
+                            } else if (category === "Nolimit City") {
+                                categoryElement.classList.add('nolimit');
+                            }
+                        } else {
+                            categoryElement.textContent = '';
+                        }
+                        
+                        document.getElementById('randomSlotResult').style.display = 'block';
+                        document.getElementById('addRandomSlotBtn').style.display = 'inline-flex';
+                        document.getElementById('selectRandomBtn').disabled = false;
+                    }, 200);
+                }
+            }, 100);
+        }
+        
+        // Ajouter la machine aléatoire sélectionnée
+        function addRandomSlot() {
+            if (!randomSlotSelected) {
+                showToast("Erreur", "Aucune machine n'a été sélectionnée.", "error");
+                return;
+            }
+            
+            // Vérifier si la limite de joueurs est atteinte
+            if (players.length >= 16) {
+                showToast("Limite atteinte", "Le tournoi est limité à 16 machines !", "error");
+                return;
+            }
+            
+            // Ajouter la machine à la liste des joueurs avec sa catégorie
+            players.push({
+                name: randomSlotSelected,
+                category: randomSlotCategory
+            });
+            document.getElementById('count').innerText = `Joueurs ajoutés : ${players.length}/16`;
+            updatePlayersDisplay();
+            
+            // Sauvegarder les données
+            saveDataToLocalStorage();
+            
+            // Vérifier si on a atteint 16 joueurs
+            if (players.length === 16) {
+                // Cacher le conteneur d'ajout de joueurs
+                document.getElementById('addPlayerContainer').style.display = 'none';
+                document.getElementById('randomSlotBtn').style.display = 'none';
+                // Afficher le bouton de tirage
+                document.getElementById('launchDraw').style.display = 'block';
+            }
+            
+            // Fermer la boîte de dialogue
+            closeRandomSlotDialog();
+            
+            // Afficher un message de succès
+            showToast("Machine ajoutée", `${randomSlotSelected} a été ajoutée au tournoi.`, "success");
+            
+            // Réinitialiser la sélection
+            randomSlotSelected = "";
+            randomSlotCategory = "";
+        }
     </script>
 
 </body>
 </html>
+
