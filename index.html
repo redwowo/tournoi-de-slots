@@ -1739,7 +1739,7 @@ window.addEventListener('resize', function() {
         </div>
         <div class="undo-confirm-buttons">
             <button class="btn-outline" onclick="closeUndoConfirmDialog()">Annuler</button>
-            <button class="btn-warning" id="undoConfirmBtn">Confirmer l'annulation</button>
+            <button class="btn-warning" id="undoConfirmBtn" onclick="undoMatch(currentRoundIndex, currentMatchIndex); closeUndoConfirmDialog();">Confirmer l'annulation</button>
         </div>
     </div>
     
@@ -1824,6 +1824,8 @@ window.addEventListener('resize', function() {
         let randomSlotSelected = "";
         let randomSlotCategory = "";
         let selectedSlotType = "all";
+        let currentRoundIndex = -1;
+        let currentMatchIndex = -1;
         
         // Liste des machines à sous Hacksaw Gaming
         const slotMachines = [
@@ -2478,7 +2480,7 @@ window.addEventListener('resize', function() {
                     time: new Date()
                 });
                 
-                // Afficher le bouton d'historique des éliminations s'il n'est pas déjà visible
+                // Afficher le bouton d'historique des éliminations s'il n'est déjà visible
                 document.getElementById('eliminationHistoryBtn').style.display = 'block';
                 
                 showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success");
@@ -2797,6 +2799,10 @@ window.addEventListener('resize', function() {
 
         // Afficher la boîte de dialogue de confirmation d'annulation de match
         function showUndoConfirmDialog(roundIndex, matchIndex) {
+            // Store the current match indices globally
+            currentRoundIndex = roundIndex;
+            currentMatchIndex = matchIndex;
+            
             const match = matches[roundIndex][matchIndex];
             
             // Obtenir les noms des joueurs sans les checkmarks
@@ -2812,12 +2818,6 @@ window.addEventListener('resize', function() {
                 `Êtes-vous sûr de vouloir annuler le résultat de ce match entre <strong>${p1Name}</strong> et <strong>${p2Name}</strong> ?<br><br>` +
                 `<strong>${winnerName}</strong> ne sera plus considéré comme le vainqueur et <strong>${loserName}</strong> sera retiré de la liste des éliminés.`;
             
-            // Configurer le bouton de confirmation pour appeler undoMatch avec les bons paramètres
-            document.getElementById('undoConfirmBtn').onclick = function() {
-                undoMatch(roundIndex, matchIndex);
-                closeUndoConfirmDialog();
-            };
-            
             // Afficher la boîte de dialogue
             document.getElementById('undoConfirmDialog').style.display = 'block';
             document.getElementById('overlay').style.display = 'block';
@@ -2825,76 +2825,102 @@ window.addEventListener('resize', function() {
 
         // Fonction pour annuler un match
         function undoMatch(roundIndex, matchIndex) {
-            const match = matches[roundIndex][matchIndex];
-            
-            // Obtenir les noms des joueurs sans les checkmarks
-            const p1Name = match.p1.replace(' ✓', '');
-            const p2Name = match.p2.replace(' ✓', '');
-            
-            // Déterminer le gagnant et le perdant
-            const winnerName = match.p1.includes(' ✓') ? p1Name : p2Name;
-            const loserName = match.p1.includes(' ✓') ? p2Name : p1Name;
-            
-            // Retirer le checkmark du gagnant
-            match.p1 = p1Name;
-            match.p2 = p2Name;
-            
-            // Retirer le perdant de la liste des éliminés
-            const eliminatedIndex = eliminated.indexOf(loserName);
-            if (eliminatedIndex !== -1) {
-                eliminated.splice(eliminatedIndex, 1);
+    const match = matches[roundIndex][matchIndex];
+    
+    // Obtenir les noms des joueurs sans les checkmarks
+    const p1Name = match.p1.replace(' ✓', '');
+    const p2Name = match.p2.replace(' ✓', '');
+    
+    // Déterminer le gagnant et le perdant
+    const winnerName = match.p1.includes(' ✓') ? p1Name : p2Name;
+    const loserName = match.p1.includes(' ✓') ? p2Name : p1Name;
+    
+    // Retirer le checkmark du gagnant
+    match.p1 = p1Name;
+    match.p2 = p2Name;
+    
+    // Retirer le perdant de la liste des éliminés
+    const eliminatedIndex = eliminated.indexOf(loserName);
+    if (eliminatedIndex !== -1) {
+        eliminated.splice(eliminatedIndex, 1);
+    }
+    
+    // Retirer de l'historique des éliminations
+    eliminationHistory = eliminationHistory.filter(item => 
+        !(item.winner === winnerName && item.loser === loserName && item.round === roundIndex)
+    );
+    
+    // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
+    const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
+    if (playerElement) playerElement.classList.remove('eliminated');
+    
+    // Vérifier si nous devons retirer le joueur des tours suivants
+    if (roundIndex < 3) { // Pas la finale
+        const nextRound = roundIndex + 1;
+        const nextMatchIndex = Math.floor(matchIndex / 2);
+        const nextMatch = matches[nextRound][nextMatchIndex];
+        
+        // Vérifier si le gagnant est présent dans le match suivant
+        if (nextMatch.p1 === winnerName || nextMatch.p2 === winnerName) {
+            // Déterminer si le joueur était en position p1 ou p2 dans le match suivant
+            if (nextMatch.p1 === winnerName) {
+                nextMatch.p1 = '';
+                nextMatch.score1 = '';
+            } else if (nextMatch.p2 === winnerName) {
+                nextMatch.p2 = '';
+                nextMatch.score2 = '';
             }
             
-            // Retirer de l'historique des éliminations
-            eliminationHistory = eliminationHistory.filter(item => 
-                !(item.winner === winnerName && item.loser === loserName && item.round === roundIndex)
-            );
-            
-            // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
-            const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, '-')} span`);
-            if (playerElement) playerElement.classList.remove('eliminated');
-            
-            // Vérifier si nous devons retirer le joueur des tours suivants
-            if (roundIndex < 3) { // Pas la finale
-                const nextRound = roundIndex + 1;
-                const nextMatchIndex = Math.floor(matchIndex / 2);
-                const nextMatch = matches[nextRound][nextMatchIndex];
-                
-                // Déterminer si le joueur était en position p1 ou p2 dans le match suivant
-                if ((matchIndex % 2 === 0 && nextMatch.p1 === winnerName) || 
-                    (matchIndex % 2 === 1 && nextMatch.p2 === winnerName)) {
-                    
-                    // Retirer le joueur du match suivant
-                    if (matchIndex % 2 === 0) {
-                        nextMatch.p1 = '';
-                        nextMatch.score1 = '';
-                    } else {
-                        nextMatch.p2 = '';
-                        nextMatch.score2 = '';
-                    }
-                    
-                    // Si le match suivant a déjà un gagnant, annuler récursivement ce match aussi
-                    if (nextMatch.p1.includes(' ✓') || nextMatch.p2.includes(' ✓')) {
-                        undoMatch(nextRound, nextMatchIndex);
-                    }
-                }
+            // Si le match suivant a déjà un gagnant, annuler récursivement ce match aussi
+            if (nextMatch.p1.includes(' ✓') || nextMatch.p2.includes(' ✓')) {
+                undoMatch(nextRound, nextMatchIndex);
             } else {
-                // Si c'était la finale, réinitialiser le gagnant et le drapeau tournamentCompleted
-                if (winner === winnerName) {
-                    winner = "";
-                    tournamentCompleted = false;
-                }
+                // Vérifier et propager les annulations aux tours suivants même sans gagnant
+                checkAndPropagateUndos(nextRound, nextMatchIndex, winnerName);
             }
-            
-            // Mettre à jour l'affichage du bracket
-            renderBracket();
-            
-            // Sauvegarder les données
-            saveDataToLocalStorage();
-            
-            // Afficher un message de succès
-            showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success");
         }
+    } else {
+        // Si c'était la finale, réinitialiser le gagnant et le drapeau tournamentCompleted
+        if (winner === winnerName) {
+            winner = "";
+            tournamentCompleted = false;
+        }
+    }
+    
+    // Mettre à jour l'affichage du bracket
+    renderBracket();
+    
+    // Sauvegarder les données
+    saveDataToLocalStorage();
+    
+    // Afficher un message de succès
+    showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success");
+}
+
+// Nouvelle fonction pour vérifier et propager les annulations aux tours suivants
+function checkAndPropagateUndos(roundIndex, matchIndex, playerName) {
+    if (roundIndex >= 3) return; // Arrêter à la finale
+    
+    const nextRound = roundIndex + 1;
+    const nextMatchIndex = Math.floor(matchIndex / 2);
+    
+    if (nextRound < matches.length) {
+        const nextMatch = matches[nextRound][nextMatchIndex];
+        
+        // Vérifier si le joueur est présent dans le match suivant
+        if (nextMatch.p1 === playerName) {
+            nextMatch.p1 = '';
+            nextMatch.score1 = '';
+            // Continuer la propagation
+            checkAndPropagateUndos(nextRound, nextMatchIndex, playerName);
+        } else if (nextMatch.p2 === playerName) {
+            nextMatch.p2 = '';
+            nextMatch.score2 = '';
+            // Continuer la propagation
+            checkAndPropagateUndos(nextRound, nextMatchIndex, playerName);
+        }
+    }
+}
         
         // Sélectionner un type de slot
         function selectSlotType(element, type) {
