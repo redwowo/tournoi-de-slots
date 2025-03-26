@@ -1665,6 +1665,15 @@ window.addEventListener('resize', function() {
         <button onclick="closeVictoryMessage()" style="margin-top: 1rem;">Fermer</button>
     </div>
     
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay-bg); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+        <img src="chargement.svg" alt="Chargement" style="width: 100px; height: 100px; margin-bottom: 20px;">
+        <p id="loadingText" style="color: white; font-size: 1.2rem; font-weight: bold; text-align: center;">Préparation du tournoi en cours...</p>
+        <div style="width: 250px; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 5px; margin-top: 15px; overflow: hidden;">
+            <div id="loadingProgress" style="width: 0%; height: 100%; background-color: var(--primary-color); border-radius: 5px; transition: width 2s linear;"></div>
+        </div>
+    </div>
+    
     <!-- Toast container -->
     <div class="toast-container" id="toastContainer"></div>
     
@@ -1920,7 +1929,9 @@ window.addEventListener('resize', function() {
                     // Convertir les dates de chaîne en objets Date pour les gagnants précédents
                     previousWinners.forEach(item => {
                         if (typeof item.date === 'string') {
-                            item.date = new Date(item.date);
+                            if (typeof item.date === 'string') {
+                                item.date = new Date(item.date);
+                            }
                         }
                     });
 
@@ -2401,21 +2412,66 @@ window.addEventListener('resize', function() {
 
         // Lancer le tirage
         function launchDraw() {
-            tournamentStarted = true;
-            shufflePlayers();
-            placePlayersRandomly();
-            document.getElementById('bracket').style.display = 'flex';
-            document.getElementById('launchDraw').style.display = 'none';
-            document.getElementById('resetButton').style.display = 'block';
-            document.getElementById('randomSlotBtn').style.display = 'none';
+            // Afficher l'animation de chargement
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            updateLoadingProgress();
             
-            // Mettre à jour l'affichage pour désactiver les boutons de suppression
-            updatePlayersDisplay();
+            // Utiliser setTimeout pour simuler un temps de chargement plus court
+            setTimeout(function() {
+                // Première étape - simuler le traitement
+                setTimeout(function() {
+                    // Deuxième étape - continuer le traitement
+                    setTimeout(function() {
+                        // Troisième étape - finaliser et afficher le tournoi
+                        tournamentStarted = true;
+                        shufflePlayers();
+                        placePlayersRandomly();
+                        document.getElementById('bracket').style.display = 'flex';
+                        document.getElementById('launchDraw').style.display = 'none';
+                        document.getElementById('resetButton').style.display = 'block';
+                        document.getElementById('randomSlotBtn').style.display = 'none';
+                        
+                        // Mettre à jour l'affichage pour désactiver les boutons de suppression
+                        updatePlayersDisplay();
+                        
+                        // Sauvegarder les données
+                        saveDataToLocalStorage();
+                        
+                        // Masquer l'animation de chargement
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        
+                        showToast("Tournoi lancé !", "Le tirage au sort a été effectué. Que la meilleure machine gagne !", "success");
+                    }, 500); // Délai réduit à 0.5 seconde pour la troisième étape
+                }, 500); // Délai réduit à 0.5 seconde pour la deuxième étape
+            }, 500); // Délai réduit à 0.5 seconde pour la première étape
+        }
+
+        // Ajouter cette fonction après la fonction launchDraw()
+        function updateLoadingProgress() {
+            const progressBar = document.getElementById('loadingProgress');
+            const loadingText = document.getElementById('loadingText');
             
-            // Sauvegarder les données
-            saveDataToLocalStorage();
+            // Démarrer l'animation de la barre de progression
+            progressBar.style.width = '0%';
             
-            showToast("Tournoi lancé !", "Le tirage au sort a été effectué. Que la meilleure machine gagne !", "success");
+            // Forcer un reflow pour que la transition fonctionne
+            void progressBar.offsetWidth;
+            
+            // Animer jusqu'à 100%
+            progressBar.style.width = '100%';
+            
+            // Mettre à jour le texte pendant le chargement
+            setTimeout(() => {
+                loadingText.textContent = "Mélange des machines...";
+            }, 500);
+            
+            setTimeout(() => {
+                loadingText.textContent = "Création des matchs...";
+            }, 1000);
+            
+            setTimeout(() => {
+                loadingText.textContent = "Finalisation du tournoi...";
+            }, 1500);
         }
 
         // Mélanger les joueurs
@@ -2833,7 +2889,7 @@ window.addEventListener('resize', function() {
     
     // Déterminer le gagnant et le perdant
     const winnerName = match.p1.includes(' ✓') ? p1Name : p2Name;
-    const loserName = match.p1.includes(' ✓') ? p2Name : p1Name;
+    const loserName = match.p2.replace(' ✓', '');
     
     // Retirer le checkmark du gagnant
     match.p1 = p1Name;
