@@ -249,6 +249,9 @@
             transition: all 0.3s ease;
             position: relative;
             font-size: 0.9rem; /* Added to make text slightly smaller */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .player-btn:hover { 
@@ -2030,12 +2033,12 @@ input[type=number] {
             
             const btn1 = match.p1 
                 ? `<button class="${p1Classes}" ${p1Disabled} 
-                    onclick="setWinner(${i}, ${j}, '${p1Name}')">${p1Display}</button>` 
+                    onclick="setWinner(${i}, ${j}, '${p1Name.replace(/'/g, "\\'")}')" title="${p1Name}">${p1Display}</button>` 
                 : `<button class="player-btn" disabled>---</button>`;
                 
             const btn2 = match.p2 
                 ? `<button class="${p2Classes}" ${p2Disabled} 
-                    onclick="setWinner(${i}, ${j}, '${p2Name}')">${p2Display}</button>` 
+                    onclick="setWinner(${i}, ${j}, '${p2Name.replace(/'/g, "\\'")}')" title="${p2Name}">${p2Display}</button>` 
                 : `<button class="player-btn" disabled>---</button>`;
             
             let matchHtml = `${btn1}${btn2}`;
@@ -3072,7 +3075,7 @@ document.addEventListener('keydown', function(e) {
 
     <!-- Mention légale -->
     <div class="legal-notice">
-        Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
+        Site créé avec IA.<br>Appartenant à JC.<br>Patouche Lamouche Inc.
     </div>
 </body>
 </html>
