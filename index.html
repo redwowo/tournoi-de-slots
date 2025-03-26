@@ -193,51 +193,59 @@
         /* Bracket à droite */
         .bracket { 
             display: flex;  
-            gap: 2rem; /* Reduced from 2.5rem to save space */
-            overflow-x: auto;
-            padding-bottom: 1rem;
+            gap: 2rem; /* Réduit de 2.5rem à 2rem */
+            padding-bottom: 1rem; /* Réduit de 1.5rem à 1rem */
             width: 100%;
             position: relative;
+            flex-wrap: wrap; /* Permet aux colonnes de passer à la ligne si nécessaire */
+            justify-content: center; /* Centre les colonnes */
+            overflow-x: hidden; /* Empêche le défilement horizontal */
         }
 
         .round { 
             display: flex; 
             flex-direction: column;
             position: relative;
-            min-width: 180px; /* Reduced from 220px */
+            min-width: 180px; /* Réduit de 220px à 180px */
+            max-width: 220px; /* Ajoute une largeur maximale */
             z-index: 1;
+            margin-right: 0; /* Supprime la marge à droite */
+            flex: 1; /* Permet aux colonnes de s'adapter à l'espace disponible */
         }
 
         .round h3 {
             text-align: center;
             font-weight: 600;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem; /* Réduit de 1.5rem à 1rem */
             color: var(--text-color);
+            font-size: 0.95rem; /* Réduit légèrement la taille du titre */
         }
 
         .match-wrapper {
             position: relative;
-            margin-bottom: 2rem;
+            margin-bottom: 2rem; /* Réduit de 3rem à 2rem pour moins d'espace vertical */
+            min-height: 100px; /* Réduit de 120px à 100px */
         }
 
         .match { 
             border: 1px solid var(--border-color); 
-            padding: 0.5rem; /* Reduced from 0.75rem */
+            padding: 0.5rem; /* Réduit de 0.6rem à 0.5rem */
             display: flex; 
             flex-direction: column; 
-            gap: 0.25rem; /* Reduced from 0.5rem */
+            gap: 0.3rem; /* Réduit de 0.4rem à 0.3rem */
             border-radius: 0.5rem; 
             background: var(--card-bg); 
             box-shadow: 0 2px 8px var(--shadow-color);
             position: relative;
             z-index: 2;
             transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-            min-width: 150px; /* Added to ensure minimum width */
-            max-width: 220px; /* Added to limit maximum width */
+            min-width: 150px; /* Réduit de 180px à 150px */
+            max-width: 200px; /* Réduit de 250px à 200px */
+            width: 100%; /* S'adapte à la largeur disponible */
         }
 
         .player-btn { 
-            padding: 0.4rem; /* Reduced from 0.5rem */
+            padding: 0.35rem; /* Réduit de 0.4rem à 0.35rem */
             cursor: pointer; 
             background: var(--btn-bg); 
             color: var(--btn-text); 
@@ -248,7 +256,7 @@
             text-align: center;
             transition: all 0.3s ease;
             position: relative;
-            font-size: 0.9rem; /* Added to make text slightly smaller */
+            font-size: 0.85rem; /* Réduit de 0.9rem à 0.85rem */
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1027,15 +1035,15 @@
 
 .score-inputs {
     display: flex;
-    gap: 0.25rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+    gap: 0.22rem;
+    margin-top: 0.22rem;
+    margin-bottom: 0.22rem;
     justify-content: center;
 }
 
 .score-inputs input {
-    padding: 0.35rem;
-    width: 45px;
+    padding: 0.20rem;
+    width: 30px;
     font-size: 1rem;
     text-align: center;
     margin-bottom: 0;
@@ -1067,11 +1075,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 0.25rem;
-    margin-bottom: 0.25rem;
+    margin-top: 0.22rem;
+    margin-bottom: 0.22rem;
     background-color: var(--item-bg);
     border-radius: 0.25rem;
-    padding: 0.25rem 0.75rem;
+    padding: 0.22rem 0.75rem;
     border: 1px solid var(--border-color);
 }
 
@@ -1473,6 +1481,105 @@ input[type=number] {
     line-height: 1.4;
     transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
+
+/* Ajouter une media query pour les écrans plus petits */
+@media (max-width: 1200px) {
+    .bracket {
+        gap: 1rem; /* Réduit encore l'espace entre les colonnes */
+    }
+    
+    .round {
+        min-width: 150px; /* Réduit encore la largeur minimale */
+    }
+    
+    .match {
+        min-width: 130px; /* Réduit encore la largeur minimale */
+        padding: 0.5rem; /* Réduit encore le padding */
+    }
+    
+    .match-wrapper {
+        margin-bottom: 1.5rem; /* Réduit encore l'espace vertical */
+    }
+}
+
+/* Ajouter une media query pour les écrans très petits */
+@media (max-width: 768px) {
+    .main-container {
+        padding: 0; /* Supprime le padding pour utiliser tout l'espace disponible */
+    }
+    
+    .bracket {
+        padding: 0.5rem; /* Réduit le padding */
+    }
+    
+    .match-wrapper {
+        margin-bottom: 1rem; /* Réduit encore plus l'espace vertical */
+    }
+    
+    .round h3 {
+        margin-bottom: 0.75rem; /* Réduit encore la marge sous les titres */
+        font-size: 0.9rem; /* Réduit encore la taille du titre */
+    }
+}
+
+/* Ajouter une media query pour les écrans de faible hauteur */
+@media (max-height: 800px) {
+    .match-wrapper {
+        margin-bottom: 1rem; /* Réduit l'espace vertical pour les écrans de faible hauteur */
+    }
+    
+    .player-btn {
+        padding: 0.25rem; /* Réduit encore le padding des boutons */
+        font-size: 0.8rem; /* Réduit encore la taille de la police */
+    }
+    
+    .round h3 {
+        margin-bottom: 0.5rem; /* Réduit encore la marge sous les titres */
+    }
+}
+
+/* Modifier la fonction adjustBracketSpacing pour mieux gérer l'espacement vertical */
+function adjustBracketSpacing() {
+    for (let i = 1; i < 4; i++) { // Commencer au deuxième round (quarts)
+        const prevRoundMatchCount = Math.pow(2, 4 - i);
+        const currentRoundMatchCount = Math.pow(2, 4 - i - 1);
+        
+        for (let j = 0; j < currentRoundMatchCount; j++) {
+            const matchWrapper = document.getElementById(`match-wrapper-${i}-${j}`);
+            if (matchWrapper) {
+                // Calculer la hauteur totale que devrait occuper ce match
+                // Utiliser un multiplicateur adaptatif basé sur la hauteur de l'écran
+                let multiplier = 5;
+                if (window.innerHeight < 800) {
+                    multiplier = 4;
+                }
+                if (window.innerHeight < 600) {
+                    multiplier = 3;
+                }
+                
+                const totalHeight = (prevRoundMatchCount / currentRoundMatchCount) * multiplier + 'rem';
+                matchWrapper.style.height = totalHeight;
+                
+                // Centrer le match dans son wrapper
+                const match = matchWrapper.querySelector('.match');
+                if (match) {
+                    match.style.position = 'absolute';
+                    match.style.top = '50%';
+                    match.style.transform = 'translateY(-50%)';
+                    match.style.width = 'calc(100% - 1rem)';
+                    match.style.maxWidth = '100%'; // S'assurer que le match ne dépasse pas son conteneur
+                }
+            }
+        }
+    }
+}
+
+// Ajouter un écouteur d'événement pour redimensionner le bracket quand la fenêtre change de taille
+window.addEventListener('resize', function() {
+    if (tournamentStarted) {
+        adjustBracketSpacing();
+    }
+});
     </style>
 </head>
 <body>
@@ -1969,25 +2076,26 @@ input[type=number] {
                 const prevRoundMatchCount = Math.pow(2, 4 - i);
                 const currentRoundMatchCount = Math.pow(2, 4 - i - 1);
                 
-                for (let j = 0; j < currentRoundMatchCount; j++) {
-                    const matchWrapper = document.getElementById(`match-wrapper-${i}-${j}`);
-                    if (matchWrapper) {
-                        // Calculer la hauteur totale que devrait occuper ce match
-                        const totalHeight = (prevRoundMatchCount / currentRoundMatchCount) * 4 + 'rem';
-                        matchWrapper.style.height = totalHeight;
-                        
-                        // Centrer le match dans son wrapper
-                        const match = matchWrapper.querySelector('.match');
-                        if (match) {
-                            match.style.position = 'absolute';
-                            match.style.top = '50%';
-                            match.style.transform = 'translateY(-50%)';
-                            match.style.width = 'calc(100% - 1rem)';
-                        }
-                    }
+        for (let j = 0; j < currentRoundMatchCount; j++) {
+            const matchWrapper = document.getElementById(`match-wrapper-${i}-${j}`);
+            if (matchWrapper) {
+                // Calculer la hauteur totale que devrait occuper ce match
+                // Augmenté le multiplicateur de 4 à 6 pour plus d'espace
+                const totalHeight = (prevRoundMatchCount / currentRoundMatchCount) * 6 + 'rem';
+                matchWrapper.style.height = totalHeight;
+                
+                // Centrer le match dans son wrapper
+                const match = matchWrapper.querySelector('.match');
+                if (match) {
+                    match.style.position = 'absolute';
+                    match.style.top = '50%';
+                    match.style.transform = 'translateY(-50%)';
+                    match.style.width = 'calc(100% - 1rem)';
                 }
             }
         }
+    }
+}
 
         // Rendre les boutons de match
         function renderMatchButtons(i, j) {
