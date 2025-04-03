@@ -203,6 +203,132 @@ window.TournamentApp = {
     "Manhattan Goes Wild",
   ],
 
+  // Add Pragmatic Play machines
+  pragmaticPlayMachines: [
+    "Gates of Olympus",
+    "Sweet Bonanza",
+    "Wolf Gold",
+    "The Dog House",
+    "Big Bass Bonanza",
+    "Starlight Princess",
+    "Sugar Rush",
+    "Fruit Party",
+    "Buffalo King Megaways",
+    "Madame Destiny Megaways",
+    "Joker's Jewels",
+    "Hot to Burn",
+    "Wild West Gold",
+    "Great Rhino Megaways",
+    "Extra Juicy",
+    "Chilli Heat",
+    "Floating Dragon",
+    "5 Lions Megaways",
+    "Book of the Fallen",
+    "Cleocatra",
+    "Voodoo Magic",
+    "Cowboys Gold",
+    "Lucky Lightning",
+    "Treasure Wild",
+    "Bigger Bass Bonanza",
+    "Barn Festival",
+    "Snakes & Ladders Megadice",
+    "Zombie Carnival",
+    "Day of Dead",
+    "Big Juan",
+    "Gold Party",
+    "Rock Vegas",
+    "Drago - Jewels of Fortune",
+    "Mystic Chief",
+    "Rise of Giza PowerNudge",
+    "Chicken Drop",
+    "Juicy Fruits",
+    "Empty the Bank!",
+    "Panda's Fortune 2",
+    "Curse of the Werewolf Megaways",
+    "Pirate Gold Deluxe",
+    "Emerald King Rainbow Road",
+    "Ultra Burn",
+    "Hot Fiesta",
+    "Wild Depths",
+    "Magician's Secrets",
+    "Gold Train",
+    "Money Mouse",
+    "John Hunter and the Book of Tut",
+    "The Hand of Midas",
+    "Eye of the Storm",
+    "Buffalo King",
+    "Hot Safari",
+    "Leprechaun Carol",
+    "Santa",
+    "Aladdin and the Sorcerer",
+    "Honey Honey Honey",
+    "Release the Kraken",
+    "Dance Party",
+    "Greek Gods",
+    "Golden Beauty",
+    "Wild Walker",
+    "Starz Megaways",
+    "Dragon Kingdom - Eyes of Fire",
+    "Super Joker",
+    "Money Train 2",
+    "Dead or Alive 2",
+    "San Quentin",
+    "Tombstone RIP",
+    "Mental",
+    "Fire in the Hole xBomb",
+    "Das xBoot",
+    "Punk Toilet",
+    "Remember Gulag",
+    "Karen Maneater",
+    "The Rave",
+    "Folsom Prison",
+    "Little Bighorn",
+    "Serial",
+    "Blood & Shadow",
+    "Kiss My Chainsaw",
+    "Disturbed",
+    "Gluttony",
+    "The Cage",
+    "Bounty Hunters",
+    "True Kult",
+    "DJ Psycho",
+    "The Crypt",
+    "Space Donkey",
+    "Ugliest Catch",
+    "Roadkill",
+    "Nine To Five",
+    "Jingle Balls",
+    "Devil's Crossroad",
+    "Land Of The Free",
+    "D-Day",
+    "Fire in the Hole 2",
+    "Possessed",
+    "BRICK SNAKE 2000",
+    "Tombstone: No Mercy",
+    "Kenneth Must Die",
+    "Loner",
+    "Deadwood R.I.P",
+    "Beheaded",
+    "Punk Rocker 2",
+    "Apocalypse Super xNudge",
+    "Outsourced",
+    "Stockholm Syndrome",
+    "Skate or Die",
+    "San Quentin 2: Death Row",
+    "Brute Force",
+    "Blood & Shadow 2",
+    "Outsourced: Slash Game",
+    "Munchies",
+    "Tanked",
+    "Outsourced: Payday",
+    "xWays Hoarder 2",
+    "Tombstone Slaughter: El Gordo's Revenge",
+    "Duck Hunters",
+    "Dead, Dead Or Deader",
+    "Home of the Brave",
+    "Mental II",
+  ],
+
   // Variables d'état
   players: [],
   matches: [],
@@ -233,6 +359,8 @@ function getMachineURL(machineName, category) {
     prefix = "hacksaw-gaming-"
   } else if (category === "Nolimit City") {
     prefix = "nolimit-city-"
+  } else if (category === "Pragmatic Play") {
+    prefix = "pragmatic-play-"
   }
 
   // Formater le nom de la machine pour l'URL
@@ -447,6 +575,8 @@ function updatePlayersDisplay() {
         categoryBadge.classList.add("hacksaw")
       } else if (player.category === "Nolimit City") {
         categoryBadge.classList.add("nolimit")
+      } else if (player.category === "Pragmatic Play") {
+        categoryBadge.classList.add("pragmatic")
       }
 
       categoryBadge.textContent = player.category
@@ -533,7 +663,7 @@ function showSuggestions(input) {
     return
   }
 
-  // Rechercher des correspondances dans les deux listes
+  // Rechercher des correspondances dans les trois listes
   const hacksawMatches = TournamentApp.slotMachines.filter(
     (machine) =>
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
@@ -544,8 +674,13 @@ function showSuggestions(input) {
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
   )
 
+  const pragmaticMatches = TournamentApp.pragmaticPlayMachines.filter(
+    (machine) =>
+      machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
+  )
+
   // Combiner les résultats et limiter à 10 suggestions
-  const allMatches = [...hacksawMatches, ...nolimitMatches].slice(0, 10)
+  const allMatches = [...hacksawMatches, ...nolimitMatches, ...pragmaticMatches].slice(0, 10)
 
   // Si aucune correspondance, afficher un message
   if (allMatches.length === 0) {
@@ -572,6 +707,9 @@ function showSuggestions(input) {
       } else if (TournamentApp.nolimitCityMachines.includes(machine)) {
         categorySpan.textContent = "Nolimit"
         categorySpan.classList.add("nolimit")
+      } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
+        categorySpan.textContent = "Pragmatic"
+        categorySpan.classList.add("pragmatic")
       }
 
       item.appendChild(nameSpan)
@@ -808,7 +946,11 @@ function updateMaxAvailableSlots() {
   let availableSlots = []
 
   if (TournamentApp.selectedSlotType === "all") {
-    const allSlots = [...TournamentApp.slotMachines, ...TournamentApp.nolimitCityMachines]
+    const allSlots = [
+      ...TournamentApp.slotMachines,
+      ...TournamentApp.nolimitCityMachines,
+      ...TournamentApp.pragmaticPlayMachines,
+    ]
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
   } else if (TournamentApp.selectedSlotType === "hacksaw") {
     availableSlots = TournamentApp.slotMachines.filter(
@@ -816,6 +958,10 @@ function updateMaxAvailableSlots() {
     )
   } else if (TournamentApp.selectedSlotType === "nolimit") {
     availableSlots = TournamentApp.nolimitCityMachines.filter(
+      (slot) => !TournamentApp.players.some((player) => player.name === slot),
+    )
+  } else if (TournamentApp.selectedSlotType === "pragmatic") {
+    availableSlots = TournamentApp.pragmaticPlayMachines.filter(
       (slot) => !TournamentApp.players.some((player) => player.name === slot),
     )
   }
@@ -1097,6 +1243,7 @@ function addPlayer() {
     // Vérifier si la machine est dans l'une des listes
     const isHacksawGaming = TournamentApp.slotMachines.includes(name)
     const isNolimitCity = TournamentApp.nolimitCityMachines.includes(name)
+    const isPragmaticPlay = TournamentApp.pragmaticPlayMachines.includes(name)
 
     // Déterminer la catégorie
     let category = ""
@@ -1104,6 +1251,8 @@ function addPlayer() {
       category = "Hacksaw Gaming"
     } else if (isNolimitCity) {
       category = "Nolimit City"
+    } else if (isPragmaticPlay) {
+      category = "Pragmatic Play"
     }
 
     // Ajouter le joueur avec sa catégorie
@@ -1458,7 +1607,7 @@ function undoMatch() {
   const match = TournamentApp.matches[roundIndex][matchIndex]
 
   // Obtenir les noms des joueurs sans les checkmarks
-  const p1Name = match.p1.replace(" ✓", "")
+  const p1Name = match.p1.replace("   ", "")
   const p2Name = match.p2.replace(" ✓", "")
 
   // Déterminer le gagnant et le perdant
@@ -1599,8 +1748,12 @@ function selectRandomSlot() {
   let availableSlots = []
 
   if (slotType === "all") {
-    // Combiner les deux listes
-    const allSlots = [...TournamentApp.slotMachines, ...TournamentApp.nolimitCityMachines]
+    // Combiner les trois listes
+    const allSlots = [
+      ...TournamentApp.slotMachines,
+      ...TournamentApp.nolimitCityMachines,
+      ...TournamentApp.pragmaticPlayMachines,
+    ]
     // Filtrer les machines qui ne sont pas déjà dans la liste des joueurs
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
   } else if (slotType === "hacksaw") {
@@ -1611,6 +1764,11 @@ function selectRandomSlot() {
   } else if (slotType === "nolimit") {
     // Filtrer uniquement les machines Nolimit City
     availableSlots = TournamentApp.nolimitCityMachines.filter(
+      (slot) => !TournamentApp.players.some((player) => player.name === slot),
+    )
+  } else if (slotType === "pragmatic") {
+    // Filtrer uniquement les machines Pragmatic Play
+    availableSlots = TournamentApp.pragmaticPlayMachines.filter(
       (slot) => !TournamentApp.players.some((player) => player.name === slot),
     )
   }
@@ -1698,6 +1856,8 @@ function selectRandomSlot() {
             category = "Hacksaw Gaming"
           } else if (TournamentApp.nolimitCityMachines.includes(name)) {
             category = "Nolimit City"
+          } else if (TournamentApp.pragmaticPlayMachines.includes(name)) {
+            category = "Pragmatic Play"
           }
           return { name, category }
         })
@@ -1717,6 +1877,8 @@ function selectRandomSlot() {
               categoryElement.classList.add("hacksaw")
             } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
               categoryElement.classList.add("nolimit")
+            } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
+              categoryElement.classList.add("pragmatic")
             }
           } else {
             categoryElement.textContent = ""
@@ -1792,6 +1954,8 @@ function addRandomSlot() {
         categoryElement.classList.add("hacksaw")
       } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
         categoryElement.classList.add("nolimit")
+      } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
+        categoryElement.classList.add("pragmatic")
       }
     } else {
       categoryElement.textContent = ""
