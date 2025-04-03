@@ -30,6 +30,7 @@
   --category-text: white;
   --nolimit-category-bg: #ef4444;
   --hacksaw-category-bg: #3b82f6;
+  --pragmatic-category-bg: #8e44ad;
 
   /* Nouvelles variables pour le dialogue de sélection aléatoire */
   --primary-color: #3b82f6;
@@ -74,6 +75,7 @@
   --warning-text: #fef3c7;
   --nolimit-category-bg: #ef4444;
   --hacksaw-category-bg: #3b82f6;
+  --pragmatic-category-bg: #8e44ad;
 
   /* Nouvelles variables pour le dialogue de sélection aléatoire en mode sombre */
   --slot-result-bg: rgba(59, 130, 246, 0.15);
@@ -1149,6 +1151,10 @@ h1 {
   background-color: var(--nolimit-category-bg);
 }
 
+.category-badge.pragmatic {
+  background-color: var(--pragmatic-category-bg);
+}
+
 /* Styles améliorés pour le modal de sélection aléatoire */
 .random-slot-dialog {
   display: none;
@@ -1306,6 +1312,11 @@ h1 {
   color: white;
 }
 
+.slot-type-badge.pragmatic {
+  background-color: var(--pragmatic-category-bg);
+  color: white;
+}
+
 .random-slot-result {
   margin: 1.5rem 0;
   padding: 1.5rem;
@@ -1377,6 +1388,11 @@ h1 {
 
 .random-slot-category.nolimit {
   background-color: var(--nolimit-category-bg);
+  color: white;
+}
+
+.random-slot-category.pragmatic {
+  background-color: var(--pragmatic-category-bg);
   color: white;
 }
 
@@ -1510,6 +1526,10 @@ input[type="number"] {
 
 .suggestion-category.nolimit {
   background-color: var(--nolimit-category-bg);
+}
+
+.suggestion-category.pragmatic {
+  background-color: var(--pragmatic-category-bg);
 }
 
 .no-suggestions {
