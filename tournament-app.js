@@ -1607,7 +1607,7 @@ function undoMatch() {
   const match = TournamentApp.matches[roundIndex][matchIndex]
 
   // Obtenir les noms des joueurs sans les checkmarks
-  const p1Name = match.p1.replace("   ", "")
+  const p1Name = match.p1.replace(" ✓", "")
   const p2Name = match.p2.replace(" ✓", "")
 
   // Déterminer le gagnant et le perdant
@@ -1884,6 +1884,13 @@ function selectRandomSlot() {
             categoryElement.textContent = ""
           }
 
+          // CORRECTION: Supprimer l'ancien compteur s'il existe avant d'en ajouter un nouveau
+          const resultElement = document.getElementById("randomSlotResult")
+          const existingCountElement = document.querySelector("#randomSlotResult div:last-child")
+          if (existingCountElement && (existingCountElement.textContent.includes("machine") || existingCountElement.textContent.includes("Machine"))) {
+            resultElement.removeChild(existingCountElement)
+          }
+
           // Afficher le compteur si plusieurs machines sont sélectionnées
           if (TournamentApp.selectedSlotsArray.length > 1) {
             const countElement = document.createElement("div")
@@ -1891,7 +1898,7 @@ function selectRandomSlot() {
             countElement.style.fontSize = "0.9rem"
             countElement.style.color = "var(--muted-text)"
             countElement.textContent = `${TournamentApp.selectedSlotsArray.length} machines sélectionnées`
-            document.getElementById("randomSlotResult").appendChild(countElement)
+            resultElement.appendChild(countElement)
           }
 
           document.getElementById("randomSlotResult").style.display = "block"
@@ -2095,4 +2102,3 @@ function removePlayer(index) {
   saveDataToLocalStorage()
   showToast("Machine retirée", "La machine a été retirée du tournoi.", "success")
 }
-
