@@ -1034,23 +1034,19 @@ function toggleSlotType(element, type) {
 
 // NOUVELLE FONCTION: Mettre à jour l'affichage des providers sélectionnés
 function updateSelectedProvidersDisplay() {
-  const displayElement = document.getElementById("selectedProvidersList")
-
-  if (TournamentApp.selectedSlotTypes.includes("all")) {
-    displayElement.innerHTML = '<span class="provider-tag all">Toutes les machines</span>'
-  } else {
-    let html = ""
-    TournamentApp.selectedSlotTypes.forEach((type) => {
-      if (type === "hacksaw") {
-        html += '<span class="provider-tag hacksaw">Hacksaw Gaming</span> '
-      } else if (type === "nolimit") {
-        html += '<span class="provider-tag nolimit">Nolimit City</span> '
-      } else if (type === "pragmatic") {
-        html += '<span class="provider-tag pragmatic">Pragmatic Play</span> '
-      }
-    })
-    displayElement.innerHTML = html || '<span style="color: var(--muted-text);">Aucun provider sélectionné</span>'
-  }
+  const displayElement = document.getElementById("selectedProvidersList");
+  if (!displayElement) return;
+  let html = ""
+  TournamentApp.selectedSlotTypes.forEach((type) => {
+    if (type === "hacksaw") {
+      html += '<span class="provider-tag hacksaw">Hacksaw Gaming</span> '
+    } else if (type === "nolimit") {
+      html += '<span class="provider-tag nolimit">Nolimit City</span> '
+    } else if (type === "pragmatic") {
+      html += '<span class="provider-tag pragmatic">Pragmatic Play</span> '
+    }
+  })
+  displayElement.innerHTML = html || '<span style="color: var(--muted-text);">Aucun provider sélectionné</span>'
 }
 
 // MODIFICATION: Fonction pour mettre à jour le nombre maximum de machines disponibles
@@ -1245,7 +1241,7 @@ function renderMatchButtons(i, j) {
     if (p1HasCheckmark) {
       p1Classes += " winner"
     } else if (!bothPlayersPresent) {
-      p1Classes += " waiting"
+      // p1Classes += " waiting" // On retire la classe waiting pour ne pas afficher le message sur le bouton
     } else if (!matchCompleted && !TournamentApp.tournamentCompleted) {
       p1Disabled = ""
     }
@@ -1258,7 +1254,7 @@ function renderMatchButtons(i, j) {
     if (p2HasCheckmark) {
       p2Classes += " winner"
     } else if (!bothPlayersPresent) {
-      p2Classes += " waiting"
+      // p2Classes += " waiting" // On retire la classe waiting pour ne pas afficher le message sur le bouton
     } else if (!matchCompleted && !TournamentApp.tournamentCompleted) {
       p2Disabled = ""
     }
@@ -1270,12 +1266,12 @@ function renderMatchButtons(i, j) {
 
   const btn1 = match.p1
     ? `<button class="${p1Classes}" ${p1Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p1Name.replace(/'/g, "\\'")}')" title="${p1Name}">${p1Display}</button>`
+            onclick="setWinner(${i}, ${j}, '${p1Name.replace(/'/g, "\\'")}')" title="${p1Name}"${matchCompleted ? ' disabled' : ''}>${p1Display}</button>`
     : `<button class="player-btn" disabled>---</button>`
 
   const btn2 = match.p2
     ? `<button class="${p2Classes}" ${p2Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p2Name.replace(/'/g, "\\'")}')" title="${p2Name}">${p2Display}</button>`
+            onclick="setWinner(${i}, ${j}, '${p2Name.replace(/'/g, "\\'")}')" title="${p2Name}"${matchCompleted ? ' disabled' : ''}>${p2Display}</button>`
     : `<button class="player-btn" disabled>---</button>`
 
   let matchHtml = `${btn1}${btn2}`
@@ -1426,6 +1422,7 @@ function launchDraw() {
             // Troisième étape - finaliser et afficher le tournoi
             TournamentApp.tournamentStarted = true
             shufflePlayers()
+            initBracket() // Initialiser le bracket avant de placer les joueurs
             placePlayersRandomly()
 
             // Mettre à jour l'interface
@@ -1442,7 +1439,8 @@ function launchDraw() {
             saveDataToLocalStorage()
 
             // Masquer l'animation de chargement
-            document.getElementById("loadingOverlay").style.display = "none"
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            if (loadingOverlay) loadingOverlay.style.display = "none";
 
             showToast(
               "Tournoi lancé !",
@@ -1453,7 +1451,8 @@ function launchDraw() {
             console.log("Tournoi lancé avec succès") // Débogage
           } catch (error) {
             console.error("Erreur lors de la finalisation du tournoi:", error)
-            document.getElementById("loadingOverlay").style.display = "none"
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            if (loadingOverlay) loadingOverlay.style.display = "none";
             showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
           }
         }, 500) // Délai réduit à 0.5 seconde pour la troisième étape
@@ -1461,7 +1460,8 @@ function launchDraw() {
     }, 500) // Délai réduit à 0.5 seconde pour la première étape
   } catch (error) {
     console.error("Erreur lors du lancement du tirage:", error)
-    document.getElementById("loadingOverlay").style.display = "none"
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) loadingOverlay.style.display = "none";
     showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
   }
 }
@@ -1517,6 +1517,11 @@ function placePlayersRandomly() {
   renderBracket()
 }
 
+// Fonction utilitaire pour générer un id CSS sûr à partir d'un nom
+function toSafeId(name) {
+  return name.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
 // Définir le gagnant d'un match
 function setWinner(roundIndex, matchIndex, winnerName) {
   // Vérifier si le tournoi est déjà terminé
@@ -1547,7 +1552,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
   // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
   if (!TournamentApp.eliminated.includes(loserName)) {
     TournamentApp.eliminated.push(loserName)
-    const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, "-")} span`)
+    const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} span`)
     if (playerElement) playerElement.classList.add("eliminated")
 
     // Ajouter à l'historique des éliminations
@@ -1561,7 +1566,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
     })
 
     // Afficher le bouton d'historique des éliminations s'il n'est déjà visible
-    document.getElementById("eliminationHistoryBtn").style.display = "block"
+    // document.getElementById("eliminationHistoryBtn").style.display = "block"
 
     showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success")
   }
@@ -1660,22 +1665,25 @@ function resetTournamentWithOption(keepPlayers) {
   TournamentApp.tournamentCompleted = false // Réinitialiser l'état de complétion du tournoi
 
   // Réinitialiser l'interface
-  document.getElementById("bracket").style.display = "none"
-  document.getElementById("resetButton").style.display = "none"
-  document.getElementById("launchDraw").style.display =
-    keepPlayers && TournamentApp.players.length === 16 ? "block" : "none"
-  document.getElementById("eliminationHistoryBtn").style.display =
-    TournamentApp.eliminationHistory.length > 0 ? "block" : "none"
-  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
+  const bracket = document.getElementById("bracket");
+  if (bracket) bracket.style.display = "none";
+  const resetButton = document.getElementById("resetButton");
+  if (resetButton) resetButton.style.display = "none";
+  const launchDraw = document.getElementById("launchDraw");
+  if (launchDraw) launchDraw.style.display = keepPlayers && TournamentApp.players.length === 16 ? "block" : "none";
+  const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn");
+  if (eliminationHistoryBtn) eliminationHistoryBtn.style.display = TournamentApp.eliminationHistory && TournamentApp.eliminationHistory.length > 0 ? "block" : "none";
+  const count = document.getElementById("count");
+  if (count) count.innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`;
 
   // Mettre à jour l'affichage des joueurs
   updatePlayersDisplay()
 
   // Réafficher le conteneur d'ajout de joueurs si nécessaire
-  document.getElementById("addPlayerContainer").style.display =
-    keepPlayers && TournamentApp.players.length === 16 ? "none" : "block"
-  document.getElementById("randomSlotBtn").style.display =
-    keepPlayers && TournamentApp.players.length === 16 ? "none" : "block"
+  const addPlayerContainer = document.getElementById("addPlayerContainer");
+  if (addPlayerContainer) addPlayerContainer.style.display = keepPlayers && TournamentApp.players.length === 16 ? "none" : "block";
+  const randomSlotBtn = document.getElementById("randomSlotBtn");
+  if (randomSlotBtn) randomSlotBtn.style.display = keepPlayers && TournamentApp.players.length === 16 ? "none" : "block";
 
   // Initialiser un nouveau bracket
   initBracket()
@@ -1693,6 +1701,10 @@ function resetTournamentWithOption(keepPlayers) {
 
   // Fermer la boîte de dialogue
   closeResetDialog()
+
+  // Juste avant d'accéder à loadingOverlay.style.display = "none" dans resetTournamentWithOption
+  const loadingOverlay = document.getElementById("loadingOverlay");
+  if (loadingOverlay) loadingOverlay.style.display = "none";
 }
 
 // Effacer toutes les données
@@ -1746,54 +1758,28 @@ function undoMatch() {
   )
 
   // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
-  const playerElement = document.querySelector(`#player-list-${loserName.replace(/\s+/g, "-")} span`)
+  const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} span`)
   if (playerElement) playerElement.classList.remove("eliminated")
 
-  // Vérifier si nous devons retirer le joueur des tours suivants
-  if (roundIndex < 3) {
-    // Pas la finale
-    const nextRound = roundIndex + 1
-    const nextMatchIndex = Math.floor(matchIndex / 2)
-    const nextMatch = TournamentApp.matches[nextRound][nextMatchIndex]
-
-    // Vérifier si le gagnant est présent dans le match suivant
-    if (nextMatch.p1 === winnerName || nextMatch.p2 === winnerName) {
-      // Déterminer si le joueur était en position p1 ou p2 dans le match suivant
+  // NOUVEAU : Retirer le joueur de TOUS les matchs des tours suivants
+  for (let r = roundIndex + 1; r < TournamentApp.matches.length; r++) {
+    for (let m = 0; m < TournamentApp.matches[r].length; m++) {
+      const nextMatch = TournamentApp.matches[r][m];
       if (nextMatch.p1 === winnerName) {
-        nextMatch.p1 = ""
-        nextMatch.score1 = ""
-      } else if (nextMatch.p2 === winnerName) {
-        nextMatch.p2 = ""
-        nextMatch.score2 = ""
+        nextMatch.p1 = "";
+        nextMatch.score1 = "";
       }
-
-      // Si le match suivant a déjà un gagnant, annuler récursivement ce match aussi
-      if (nextMatch.p1.includes(" ✓") || nextMatch.p2.includes(" ✓")) {
-        // Sauvegarder les indices actuels
-        const savedRoundIndex = TournamentApp.currentRoundIndex
-        const savedMatchIndex = TournamentApp.currentMatchIndex
-
-        // Mettre à jour les indices pour le match suivant
-        TournamentApp.currentRoundIndex = nextRound
-        TournamentApp.currentMatchIndex = nextMatchIndex
-
-        // Annuler le match suivant
-        undoMatch()
-
-        // Restaurer les indices
-        TournamentApp.currentRoundIndex = savedRoundIndex
-        TournamentApp.currentMatchIndex = savedMatchIndex
-      } else {
-        // Vérifier et propager les annulations aux tours suivants même sans gagnant
-        checkAndPropagateUndos(nextRound, nextMatchIndex, winnerName)
+      if (nextMatch.p2 === winnerName) {
+        nextMatch.p2 = "";
+        nextMatch.score2 = "";
       }
     }
-  } else {
-    // Si c'était la finale, réinitialiser le gagnant et le drapeau tournamentCompleted
-    if (TournamentApp.winner === winnerName) {
-      TournamentApp.winner = ""
-      TournamentApp.tournamentCompleted = false
-    }
+  }
+
+  // Si c'était la finale, réinitialiser le gagnant et le drapeau tournamentCompleted
+  if (roundIndex === 3 && TournamentApp.winner === winnerName) {
+    TournamentApp.winner = ""
+    TournamentApp.tournamentCompleted = false
   }
 
   // Mettre à jour l'affichage du bracket
@@ -2146,4 +2132,23 @@ function afficherMachineCourante() {
 function rejectCurrentSlot() {
   // Relancer la sélection aléatoire pour proposer une nouvelle machine
   selectRandomSlot();
+}
+
+// Affichage/fermeture de la mention légale en slide
+const legalNoticeIcon = document.getElementById('legalNoticeIcon');
+const legalNoticeSlide = document.getElementById('legalNoticeSlide');
+
+if (legalNoticeIcon && legalNoticeSlide) {
+  legalNoticeIcon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    legalNoticeSlide.classList.toggle('active');
+  });
+  // Fermer si on clique ailleurs
+  document.addEventListener('click', (e) => {
+    if (legalNoticeSlide.classList.contains('active')) {
+      if (!legalNoticeSlide.contains(e.target) && !legalNoticeIcon.contains(e.target)) {
+        legalNoticeSlide.classList.remove('active');
+      }
+    }
+  });
 }
