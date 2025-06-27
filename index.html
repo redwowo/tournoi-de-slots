@@ -42,7 +42,7 @@
             
             <p id="count">Slot ajoutés : 0/16</p>
             
-            <button id="randomSlotBtn" onclick="showRandomSlotDialog()" class="btn-outline" style="width: 100%; margin-bottom: 1rem;">
+            <button id="randomSlotBtn" onclick="showRandomSlotDialog()" class="btn-outline" style="width: 100%;">
                 <span class="shuffle-icon">
     		<img src="./de.png" 
          	alt="Dé" class="dice-icon">
@@ -63,13 +63,8 @@
                 Réinitialiser le tournoi
             </button>
             
-            <!-- Bouton d'historique des éliminations -->
-            <button id="eliminationHistoryBtn" onclick="showEliminationHistory()" class="btn-outline" style="display: none; width: 100%; margin-top: 1rem;">
-                <span style="margin-right: 0.5rem;">📋</span> Historique des éliminations
-            </button>
-            
             <!-- Bouton pour effacer toutes les données -->
-            <button id="clearDataBtn" onclick="showConfirmDialog('Effacer toutes les données', 'Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.', clearAllData)" class="btn-outline" style="width: 100%; margin-top: 1rem;">
+            <button id="clearDataBtn" onclick="showConfirmDialog('Effacer toutes les données', 'Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.', clearAllData)" class="btn-outline" style="width: 100%;">
                 <img src="./poubelle.png" alt="Poubelle" width="16" height="16" style="margin-right: 0.5rem;"> Effacer toutes les données
             </button>
             
@@ -121,23 +116,6 @@
             <button onclick="resetTournamentWithOption(true)">Conserver la liste des joueurs</button>
             <button class="btn-danger" onclick="resetTournamentWithOption(false)">Tout réinitialiser</button>
             <button class="btn-outline" onclick="closeResetDialog()">Annuler</button>
-        </div>
-    </div>
-    
-    <!-- Modal d'historique des éliminations -->
-    <div class="modal" id="eliminationHistoryModal">
-        <div class="modal-overlay" onclick="closeEliminationHistory()"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">Historique des éliminations</div>
-                <div class="modal-description">Liste chronologique des joueurs éliminés durant le tournoi</div>
-            </div>
-            <div class="modal-body">
-                <ul class="elimination-list" id="eliminationList"></ul>
-            </div>
-            <div class="modal-footer">
-                <button onclick="closeEliminationHistory()">Fermer</button>
-            </div>
         </div>
     </div>
     
@@ -211,9 +189,10 @@
                         <input type="checkbox" id="checkbox-hacksaw">
                         <span class="checkmark">✓</span>
                     </div>
-                    <div class="slot-type-label">
-                        <span class="slot-type-name">Hacksaw Gaming</span>
-                        <span class="slot-type-badge hacksaw">Hacksaw</span>
+                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                            <img src="./hacksawlogo.png" alt="Hacksaw Gaming" class="provider-logo">
+                        </span>
                     </div>
                 </div>
                 
@@ -222,9 +201,10 @@
                         <input type="checkbox" id="checkbox-nolimit">
                         <span class="checkmark">✓</span>
                     </div>
-                    <div class="slot-type-label">
-                        <span class="slot-type-name">Nolimit City</span>
-                        <span class="slot-type-badge nolimit">Nolimit</span>
+                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                            <img src="./nolimitcitylogo.png" alt="Nolimit City" class="provider-logo">
+                        </span>
                     </div>
                 </div>
                 
@@ -233,9 +213,10 @@
                         <input type="checkbox" id="checkbox-pragmatic">
                         <span class="checkmark">✓</span>
                     </div>
-                    <div class="slot-type-label">
-                        <span class="slot-type-name">Pragmatic Play</span>
-                        <span class="slot-type-badge pragmatic">Pragmatic</span>
+                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
+                            <img src="./pragmaticplaylogo.png" alt="Pragmatic Play" class="provider-logo">
+                        </span>
                     </div>
                 </div>
             </div>
@@ -284,7 +265,10 @@
     </div>
 
     <!-- Mention légale -->
-    <div class="legal-notice">
+    <div class="legal-notice-icon" id="legalNoticeIcon" style="position: fixed; bottom: 20px; left: 20px; z-index: 51; cursor: pointer;">
+        <img src="./about-us.png" alt="Mentions légales" style="width: 40px; height: 40px;">
+    </div>
+    <div class="legal-notice-slide" id="legalNoticeSlide">
         Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
     </div>
 
