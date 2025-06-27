@@ -121,6 +121,7 @@ window.TournamentApp = {
   ],
 
   nolimitCityMachines: [
+    "Tractor Beam",
     "Fire in the Hole 3",
     "Kill Em All",
     "Highway to Hell",
@@ -329,7 +330,7 @@ window.TournamentApp = {
     "Yeti Quest",
   ],
 
-  // Variables d'état
+  // Variables d'état - MODIFICATION: selectedSlotType devient selectedSlotTypes (tableau)
   players: [],
   matches: [],
   eliminated: [],
@@ -340,7 +341,7 @@ window.TournamentApp = {
   tournamentCompleted: false,
   randomSlotSelected: "",
   randomSlotCategory: "",
-  selectedSlotType: "all",
+  selectedSlotTypes: ["all"], // CHANGEMENT: maintenant un tableau au lieu d'une chaîne
   currentRoundIndex: -1,
   currentMatchIndex: -1,
   selectedSlotsArray: [],
@@ -899,7 +900,7 @@ function showUndoConfirmDialog(roundIndex, matchIndex) {
   document.getElementById("overlay").style.display = "block"
 }
 
-// Afficher la boîte de dialogue de sélection aléatoire améliorée
+// NOUVELLE FONCTION: Afficher la boîte de dialogue de sélection aléatoire améliorée
 function showRandomSlotDialog() {
   // Réinitialiser l'état
   document.getElementById("randomSlotResult").style.display = "none"
@@ -907,19 +908,35 @@ function showRandomSlotDialog() {
   document.getElementById("slotSelecting").style.display = "none"
   document.getElementById("selectRandomBtn").disabled = false
 
+  // Réinitialiser l'affichage des boutons
+  document.getElementById("selectRandomBtn").style.display = "inline-flex"
+  document.getElementById("selectAnotherBtn").style.display = "none"
+  document.getElementById("acceptSlotBtn").style.display = "none"
+  document.getElementById("rejectSlotBtn").style.display = "none"
+  document.getElementById("addRandomSlotBtn").style.display = "none"
+
   // Réinitialiser les variables
   TournamentApp.selectedSlotsArray = []
   TournamentApp.currentSlotIndex = 0
 
-  // Sélectionner l'option "Toutes les machines" par défaut
-  const allOption = document.querySelector('.slot-type-option[data-value="all"]')
-  selectSlotType(allOption, "all")
+  // Réinitialiser la sélection à "Toutes les machines"
+  TournamentApp.selectedSlotTypes = ["all"]
 
-  // Mettre à jour le nombre maximum de machines disponibles
+  // Mettre à jour l'interface
+  document.querySelectorAll(".slot-type-option").forEach((option) => {
+    const checkbox = option.querySelector('input[type="checkbox"]')
+    if (option.dataset.value === "all") {
+      option.classList.add("selected")
+      checkbox.checked = true
+    } else {
+      option.classList.remove("selected")
+      checkbox.checked = false
+    }
+  })
+
   updateMaxAvailableSlots()
 
-  // Afficher la boîte de dialogue
-  document.getElementById("randomSlotDialog").style.display = "block"
+  document.getElementById("randomSlotDialog").style.display = "flex"
   document.getElementById("overlay").style.display = "block"
 }
 
@@ -936,34 +953,139 @@ function closeRandomSlotDialog() {
     resultElement.removeChild(countElement)
   }
 
+  // Réinitialiser l'affichage des boutons
+  document.getElementById("selectRandomBtn").style.display = "inline-flex"
+  document.getElementById("selectAnotherBtn").style.display = "none"
+  document.getElementById("acceptSlotBtn").style.display = "none"
+  document.getElementById("rejectSlotBtn").style.display = "none"
+  document.getElementById("addRandomSlotBtn").style.display = "none"
+
   // Réinitialiser les variables
   TournamentApp.selectedSlotsArray = []
   TournamentApp.currentSlotIndex = 0
 }
 
-// Fonction pour mettre à jour le nombre maximum de machines disponibles
+// NOUVELLE FONCTION: Fonction pour basculer la sélection d'un type de slot (sélection multiple)
+function toggleSlotType(element, type) {
+  const checkbox = element.querySelector('input[type="checkbox"]')
+
+  if (type === "all") {
+    // Si "Toutes les machines" est sélectionné, désélectionner les autres
+    if (!TournamentApp.selectedSlotTypes.includes("all")) {
+      TournamentApp.selectedSlotTypes = ["all"]
+      // Décocher toutes les autres options
+      document.querySelectorAll('.slot-type-option:not([data-value="all"])').forEach((option) => {
+        option.classList.remove("selected")
+        option.querySelector('input[type="checkbox"]').checked = false
+      })
+      // Cocher "Toutes les machines"
+      element.classList.add("selected")
+      checkbox.checked = true
+    } else {
+      // Si "Toutes les machines" était déjà sélectionné, on ne peut pas le désélectionner
+      // (il faut au moins une option sélectionnée)
+      return
+    }
+  } else {
+    // Pour les autres options
+    if (TournamentApp.selectedSlotTypes.includes(type)) {
+      // Désélectionner ce type
+      TournamentApp.selectedSlotTypes = TournamentApp.selectedSlotTypes.filter((t) => t !== type)
+      element.classList.remove("selected")
+      checkbox.checked = false
+
+      // Si "Toutes les machines" était sélectionné, le désélectionner
+      if (TournamentApp.selectedSlotTypes.includes("all")) {
+        TournamentApp.selectedSlotTypes = TournamentApp.selectedSlotTypes.filter((t) => t !== "all")
+        const allOption = document.querySelector('.slot-type-option[data-value="all"]')
+        allOption.classList.remove("selected")
+        allOption.querySelector('input[type="checkbox"]').checked = false
+      }
+
+      // Si aucune option n'est sélectionnée, sélectionner "Toutes les machines"
+      if (TournamentApp.selectedSlotTypes.length === 0) {
+        TournamentApp.selectedSlotTypes = ["all"]
+        const allOption = document.querySelector('.slot-type-option[data-value="all"]')
+        allOption.classList.add("selected")
+        allOption.querySelector('input[type="checkbox"]').checked = true
+      }
+    } else {
+      // Sélectionner ce type
+      TournamentApp.selectedSlotTypes.push(type)
+      element.classList.add("selected")
+      checkbox.checked = true
+
+      // Si "Toutes les machines" était sélectionné, le désélectionner
+      if (TournamentApp.selectedSlotTypes.includes("all")) {
+        TournamentApp.selectedSlotTypes = TournamentApp.selectedSlotTypes.filter((t) => t !== "all")
+        const allOption = document.querySelector('.slot-type-option[data-value="all"]')
+        allOption.classList.remove("selected")
+        allOption.querySelector('input[type="checkbox"]').checked = false
+      }
+    }
+  }
+
+  // Mettre à jour l'affichage des providers sélectionnés
+  updateSelectedProvidersDisplay()
+
+  // Mettre à jour le nombre maximum de machines disponibles
+  updateMaxAvailableSlots()
+}
+
+// NOUVELLE FONCTION: Mettre à jour l'affichage des providers sélectionnés
+function updateSelectedProvidersDisplay() {
+  const displayElement = document.getElementById("selectedProvidersList")
+
+  if (TournamentApp.selectedSlotTypes.includes("all")) {
+    displayElement.innerHTML = '<span class="provider-tag all">Toutes les machines</span>'
+  } else {
+    let html = ""
+    TournamentApp.selectedSlotTypes.forEach((type) => {
+      if (type === "hacksaw") {
+        html += '<span class="provider-tag hacksaw">Hacksaw Gaming</span> '
+      } else if (type === "nolimit") {
+        html += '<span class="provider-tag nolimit">Nolimit City</span> '
+      } else if (type === "pragmatic") {
+        html += '<span class="provider-tag pragmatic">Pragmatic Play</span> '
+      }
+    })
+    displayElement.innerHTML = html || '<span style="color: var(--muted-text);">Aucun provider sélectionné</span>'
+  }
+}
+
+// MODIFICATION: Fonction pour mettre à jour le nombre maximum de machines disponibles
 function updateMaxAvailableSlots() {
   let availableSlots = []
 
-  if (TournamentApp.selectedSlotType === "all") {
+  if (TournamentApp.selectedSlotTypes.includes("all")) {
     const allSlots = [
       ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
     ]
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
-  } else if (TournamentApp.selectedSlotType === "hacksaw") {
-    availableSlots = TournamentApp.slotMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
-  } else if (TournamentApp.selectedSlotType === "nolimit") {
-    availableSlots = TournamentApp.nolimitCityMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
-  } else if (TournamentApp.selectedSlotType === "pragmatic") {
-    availableSlots = TournamentApp.pragmaticPlayMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
+  } else {
+    // Combiner les machines des providers sélectionnés
+    if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
+      const hacksawSlots = TournamentApp.slotMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      )
+      availableSlots = availableSlots.concat(hacksawSlots)
+    }
+
+    if (TournamentApp.selectedSlotTypes.includes("nolimit")) {
+      const nolimitSlots = TournamentApp.nolimitCityMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      )
+      availableSlots = availableSlots.concat(nolimitSlots)
+    }
+
+    if (TournamentApp.selectedSlotTypes.includes("pragmatic")) {
+      const pragmaticSlots = TournamentApp.pragmaticPlayMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      )
+      availableSlots = availableSlots.concat(pragmaticSlots)
+    }
   }
 
   // Mettre à jour l'affichage du nombre total de machines disponibles
@@ -971,19 +1093,13 @@ function updateMaxAvailableSlots() {
 
   // Limiter le nombre maximum dans l'input
   const slotCountInput = document.getElementById("slotCount")
-
-  // Limiter à 16 machines maximum, ou moins si moins de places disponibles dans le tournoi
   const maxSelectable = Math.min(16, 16 - TournamentApp.players.length)
-
-  // Limiter également au nombre de machines disponibles
   slotCountInput.max = Math.min(availableSlots.length, maxSelectable)
 
-  // Si la valeur actuelle est supérieure au maximum, la réduire
   if (Number.parseInt(slotCountInput.value) > Number.parseInt(slotCountInput.max)) {
     slotCountInput.value = slotCountInput.max
   }
 
-  // Vérification supplémentaire pour s'assurer que la valeur ne dépasse jamais 16
   if (Number.parseInt(slotCountInput.value) > 16) {
     slotCountInput.value = 16
   }
@@ -1718,381 +1834,176 @@ function checkAndPropagateUndos(roundIndex, matchIndex, playerName) {
   }
 }
 
-// Sélectionner un type de slot
-function selectSlotType(element, type) {
-  // Mettre à jour la variable globale
-  TournamentApp.selectedSlotType = type
-
-  // Mettre à jour l'interface utilisateur
-  const options = document.querySelectorAll(".slot-type-option")
-  options.forEach((option) => {
-    option.classList.remove("selected")
-  })
-  element.classList.add("selected")
-
-  // Mettre à jour le nombre maximum de machines disponibles
-  updateMaxAvailableSlots()
-}
-
-// Sélectionner une machine à sous aléatoire avec animation
+// MODIFICATION: Fonction selectRandomSlot pour gérer la sélection multiple
 function selectRandomSlot() {
-  // Désactiver le bouton pendant l'animation
-  document.getElementById("selectRandomBtn").disabled = true
+  const slotCount = Number.parseInt(document.getElementById("slotCount").value) || 1;
+  let availableSlots = [];
 
-  // Récupérer le type de machine sélectionné
-  const slotType = TournamentApp.selectedSlotType
-
-  // Récupérer le nombre de machines à sélectionner
-  const slotCount = Number.parseInt(document.getElementById("slotCount").value) || 1
-
-  let availableSlots = []
-
-  if (slotType === "all") {
-    // Combiner les trois listes
+  if (TournamentApp.selectedSlotTypes.includes("all")) {
     const allSlots = [
       ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
-    ]
-    // Filtrer les machines qui ne sont pas déjà dans la liste des joueurs
-    availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
-  } else if (slotType === "hacksaw") {
-    // Filtrer uniquement les machines Hacksaw Gaming
-    availableSlots = TournamentApp.slotMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
-  } else if (slotType === "nolimit") {
-    // Filtrer uniquement les machines Nolimit City
-    availableSlots = TournamentApp.nolimitCityMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
-  } else if (slotType === "pragmatic") {
-    // Filtrer uniquement les machines Pragmatic Play
-    availableSlots = TournamentApp.pragmaticPlayMachines.filter(
-      (slot) => !TournamentApp.players.some((player) => player.name === slot),
-    )
+    ];
+    availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot));
+  } else {
+    if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
+      const hacksawSlots = TournamentApp.slotMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      );
+      availableSlots = availableSlots.concat(hacksawSlots);
+    }
+    if (TournamentApp.selectedSlotTypes.includes("nolimit")) {
+      const nolimitSlots = TournamentApp.nolimitCityMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      );
+      availableSlots = availableSlots.concat(nolimitSlots);
+    }
+    if (TournamentApp.selectedSlotTypes.includes("pragmatic")) {
+      const pragmaticSlots = TournamentApp.pragmaticPlayMachines.filter(
+        (slot) => !TournamentApp.players.some((player) => player.name === slot),
+      );
+      availableSlots = availableSlots.concat(pragmaticSlots);
+    }
   }
 
   if (availableSlots.length === 0) {
     showToast(
       "Aucune machine disponible",
-      "Toutes les machines de cette catégorie sont déjà ajoutées au tournoi.",
+      "Toutes les machines des providers sélectionnés sont déjà ajoutées au tournoi.",
       "error",
-    )
-    document.getElementById("selectRandomBtn").disabled = false
-    return
+    );
+    document.getElementById("selectRandomBtn").disabled = false;
+    return;
   }
 
-  // Vérifier si le nombre demandé est supérieur au nombre disponible ou à la limite de 16
-  const maxSelectable = Math.min(16, 16 - TournamentApp.players.length)
-  const actualCount = Math.min(slotCount, availableSlots.length, maxSelectable)
+  const maxSelectable = Math.min(16, 16 - TournamentApp.players.length);
+  const actualCount = Math.min(slotCount, availableSlots.length, maxSelectable);
 
-  // Si l'utilisateur demande plus de machines que ce qui est disponible, mettre à jour l'input
   if (actualCount < slotCount) {
-    document.getElementById("slotCount").value = actualCount
+    document.getElementById("slotCount").value = actualCount;
   }
 
   if (actualCount < slotCount) {
     if (availableSlots.length < slotCount) {
       showToast(
         "Nombre limité",
-        `Seulement ${availableSlots.length} machines disponibles dans cette catégorie.`,
+        `Seulement ${availableSlots.length} machines disponibles pour les providers sélectionnés.`,
         "warning",
-      )
+      );
     } else if (maxSelectable < slotCount) {
       showToast(
         "Nombre limité",
         `Vous ne pouvez ajouter que ${maxSelectable} machines supplémentaires au tournoi.`,
         "warning",
-      )
+      );
     }
   }
 
-  // Mélanger le tableau pour une sélection aléatoire
-  shuffleArray(availableSlots)
+  shuffleArray(availableSlots);
 
-  // Sélectionner les machines
-  const selectedSlots = availableSlots.slice(0, actualCount)
+  // Si la liste existe déjà (refus), on passe à la suivante
+  if (TournamentApp.selectedSlotsArray && TournamentApp.selectedSlotsArray.length > 1) {
+    TournamentApp.selectedSlotsArray.shift();
+    afficherMachineCourante();
+    return;
+  }
 
-  // Préparer la zone d'animation
-  const slotSelecting = document.getElementById("slotSelecting")
-  slotSelecting.innerHTML = ""
-  slotSelecting.style.display = "block"
-
-  // Animer la sélection
-  let count = 0
-  const maxCount = 15 // Nombre d'étapes d'animation
-  const interval = setInterval(() => {
-    // Sélectionner une machine aléatoire pour l'animation
-    const animIndex = Math.floor(Math.random() * availableSlots.length)
-    const animSlot = availableSlots[animIndex]
-
-    // Créer un élément pour l'animation
-    const slotItem = document.createElement("div")
-    slotItem.className = "slot-item"
-    slotItem.textContent = count === maxCount - 1 ? selectedSlots[0].name || selectedSlots[0] : animSlot
-    slotSelecting.appendChild(slotItem)
-
-    // Supprimer les anciens éléments
-    setTimeout(() => {
-      if (slotItem.parentNode === slotSelecting) {
-        slotSelecting.removeChild(slotItem)
-      }
-    }, 200)
-
-    count++
-    if (count >= maxCount) {
-      clearInterval(interval)
-
-      // Cacher la zone d'animation
-      setTimeout(() => {
-        slotSelecting.style.display = "none"
-
-        // Préparer les résultats
-        TournamentApp.selectedSlotsArray = selectedSlots.map((slot) => {
-          const name = typeof slot === "string" ? slot : slot.name
-          let category = ""
-          if (TournamentApp.slotMachines.includes(name)) {
-            category = "Hacksaw Gaming"
-          } else if (TournamentApp.nolimitCityMachines.includes(name)) {
-            category = "Nolimit City"
-          } else if (TournamentApp.pragmaticPlayMachines.includes(name)) {
-            category = "Pragmatic Play"
-          }
-          return { name, category }
-        })
-
-        // Afficher le premier résultat
-        if (TournamentApp.selectedSlotsArray.length > 0) {
-          TournamentApp.randomSlotSelected = TournamentApp.selectedSlotsArray[0].name
-          TournamentApp.randomSlotCategory = TournamentApp.selectedSlotsArray[0].category
-
-          document.getElementById("randomSlotName").textContent = TournamentApp.randomSlotSelected
-
-          const categoryElement = document.getElementById("randomSlotCategory")
-          if (TournamentApp.randomSlotCategory) {
-            categoryElement.textContent = TournamentApp.randomSlotCategory
-            categoryElement.className = "random-slot-category"
-            if (TournamentApp.randomSlotCategory === "Hacksaw Gaming") {
-              categoryElement.classList.add("hacksaw")
-            } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
-              categoryElement.classList.add("nolimit")
-            } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
-              categoryElement.classList.add("pragmatic")
-            }
-          } else {
-            categoryElement.textContent = ""
-          }
-
-          // CORRECTION: Supprimer l'ancien compteur s'il existe avant d'en ajouter un nouveau
-          const resultElement = document.getElementById("randomSlotResult")
-          const existingCountElement = document.querySelector("#randomSlotResult div:last-child")
-          if (existingCountElement && (existingCountElement.textContent.includes("machine") || existingCountElement.textContent.includes("Machine"))) {
-            resultElement.removeChild(existingCountElement)
-          }
-
-          // Afficher le compteur si plusieurs machines sont sélectionnées
-          if (TournamentApp.selectedSlotsArray.length > 1) {
-            const countElement = document.createElement("div")
-            countElement.style.marginTop = "0.5rem"
-            countElement.style.fontSize = "0.9rem"
-            countElement.style.color = "var(--muted-text)"
-            countElement.textContent = `${TournamentApp.selectedSlotsArray.length} machines sélectionnées`
-            resultElement.appendChild(countElement)
-          }
-
-          document.getElementById("randomSlotResult").style.display = "block"
-          const addBtn = document.getElementById("addRandomSlotBtn")
-          addBtn.style.display = "inline-flex"
-          if (TournamentApp.selectedSlotsArray.length > 1) {
-            addBtn.innerHTML = `<img src="./slot.png" alt="Slot Machine" width="16" height="16"> Ajouter ces machines`
-          } else {
-            addBtn.innerHTML = `<img src="./slot.png" alt="Slot Machine" width="16" height="16"> Ajouter cette machine`
-          }
-          document.getElementById("selectRandomBtn").disabled = false
-        }
-      }, 200)
+  // Sinon, on crée la liste aléatoire complète
+  const selectedSlots = availableSlots.slice(0, actualCount).map((slot) => {
+    let category = "";
+    if (TournamentApp.slotMachines.includes(slot)) {
+      category = "Hacksaw Gaming";
+    } else if (TournamentApp.nolimitCityMachines.includes(slot)) {
+      category = "Nolimit City";
+    } else if (TournamentApp.pragmaticPlayMachines.includes(slot)) {
+      category = "Pragmatic Play";
     }
-  }, 100)
+    return { name: slot, category };
+  });
+  TournamentApp.selectedSlotsArray = selectedSlots;
+  afficherMachineCourante();
 }
 
-// Ajouter la machine aléatoire sélectionnée
-function addRandomSlot() {
-  if (!TournamentApp.randomSlotSelected || TournamentApp.selectedSlotsArray.length === 0) {
-    showToast("Erreur", "Aucune machine n'a été sélectionnée.", "error")
-    return
-  }
-
-  // Vérifier si la limite de joueurs est atteinte
-  if (TournamentApp.players.length >= 16) {
-    showToast("Limite atteinte", "Le tournoi est limité à 16 machines !", "error")
-    closeRandomSlotDialog() // Fermer la boîte de dialogue si la limite est atteinte
-    return
-  }
-
-  // Ajouter la machine actuelle à la liste des joueurs avec sa catégorie
-  TournamentApp.players.push({
-    name: TournamentApp.randomSlotSelected,
-    category: TournamentApp.randomSlotCategory,
-  })
-  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
-  updatePlayersDisplay()
-
-  // Sauvegarder les données
-  saveDataToLocalStorage()
-
-  // Afficher un message de succès
-  showToast("Machine ajoutée", `${TournamentApp.randomSlotSelected} a été ajoutée au tournoi.`, "success")
-
-  // Passer à la machine suivante s'il y en a d'autres
-  TournamentApp.currentSlotIndex++
-  if (TournamentApp.currentSlotIndex < TournamentApp.selectedSlotsArray.length) {
-    // Mettre à jour l'affichage avec la machine suivante
-    TournamentApp.randomSlotSelected = TournamentApp.selectedSlotsArray[TournamentApp.currentSlotIndex].name
-    TournamentApp.randomSlotCategory = TournamentApp.selectedSlotsArray[TournamentApp.currentSlotIndex].category
-
-    document.getElementById("randomSlotName").textContent = TournamentApp.randomSlotSelected
-
-    const categoryElement = document.getElementById("randomSlotCategory")
-    if (TournamentApp.randomSlotCategory) {
-      categoryElement.textContent = TournamentApp.randomSlotCategory
-      categoryElement.className = "random-slot-category"
-      if (TournamentApp.randomSlotCategory === "Hacksaw Gaming") {
-        categoryElement.classList.add("hacksaw")
-      } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
-        categoryElement.classList.add("nolimit")
-      } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
-        categoryElement.classList.add("pragmatic")
-      }
-    } else {
-      categoryElement.textContent = ""
-    }
-
-    // Mettre à jour le compteur
-    const countElement = document.querySelector("#randomSlotResult div:last-child")
-    if (countElement) {
-      const remaining = TournamentApp.selectedSlotsArray.length - TournamentApp.currentSlotIndex
-      countElement.textContent = `${remaining} machine${remaining > 1 ? "s" : ""} restante${remaining > 1 ? "s" : ""}`
-    }
-
-    // Vérifier si on a atteint 16 joueurs
-    if (TournamentApp.players.length >= 16) {
-      // Fermer la boîte de dialogue
-      closeRandomSlotDialog()
-
-      // Cacher le conteneur d'ajout de joueurs
-      document.getElementById("addPlayerContainer").style.display = "none"
-      document.getElementById("randomSlotBtn").style.display = "none"
-      // Afficher le bouton de tirage
-      document.getElementById("launchDraw").style.display = "block"
-    }
-  } else {
-    // CORRECTION: Ajouter cette condition pour gérer le cas où toutes les machines ont été ajoutées
-    // et qu'on a atteint exactement 16 joueurs
-    if (TournamentApp.players.length >= 16) {
-      // Fermer la boîte de dialogue
-      closeRandomSlotDialog()
-
-      // Cacher le conteneur d'ajout de joueurs
-      document.getElementById("addPlayerContainer").style.display = "none"
-      document.getElementById("randomSlotBtn").style.display = "none"
-      // Afficher le bouton de tirage
-      document.getElementById("launchDraw").style.display = "block"
-    }
-  }
-}
-
-// Fonction utilitaire pour mélanger un tableau
+// Fonction pour mélanger un tableau (Fisher-Yates shuffle)
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[array[i], array[j]] = [array[j], array[i]]
   }
-  return array
 }
 
-// Assurons-nous que le bouton de tirage est correctement configuré au chargement
-document.addEventListener("DOMContentLoaded", () => {
-  // Initialiser le thème et le bracket au chargement
-  initTheme()
-  initBracket()
-  loadDataFromLocalStorage()
-  updateWinnersDisplay()
+// Fonction pour ajouter les machines sélectionnées aléatoirement
+function addRandomSlot() {
+  if (TournamentApp.selectedSlotsArray.length === 0) {
+    showToast("Erreur", "Aucune machine sélectionnée.", "error")
+    return
+  }
 
-  // Vérifier si nous avons déjà 16 joueurs pour afficher le bouton de tirage
-  if (TournamentApp.players.length >= 16 && !TournamentApp.tournamentStarted) {
+  let addedCount = 0
+  let skippedCount = 0
+
+  TournamentApp.selectedSlotsArray.forEach((slot) => {
+    // Vérifier si la machine n'est pas déjà dans la liste
+    const playerExists = TournamentApp.players.some((player) => player.name.toLowerCase() === slot.name.toLowerCase())
+
+    if (!playerExists && TournamentApp.players.length < 16) {
+      TournamentApp.players.push({
+        name: slot.name,
+        category: slot.category,
+      })
+      addedCount++
+    } else {
+      skippedCount++
+    }
+  })
+
+  // Mettre à jour l'interface
+  updateRandomSlotInterface()
+
+  // Fermer le dialogue
+  closeRandomSlotDialog()
+
+  // Afficher un message de confirmation
+  if (addedCount > 0) {
+    let message = `${addedCount} machine${addedCount > 1 ? "s" : ""} ajoutée${addedCount > 1 ? "s" : ""} au tournoi.`
+    if (skippedCount > 0) {
+      message += ` ${skippedCount} machine${skippedCount > 1 ? "s" : ""} ignorée${skippedCount > 1 ? "s" : ""} (déjà présente${skippedCount > 1 ? "s" : ""} ou limite atteinte).`
+    }
+    showToast("Machines ajoutées", message, "success")
+  } else {
+    showToast(
+      "Aucune machine ajoutée",
+      "Toutes les machines sélectionnées sont déjà présentes ou la limite est atteinte.",
+      "warning",
+    )
+  }
+
+  // Vérifier si on a atteint 16 joueurs
+  if (TournamentApp.players.length >= 16) {
     document.getElementById("addPlayerContainer").style.display = "none"
     document.getElementById("randomSlotBtn").style.display = "none"
     document.getElementById("launchDraw").style.display = "block"
-    console.log("Bouton de tirage affiché au chargement") // Débogage
   }
 
-  // ===== INITIALISATION ET ÉVÉNEMENTS =====
-
-  // Gérer l'appui sur Entrée dans le champ de saisie
-  // Ajouter les écouteurs d'événements
-  document.getElementById("playerName").addEventListener("keypress", (e) => {
-    if (e.key === "Enter") {
-      addPlayer()
-    }
-  })
-
-  // S'assurer que le bouton de tirage a bien un écouteur d'événements
-  document.getElementById("launchDraw").addEventListener("click", () => {
-    console.log("Clic sur le bouton de tirage détecté") // Débogage
-    launchDraw()
-  })
-
-  // Gérer le clic sur l'overlay pour fermer le message de victoire
-  document.getElementById("overlay").addEventListener("click", (e) => {
-    // Fermer uniquement si on clique directement sur l'overlay
-    if (e.target === document.getElementById("overlay")) {
-      closeVictoryMessage()
-      closeConfirmDialog()
-      closeResetDialog()
-      closeEliminationHistory()
-      toggleWinnersPanel()
-      closeUndoConfirmDialog()
-      closeRandomSlotDialog()
-    }
-  })
-
-  // Ajouter l'événement de clic pour le bouton de thème
-  document.getElementById("themeToggle").addEventListener("click", toggleTheme)
-
-  // Ajouter un événement d'entrée au champ de saisie
-  document.getElementById("playerName").addEventListener("input", function () {
-    showSuggestions(this)
-  })
-
-  // Fermer les suggestions lorsqu'on clique ailleurs
-  document.addEventListener("click", (e) => {
-    const suggestionsContainer = document.getElementById("suggestionsList")
-    const playerNameInput = document.getElementById("playerName")
-
-    if (e.target !== playerNameInput && e.target !== suggestionsContainer && !suggestionsContainer.contains(e.target)) {
-      suggestionsContainer.style.display = "none"
-    }
-  })
-
-  // Fermer les suggestions avec la touche Échap
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
-      document.getElementById("suggestionsList").style.display = "none"
-    }
-  })
-})
-
-// Initialiser le thème immédiatement pour éviter un flash de thème incorrect
-initTheme()
+  // Sauvegarder les données
+  saveDataToLocalStorage()
+}
 
 // Fonction pour supprimer un joueur
 function removePlayer(index) {
-  TournamentApp.players.splice(index, 1)
-  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
-  updatePlayersDisplay()
+  if (TournamentApp.tournamentStarted) {
+    showToast("Action impossible", "Impossible de retirer une machine une fois le tournoi commencé.", "error")
+    return
+  }
 
-  // Réafficher le conteneur d'ajout de joueurs et le bouton randomSlotBtn si nécessaire
+  const removedPlayer = TournamentApp.players[index]
+  TournamentApp.players.splice(index, 1)
+
+  updatePlayersDisplay()
+  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
+
+  // Réafficher les contrôles d'ajout si nécessaire
   if (TournamentApp.players.length < 16) {
     document.getElementById("addPlayerContainer").style.display = "block"
     document.getElementById("randomSlotBtn").style.display = "block"
@@ -2100,5 +2011,139 @@ function removePlayer(index) {
   }
 
   saveDataToLocalStorage()
-  showToast("Machine retirée", "La machine a été retirée du tournoi.", "success")
+  showToast("Machine retirée", `${removedPlayer.name} a été retirée du tournoi.`, "success")
+}
+
+// Initialisation au chargement de la page
+document.addEventListener("DOMContentLoaded", () => {
+  // Initialiser le thème
+  initTheme()
+
+  // Charger les données sauvegardées
+  loadDataFromLocalStorage()
+
+  // Initialiser le bracket
+  initBracket()
+
+  // S'assurer que la fenêtre de sélection aléatoire est fermée au démarrage
+  const randomSlotDialog = document.getElementById("randomSlotDialog")
+  const overlay = document.getElementById("overlay")
+  if (randomSlotDialog) {
+    randomSlotDialog.style.display = "none"
+  }
+  if (overlay) {
+    overlay.style.display = "none"
+  }
+
+  // Ajouter les événements
+  document.getElementById("themeToggle").addEventListener("click", toggleTheme)
+
+  // Ajouter l'événement pour les suggestions
+  const playerNameInput = document.getElementById("playerName")
+  playerNameInput.addEventListener("input", function () {
+    showSuggestions(this)
+  })
+
+  // Cacher les suggestions quand on clique ailleurs
+  document.addEventListener("click", (event) => {
+    if (!event.target.closest("#addPlayerContainer")) {
+      document.getElementById("suggestionsList").style.display = "none"
+    }
+  })
+
+  // Fermer la fenêtre de sélection aléatoire quand on clique sur l'overlay
+  document.getElementById("overlay").addEventListener("click", (event) => {
+    if (event.target === document.getElementById("overlay")) {
+      closeRandomSlotDialog()
+    }
+  })
+
+  // Permettre d'ajouter un joueur en appuyant sur Entrée
+  playerNameInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      addPlayer()
+    }
+  })
+
+  // Fermer la fenêtre de sélection aléatoire avec la touche Échap
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      const randomSlotDialog = document.getElementById("randomSlotDialog")
+      if (randomSlotDialog && randomSlotDialog.style.display === "flex") {
+        closeRandomSlotDialog()
+      }
+    }
+  })
+
+  // Mettre à jour le nombre maximum de machines disponibles au chargement
+  updateMaxAvailableSlots()
+})
+
+// Accepter la machine affichée et l'ajouter au tournoi
+function acceptCurrentSlot() {
+  if (!TournamentApp.selectedSlotsArray || TournamentApp.selectedSlotsArray.length === 0) return;
+  const slot = TournamentApp.selectedSlotsArray[0];
+  // Vérifier si la machine n'est pas déjà dans la liste
+  const playerExists = TournamentApp.players.some((player) => player.name.toLowerCase() === slot.name.toLowerCase());
+  if (!playerExists && TournamentApp.players.length < 16) {
+    TournamentApp.players.push({
+      name: slot.name,
+      category: slot.category,
+    });
+    updateRandomSlotInterface();
+    showToast("Machine ajoutée", `${slot.name} a été ajoutée au tournoi.`, "success");
+  } else {
+    showToast("Déjà présente", "Cette machine est déjà dans le tournoi ou la limite est atteinte.", "warning");
+  }
+  // Vérifier si on a atteint 16 joueurs
+  if (TournamentApp.players.length >= 16) {
+    document.getElementById("addPlayerContainer").style.display = "none";
+    document.getElementById("randomSlotBtn").style.display = "none";
+    document.getElementById("launchDraw").style.display = "block";
+  }
+  // Retirer la machine acceptée de la liste
+  TournamentApp.selectedSlotsArray.shift();
+  // S'il reste des machines, afficher la suivante, sinon fermer la fenêtre
+  if (TournamentApp.selectedSlotsArray.length > 0) {
+    afficherMachineCourante();
+  } else {
+    closeRandomSlotDialog();
+  }
+}
+
+// Nouvelle fonction pour afficher la machine courante de la liste aléatoire
+function afficherMachineCourante() {
+  if (!TournamentApp.selectedSlotsArray || TournamentApp.selectedSlotsArray.length === 0) {
+    closeRandomSlotDialog();
+    return;
+  }
+  const slot = TournamentApp.selectedSlotsArray[0];
+  TournamentApp.randomSlotSelected = slot.name;
+  TournamentApp.randomSlotCategory = slot.category;
+  document.getElementById("randomSlotName").textContent = TournamentApp.randomSlotSelected;
+  const categoryElement = document.getElementById("randomSlotCategory");
+  if (TournamentApp.randomSlotCategory) {
+    categoryElement.textContent = TournamentApp.randomSlotCategory;
+    categoryElement.className = "random-slot-category";
+    if (TournamentApp.randomSlotCategory === "Hacksaw Gaming") {
+      categoryElement.classList.add("hacksaw");
+    } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
+      categoryElement.classList.add("nolimit");
+    } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
+      categoryElement.classList.add("pragmatic");
+    }
+  } else {
+    categoryElement.textContent = "";
+  }
+  document.getElementById("randomSlotResult").style.display = "block";
+  document.getElementById("acceptSlotBtn").style.display = "inline-flex";
+  document.getElementById("rejectSlotBtn").style.display = "inline-flex";
+  document.getElementById("selectRandomBtn").style.display = "none";
+  document.getElementById("selectAnotherBtn").style.display = "inline-flex";
+}
+
+// Refuser la machine affichée et en proposer une autre
+function rejectCurrentSlot() {
+  // Relancer la sélection aléatoire pour proposer une nouvelle machine
+  selectRandomSlot();
 }
