@@ -1264,14 +1264,27 @@ function renderMatchButtons(i, j) {
   const p1Display = p1HasCheckmark ? `${p1Name} <span class="checkmark">✓</span>` : match.p1
   const p2Display = p2HasCheckmark ? `${p2Name} <span class="checkmark">✓</span>` : match.p2
 
+  // Si c'est la finale et le tournoi est terminé, forcer l'affichage du gagnant même si le checkmark a sauté
+  let finaleWinner = null;
+  if (i === 3 && TournamentApp.tournamentCompleted) {
+    if (p1Name === TournamentApp.winner) finaleWinner = 'p1';
+    if (p2Name === TournamentApp.winner) finaleWinner = 'p2';
+  }
+
+  // Correction : les boutons ne sont désactivés que pour la finale si le tournoi est terminé
+  const isFinale = (i === 3);
+  const tournoiFini = TournamentApp.tournamentCompleted;
+
   const btn1 = match.p1
-    ? `<button class="${p1Classes}" ${p1Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p1Name.replace(/'/g, "\\'")}')" title="${p1Name}"${matchCompleted ? ' disabled' : ''}>${p1Display}</button>`
+    ? `<button class="${p1Classes}${((isFinale && ((p1HasCheckmark && tournoiFini) || finaleWinner==='p1')) ? ' finale-winner' : '')}"
+        ${(isFinale && tournoiFini) || !match.p1 || !match.p2 || matchCompleted ? 'disabled' : ''}
+        onclick="setWinner(${i}, ${j}, '${p1Name.replace(/'/g, "\\'")}')" title="${p1Name}">${p1Display}${((isFinale && ((p1HasCheckmark && tournoiFini) || finaleWinner==='p1')) ? '<span class=\"winner-crown\">👑</span>' : '')}</button>`
     : `<button class="player-btn" disabled>---</button>`
 
   const btn2 = match.p2
-    ? `<button class="${p2Classes}" ${p2Disabled} 
-            onclick="setWinner(${i}, ${j}, '${p2Name.replace(/'/g, "\\'")}')" title="${p2Name}"${matchCompleted ? ' disabled' : ''}>${p2Display}</button>`
+    ? `<button class="${p2Classes}${((isFinale && ((p2HasCheckmark && tournoiFini) || finaleWinner==='p2')) ? ' finale-winner' : '')}"
+        ${(isFinale && tournoiFini) || !match.p1 || !match.p2 || matchCompleted ? 'disabled' : ''}
+        onclick="setWinner(${i}, ${j}, '${p2Name.replace(/'/g, "\\'")}')" title="${p2Name}">${p2Display}${((isFinale && ((p2HasCheckmark && tournoiFini) || finaleWinner==='p2')) ? '<span class=\"winner-crown\">👑</span>' : '')}</button>`
     : `<button class="player-btn" disabled>---</button>`
 
   let matchHtml = `${btn1}${btn2}`
@@ -1319,6 +1332,25 @@ function renderMatchButtons(i, j) {
     matchHtml += `<button class="undo-match-btn" onclick="showUndoConfirmDialog(${i}, ${j})">
             <span class="undo-icon">↺</span> Annuler ce match
         </button>`
+  }
+
+  // Affichage spécial pour la finale terminée : gagnant doré + perdant grisé
+  if (i === 3 && TournamentApp.tournamentCompleted && TournamentApp.winner) {
+    const winnerName = TournamentApp.winner;
+    let loserName = '';
+    if (match.p1 && match.p2) {
+      const p1Name = match.p1.replace(' ✓', '');
+      const p2Name = match.p2.replace(' ✓', '');
+      loserName = (p1Name === winnerName) ? p2Name : p1Name;
+    }
+    return `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0.5em;">
+        <button class="player-btn finale-winner" style="width:100%;font-size:1.2em;display:flex;align-items:center;justify-content:center;gap:0.5em;" disabled>
+          <span>${winnerName}</span> <span class=\"winner-crown\" style=\"font-size:1.3em;vertical-align:middle;\">👑</span>
+        </button>
+        ${loserName ? `<button class=\"player-btn\" style=\"width:100%;opacity:0.6;cursor:not-allowed;background:#888;color:#222;font-size:1.1em;\" disabled>${loserName}</button>` : ''}
+      </div>
+    `;
   }
 
   return matchHtml
@@ -1608,6 +1640,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
     TournamentApp.winner = winnerName
     TournamentApp.tournamentCompleted = true // Marquer le tournoi comme terminé
     showVictoryMessage(winnerName)
+    renderBracket() // <-- Ajouté pour forcer la mise à jour visuelle du bracket
   }
 
   // Sauvegarder les données
@@ -1620,6 +1653,7 @@ function showVictoryMessage(winnerName) {
     `🏆 Félicitations <strong>${winnerName}</strong>, grande gagnante du tournoi ! 🎉`
   document.getElementById("victoryMessage").style.display = "block"
   document.getElementById("overlay").style.display = "block"
+  launchConfetti();
 }
 
 // Fermer le message de victoire
@@ -1649,6 +1683,7 @@ function closeVictoryMessage() {
 
   document.getElementById("victoryMessage").style.display = "none"
   document.getElementById("overlay").style.display = "none"
+  stopConfetti();
 }
 
 // Réinitialiser le tournoi avec option
@@ -2152,3 +2187,81 @@ if (legalNoticeIcon && legalNoticeSlide) {
     }
   });
 }
+
+// === Confettis de victoire ===
+let confettiActive = false;
+let confettiParticles = [];
+let confettiCanvas, confettiCtx, confettiAnimationFrame;
+
+function launchConfetti() {
+  confettiCanvas = document.getElementById('confetti-canvas');
+  if (!confettiCanvas) return;
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  confettiCtx = confettiCanvas.getContext('2d');
+  confettiParticles = [];
+  confettiActive = true;
+  confettiCanvas.style.display = 'block';
+  // Générer 150 confettis
+  for (let i = 0; i < 150; i++) {
+    confettiParticles.push({
+      x: Math.random() * confettiCanvas.width,
+      y: Math.random() * -confettiCanvas.height,
+      r: 6 + Math.random() * 8,
+      d: 8 + Math.random() * 8,
+      color: randomConfettiColor(),
+      tilt: Math.random() * 10 - 10,
+      tiltAngle: 0,
+      tiltAngleIncremental: (Math.random() * 0.07) + 0.05,
+      speed: 2 + Math.random() * 3
+    });
+  }
+  confettiDraw();
+}
+
+function randomConfettiColor() {
+  const colors = ['#FFD700', '#FF69B4', '#00CFFF', '#FF6347', '#32CD32', '#FFF', '#FFA500'];
+  return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function confettiDraw() {
+  if (!confettiActive || !confettiCtx) return;
+  confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+  for (let i = 0; i < confettiParticles.length; i++) {
+    let p = confettiParticles[i];
+    confettiCtx.beginPath();
+    confettiCtx.ellipse(p.x, p.y, p.r, p.r / 2, p.tilt, 0, 2 * Math.PI);
+    confettiCtx.fillStyle = p.color;
+    confettiCtx.fill();
+  }
+  updateConfetti();
+  confettiAnimationFrame = requestAnimationFrame(confettiDraw);
+}
+
+function updateConfetti() {
+  for (let i = 0; i < confettiParticles.length; i++) {
+    let p = confettiParticles[i];
+    p.y += p.speed;
+    p.tiltAngle += p.tiltAngleIncremental;
+    p.tilt = Math.sin(p.tiltAngle) * 15;
+    // Remettre en haut si en bas
+    if (p.y > confettiCanvas.height + 20) {
+      p.x = Math.random() * confettiCanvas.width;
+      p.y = -10;
+      p.tilt = Math.random() * 10 - 10;
+    }
+  }
+}
+
+function stopConfetti() {
+  confettiActive = false;
+  if (confettiAnimationFrame) cancelAnimationFrame(confettiAnimationFrame);
+  if (confettiCanvas) confettiCanvas.style.display = 'none';
+}
+
+window.addEventListener('resize', () => {
+  if (confettiCanvas && confettiActive) {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+});
