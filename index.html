@@ -178,7 +178,7 @@
         </div>
     </div>
     
-    <!-- Modal amélioré de sélection aléatoire de slot -->
+    <!-- Modal AMÉLIORÉ de sélection aléatoire de slot avec sélection multiple -->
     <div class="random-slot-dialog" id="randomSlotDialog">
         <div class="random-slot-header">
             <div class="random-slot-title">
@@ -192,52 +192,64 @@
         
         <div class="random-slot-content">
             <div class="random-slot-description">
-                Sélectionnez le type de machine à sous que vous souhaitez choisir aléatoirement.
+                Sélectionnez les types de machines à sous que vous souhaitez inclure dans la sélection aléatoire. Vous pouvez choisir plusieurs providers en même temps.
             </div>
             
             <div class="slot-type-selection" id="slotTypeSelection">
-                <div class="slot-type-option selected" data-value="all" onclick="selectSlotType(this, 'all')">
-                    <div class="slot-type-radio"></div>
+                <div class="slot-type-option selected" data-value="all" onclick="toggleSlotType(this, 'all')">
+                    <div class="slot-type-checkbox">
+                        <input type="checkbox" id="checkbox-all" checked>
+                        <span class="checkmark">✓</span>
+                    </div>
                     <div class="slot-type-label">
                         <span class="slot-type-name">Toutes les machines</span>
                     </div>
                 </div>
                 
-                <div class="slot-type-option" data-value="hacksaw" onclick="selectSlotType(this, 'hacksaw')">
-                    <div class="slot-type-radio"></div>
+                <div class="slot-type-option" data-value="hacksaw" onclick="toggleSlotType(this, 'hacksaw')">
+                    <div class="slot-type-checkbox">
+                        <input type="checkbox" id="checkbox-hacksaw">
+                        <span class="checkmark">✓</span>
+                    </div>
                     <div class="slot-type-label">
-                        <span class="slot-type-name">Uniquement Hacksaw Gaming</span>
+                        <span class="slot-type-name">Hacksaw Gaming</span>
                         <span class="slot-type-badge hacksaw">Hacksaw</span>
                     </div>
                 </div>
                 
-                <div class="slot-type-option" data-value="nolimit" onclick="selectSlotType(this, 'nolimit')">
-                    <div class="slot-type-radio"></div>
+                <div class="slot-type-option" data-value="nolimit" onclick="toggleSlotType(this, 'nolimit')">
+                    <div class="slot-type-checkbox">
+                        <input type="checkbox" id="checkbox-nolimit">
+                        <span class="checkmark">✓</span>
+                    </div>
                     <div class="slot-type-label">
-                        <span class="slot-type-name">Uniquement Nolimit City</span>
+                        <span class="slot-type-name">Nolimit City</span>
                         <span class="slot-type-badge nolimit">Nolimit</span>
                     </div>
                 </div>
                 
-                <div class="slot-type-option" data-value="pragmatic" onclick="selectSlotType(this, 'pragmatic')">
-                    <div class="slot-type-radio"></div>
+                <div class="slot-type-option" data-value="pragmatic" onclick="toggleSlotType(this, 'pragmatic')">
+                    <div class="slot-type-checkbox">
+                        <input type="checkbox" id="checkbox-pragmatic">
+                        <span class="checkmark">✓</span>
+                    </div>
                     <div class="slot-type-label">
-                        <span class="slot-type-name">Uniquement Pragmatic Play</span>
+                        <span class="slot-type-name">Pragmatic Play</span>
                         <span class="slot-type-badge pragmatic">Pragmatic</span>
                     </div>
                 </div>
             </div>
             
             <!-- Sélecteur de nombre de machines -->
-            <div class="number-selection" style="margin: 1.5rem 0;">
-                <label for="slotCount" style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Nombre de machines à sélectionner (max 16):</label>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <input type="number" id="slotCount" min="1" max="16" value="1" style="width: 80px; padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 0.5rem; background-color: var(--card-bg); color: var(--text-color);" oninput="validateSlotCount(this)">
-                    <span style="color: var(--muted-text); font-size: 0.9rem;">Maximum: <span id="maxAvailable">0</span> machines disponibles</span>
+            <div class="number-selection">
+                <label for="slotCount" class="number-selection-label">Nombre de machines à sélectionner :</label>
+                <div class="number-selection-input">
+                    <input type="number" id="slotCount" min="1" max="16" value="1" oninput="validateSlotCount(this)">
+                    <span class="number-selection-info">Maximum: <span id="maxAvailable">0</span> machines disponibles</span>
                 </div>
             </div>
             
-            <div class="slot-selecting" id="slotSelecting" style="display: none;">
+            <div class="slot-selecting" id="slotSelecting">
                 <!-- Les éléments seront ajoutés dynamiquement pendant l'animation -->
             </div>
             
@@ -248,18 +260,26 @@
             </div>
         </div>
         
-        <div class="random-slot-footer">
-            <button class="btn-outline" onclick="closeRandomSlotDialog()">Annuler</button>
-            <div>
-                <button class="btn-primary" id="selectRandomBtn" onclick="selectRandomSlot()">
-                    <img src="./de.png" alt="Dé" width="16" height="16">
-                    Sélectionner aléatoirement
+        <div class="random-slot-footer" style="flex-direction: column; align-items: center;">
+            <div style="display: flex; gap: 1.2rem; justify-content: center; width: 100%; margin-bottom: 0.5rem;">
+                <button class="btn-refuser" id="rejectSlotBtn" onclick="rejectCurrentSlot()" style="display: none; min-width: 120px;">
+                    Refuser
                 </button>
-                <button class="btn-primary btn-add-slot" id="addRandomSlotBtn" onclick="addRandomSlot()">
-                    <img src="./slot.png" alt="Slot Machine" width="16" height="16">
-                    Ajouter cette machine
+                <button class="btn-gris" id="selectAnotherBtn" onclick="selectRandomSlot()" style="display: none; min-width: 180px;">
+                    Sélectionner une autre machine
+                </button>
+                <button class="btn-accepter" id="acceptSlotBtn" onclick="acceptCurrentSlot()" style="display: none; min-width: 120px;">
+                    Accepter
                 </button>
             </div>
+            <button class="btn-primary" id="selectRandomBtn" onclick="selectRandomSlot()">
+                <img src="./de.png" alt="Dé" width="16" height="16">
+                Sélectionner aléatoirement
+            </button>
+            <button class="btn-primary btn-add-slot" id="addRandomSlotBtn" onclick="addRandomSlot()" style="display: none;">
+                <img src="./slot.png" alt="Slot Machine" width="16" height="16">
+                Ajouter cette machine
+            </button>
         </div>
     </div>
 
@@ -272,4 +292,3 @@
     <script src="tournament-app.js"></script>
 </body>
 </html>
-
