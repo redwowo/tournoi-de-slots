@@ -507,10 +507,10 @@ function toggleTheme() {
 function updateThemeToggleIcon() {
   const themeToggle = document.getElementById("themeToggle")
   if (document.documentElement.className === "dark") {
-    themeToggle.innerHTML = '<img src="./soleil.png" alt="Soleil" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="/soleil.png" alt="Soleil" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème clair")
   } else {
-    themeToggle.innerHTML = '<img src="./lune.png" alt="Lune" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="/lune.png" alt="Lune" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème sombre")
   }
 }
@@ -585,7 +585,7 @@ function updatePlayersDisplay() {
     }
 
     const removeButton = document.createElement("button")
-    removeButton.innerHTML = '<img src="./croix.png" alt="Supprimer" width="16" height="16">'
+    removeButton.innerHTML = '<img src="/croix.png" alt="Supprimer" width="16" height="16">'
     removeButton.className = "remove-btn"
     removeButton.title = "Retirer cette machine"
     removeButton.onclick = () => {
@@ -1410,6 +1410,16 @@ function addPlayer() {
 
     // Sauvegarder les données
     saveDataToLocalStorage()
+    updateTournamentState({
+      players: TournamentApp.players,
+      matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+      eliminated: TournamentApp.eliminated,
+      winner: TournamentApp.winner,
+      tournamentStarted: TournamentApp.tournamentStarted,
+      eliminationHistory: TournamentApp.eliminationHistory,
+      previousWinners: TournamentApp.previousWinners,
+      tournamentCompleted: TournamentApp.tournamentCompleted
+    })
 
     console.log("Nombre de joueurs:", TournamentApp.players.length) // Débogage
 
@@ -1645,6 +1655,16 @@ function setWinner(roundIndex, matchIndex, winnerName) {
 
   // Sauvegarder les données
   saveDataToLocalStorage()
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Afficher le message de victoire
@@ -1725,6 +1745,16 @@ function resetTournamentWithOption(keepPlayers) {
 
   // Sauvegarder les données
   saveDataToLocalStorage()
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  })
 
   showToast(
     "Tournoi réinitialisé",
@@ -1740,12 +1770,16 @@ function resetTournamentWithOption(keepPlayers) {
   // Juste avant d'accéder à loadingOverlay.style.display = "none" dans resetTournamentWithOption
   const loadingOverlay = document.getElementById("loadingOverlay");
   if (loadingOverlay) loadingOverlay.style.display = "none";
+
+  // Rediriger vers la page d'accueil après réinitialisation
+  window.location.href = "/";
 }
 
 // Effacer toutes les données
 function clearAllData() {
   localStorage.removeItem("tournamentData")
-  location.reload() // Recharger la page pour repartir de zéro
+  // Recharger la page pour repartir de zéro
+  window.location.href = "/";
 }
 
 // Mettre à jour le score d'un match
@@ -1760,6 +1794,18 @@ function updateScore(roundIndex, matchIndex, scoreType, scoreValue) {
 
   saveDataToLocalStorage()
   renderBracket()
+
+  // Synchronisation en temps réel des scores
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Fonction pour annuler un match
@@ -1822,6 +1868,16 @@ function undoMatch() {
 
   // Sauvegarder les données
   saveDataToLocalStorage()
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  })
 
   // Fermer la boîte de dialogue
   closeUndoConfirmDialog()
@@ -2009,6 +2065,16 @@ function addRandomSlot() {
 
   // Sauvegarder les données
   saveDataToLocalStorage()
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Fonction pour supprimer un joueur
@@ -2033,6 +2099,16 @@ function removePlayer(index) {
 
   saveDataToLocalStorage()
   showToast("Machine retirée", `${removedPlayer.name} a été retirée du tournoi.`, "success")
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Initialisation au chargement de la page
@@ -2098,6 +2174,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Mettre à jour le nombre maximum de machines disponibles au chargement
   updateMaxAvailableSlots()
+
+  // Redirection vers l'accueil si on clique sur le titre ou les images du titre
+  const h1 = document.querySelector("h1");
+  if (h1) {
+    h1.style.cursor = "pointer";
+    h1.addEventListener("click", () => {
+      window.location.href = "/";
+    });
+    const imgs = h1.querySelectorAll("img");
+    imgs.forEach(img => {
+      img.style.cursor = "pointer";
+      img.addEventListener("click", (e) => {
+        e.stopPropagation();
+        window.location.href = "/";
+      });
+    });
+  }
 })
 
 // Accepter la machine affichée et l'ajouter au tournoi
@@ -2130,6 +2223,16 @@ function acceptCurrentSlot() {
   } else {
     closeRandomSlotDialog();
   }
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Nouvelle fonction pour afficher la machine courante de la liste aléatoire
@@ -2265,3 +2368,149 @@ window.addEventListener('resize', () => {
     confettiCanvas.height = window.innerHeight;
   }
 });
+
+// Remplace les ... par ta vraie config copiée sur la console Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
+  authDomain: "tournoi-de-slots.firebaseapp.com",
+  projectId: "tournoi-de-slots",
+  storageBucket: "tournoi-de-slots.appspot.com", // <-- CORRIGÉ
+  messagingSenderId: "834358073654",
+  appId: "1:834358073654:web:6d935be1322c9450e37b97",
+  measurementId: "G-MZKD5K781T"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function generateTournamentId() {
+  return Math.random().toString(36).substring(2, 10);
+}
+
+async function createTournament(initialState) {
+  const id = generateTournamentId();
+  await db.collection("tournois").doc(id).set({ state: initialState });
+  window.location.href = `/tournoi/${id}`;
+}
+
+function getTournamentIdFromUrl() {
+  const match = window.location.pathname.match(/tournoi\/([a-z0-9]+)/i);
+  return match ? match[1] : null;
+}
+
+const tournamentId = getTournamentIdFromUrl();
+if (tournamentId) {
+  db.collection("tournois").doc(tournamentId)
+    .onSnapshot((doc) => {
+      if (doc.exists) {
+        const state = doc.data().state;
+        // Ici, tu dois mettre à jour ton UI avec le state reçu
+        updateTournamentUI(state);
+      }
+    });
+}
+
+async function updateTournamentState(newState) {
+  const tournamentId = getTournamentIdFromUrl();
+  if (tournamentId) {
+    await db.collection("tournois").doc(tournamentId).update({ state: newState });
+  }
+}
+
+// 1. Initialisation Firebase (voir plus haut)
+// 2. Fonctions utilitaires (voir plus haut)
+
+// 3. Création d'un tournoi (à appeler au bon moment)
+async function lancerNouveauTournoi() {
+  // Initialiser le bracket et placer les joueurs
+  TournamentApp.tournamentStarted = true;
+  initBracket();
+  placePlayersRandomly();
+
+  // Transforme matches en objet pour Firestore
+  const matchesObject = {};
+  for (let i = 0; i < TournamentApp.matches.length; i++) {
+    matchesObject['round' + i] = TournamentApp.matches[i];
+  }
+
+  const initialState = {
+    players: TournamentApp.players,
+    matches: matchesObject, // plus de tableau imbriqué !
+    eliminated: [],
+    winner: "",
+    tournamentStarted: true,
+    eliminationHistory: [],
+    previousWinners: [],
+    tournamentCompleted: false
+  };
+  await createTournament(initialState);
+}
+
+// 4. Écoute en temps réel (au chargement d'un tournoi)
+document.addEventListener('DOMContentLoaded', () => {
+  const id = getTournamentIdFromUrl();
+  if (id) {
+    db.collection("tournois").doc(id)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          updateTournamentUI(doc.data().state);
+        }
+      });
+  }
+});
+
+// 5. Mise à jour (à chaque action)
+async function onAction(newState) {
+  await updateTournamentState(newState);
+}
+
+function updateTournamentUI(state) {
+  // Met à jour l'état du tournoi à partir de l'objet reçu de Firestore
+  TournamentApp.players = state.players || [];
+  TournamentApp.eliminated = state.eliminated || [];
+  TournamentApp.winner = state.winner || "";
+  TournamentApp.tournamentStarted = state.tournamentStarted || false;
+  TournamentApp.tournamentCompleted = state.tournamentCompleted || false;
+  TournamentApp.eliminationHistory = state.eliminationHistory || [];
+  TournamentApp.previousWinners = state.previousWinners || [];
+
+  // Reconstruit le tableau imbriqué à partir de l'objet matches
+  if (state.matches && typeof state.matches === 'object' && !Array.isArray(state.matches)) {
+    TournamentApp.matches = [];
+    for (let i = 0; i < 4; i++) {
+      TournamentApp.matches[i] = state.matches['round' + i] || [];
+    }
+  } else {
+    TournamentApp.matches = state.matches || [];
+  }
+
+  // Correction de la structure des matches si besoin
+  if (!Array.isArray(TournamentApp.matches) || TournamentApp.matches.length !== 4) {
+    TournamentApp.matches = [];
+    for (let i = 0; i < 4; i++) {
+      TournamentApp.matches[i] = [];
+      for (let j = 0; j < Math.pow(2, 4 - i - 1); j++) {
+        TournamentApp.matches[i][j] = { p1: "", p2: "", score1: "", score2: "" };
+      }
+    }
+  }
+
+  // Mets à jour l'interface utilisateur
+  updatePlayersDisplay();
+  updateWinnersDisplay();
+  renderBracket();
+
+  // Affichage du bracket si le tournoi est démarré
+  if (TournamentApp.tournamentStarted) {
+    document.getElementById("bracket").style.display = "flex";
+    document.getElementById("launchDraw").style.display = "none";
+    document.getElementById("resetButton").style.display = "block";
+    document.getElementById("addPlayerContainer").style.display = "none";
+    document.getElementById("randomSlotBtn").style.display = "none";
+  } else {
+    if (TournamentApp.players.length === 16) {
+      document.getElementById("addPlayerContainer").style.display = "none";
+      document.getElementById("randomSlotBtn").style.display = "none";
+      document.getElementById("launchDraw").style.display = "block";
+    }
+  }
+}
