@@ -2000,3 +2000,27 @@ input[type="number"] {
 .sidebar > button:first-of-type {
   margin-top: 0;
 }
+
+.finale-winner {
+  background: linear-gradient(90deg, #ffe066 0%, #ffd700 100%) !important;
+  color: #7c5700 !important;
+  border: 2px solid #ffd700 !important;
+  font-weight: bold;
+  box-shadow: 0 0 12px 2px #ffd70055;
+  position: relative;
+  z-index: 2;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5em;
+}
+.winner-crown {
+  font-size: 1.3em;
+  display: flex;
+  align-items: center;
+  align-self: center;
+  margin-left: 0.3em;
+  margin-bottom: 0;
+  position: relative;
+  top: -2px;
+}
