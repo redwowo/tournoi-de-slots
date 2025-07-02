@@ -412,7 +412,8 @@ h1 {
   font-weight: bold;
   margin-top: 1.25rem;
   color: var(--heading-color);
-  transition: color 0.3s ease;
+  /* Suppression de toute animation */
+  /* animation: h1SwingNatural 10s cubic-bezier(.4,1.6,.6,1) infinite; */
 }
 
 .trophy-icon {
@@ -2023,4 +2024,218 @@ input[type="number"] {
   margin-bottom: 0;
   position: relative;
   top: -2px;
+}
+
+/* Modal pour afficher les anciens tournois */
+.previous-tournament-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.previous-tournament-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.previous-tournament-content {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 32px var(--shadow-color);
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 1200px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.previous-tournament-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+}
+
+.previous-tournament-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.previous-tournament-title .trophy-icon {
+  color: gold;
+  font-size: 1.75rem;
+  margin: 0;
+  display: inline;
+}
+
+.previous-tournament-description {
+  color: var(--muted-text);
+  font-size: 1rem;
+  margin-top: 0.5rem;
+}
+
+.previous-tournament-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+
+.previous-tournament-close:hover {
+  background-color: var(--hover-bg);
+}
+
+.previous-tournament-body {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1.5rem;
+}
+
+.previous-tournament-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.previous-tournament-bracket {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.previous-tournament-round {
+  flex: 1;
+  min-width: 0;
+}
+
+.previous-tournament-round h3 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 0.5rem;
+}
+
+.previous-tournament-matches {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.previous-tournament-match {
+  background: var(--item-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 80px;
+  justify-content: center;
+}
+
+.previous-tournament-player {
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.2s ease;
+}
+
+.previous-tournament-player.winner {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: bold;
+}
+
+.previous-tournament-score {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  padding: 0.25rem;
+  background-color: var(--hover-bg);
+  border-radius: 0.25rem;
+}
+
+/* Responsive pour la modal d'ancien tournoi */
+@media (max-width: 768px) {
+  .previous-tournament-content {
+    width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .previous-tournament-bracket {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .previous-tournament-round {
+    min-width: auto;
+  }
+  
+  .previous-tournament-match {
+    min-height: 60px;
+  }
+}
+
+/* Animation d'apparition générale */
+@keyframes fadeInUp {
+  /* supprimé */
+}
+
+/* Animation sur les images du titre */
+h1 img {
+  /* supprimé */
+}
+
+/* Animation sur les boutons principaux */
+.sidebar button,
+.btn-outline,
+.btn-add,
+.btn-primary {
+  /* supprimé */
+}
+
+/* Animation sur les cartes de sélection aléatoire */
+.slot-type-option {
+  /* supprimé */
+}
+
+/* Animation sur les images de slot dans la sidebar */
+.sidebar img {
+  /* supprimé */
+}
+
+.sidebar img:hover {
+  /* supprimé */
+}
+
+/* Animation sur le message de victoire */
+#victoryMessage {
+  /* supprimé */
 }
