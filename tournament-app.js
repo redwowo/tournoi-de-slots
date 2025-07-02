@@ -1358,6 +1358,12 @@ function renderMatchButtons(i, j) {
 
 // Modifions la fonction addPlayer pour s'assurer que le bouton de tirage apparaît correctement
 function addPlayer() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   const nameInput = document.getElementById("playerName")
   const name = nameInput.value.trim()
 
@@ -1441,6 +1447,12 @@ function addPlayer() {
 
 // Améliorons la fonction launchDraw pour s'assurer qu'elle fonctionne correctement
 function launchDraw() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   console.log("Lancement du tirage...") // Débogage
 
   // Afficher l'animation de chargement
@@ -1544,15 +1556,15 @@ function shufflePlayers() {
   }
 }
 
-// Placer les joueurs aléatoirement
-function placePlayersRandomly() {
-  for (let i = 0; i < TournamentApp.players.length; i++) {
+// Nouvelle version : placer les joueurs aléatoirement à partir d'un tableau donné
+function placePlayersRandomly(playersArray) {
+  for (let i = 0; i < playersArray.length; i++) {
     const matchIndex = Math.floor(i / 2)
     if (i % 2 === 0) {
-      TournamentApp.matches[0][matchIndex].p1 = TournamentApp.players[i].name
+      TournamentApp.matches[0][matchIndex].p1 = playersArray[i].name
       TournamentApp.matches[0][matchIndex].score1 = ""
     } else {
-      TournamentApp.matches[0][matchIndex].p2 = TournamentApp.players[i].name
+      TournamentApp.matches[0][matchIndex].p2 = playersArray[i].name
       TournamentApp.matches[0][matchIndex].score2 = ""
     }
   }
@@ -1566,6 +1578,12 @@ function toSafeId(name) {
 
 // Définir le gagnant d'un match
 function setWinner(roundIndex, matchIndex, winnerName) {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   // Vérifier si le tournoi est déjà terminé
   if (TournamentApp.tournamentCompleted) {
     showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error")
@@ -1708,6 +1726,12 @@ function closeVictoryMessage() {
 
 // Réinitialiser le tournoi avec option
 function resetTournamentWithOption(keepPlayers) {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   // Sauvegarder la liste des joueurs si demandé
   const savedPlayers = keepPlayers ? [...TournamentApp.players] : []
 
@@ -1777,6 +1801,12 @@ function resetTournamentWithOption(keepPlayers) {
 
 // Effacer toutes les données
 function clearAllData() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   localStorage.removeItem("tournamentData")
   // Recharger la page pour repartir de zéro
   window.location.href = "/";
@@ -1784,6 +1814,12 @@ function clearAllData() {
 
 // Mettre à jour le score d'un match
 function updateScore(roundIndex, matchIndex, scoreType, scoreValue) {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   TournamentApp.matches[roundIndex][matchIndex][scoreType] = scoreValue
 
   // Conserver la largeur du champ après la mise à jour
@@ -1810,6 +1846,12 @@ function updateScore(roundIndex, matchIndex, scoreType, scoreValue) {
 
 // Fonction pour annuler un match
 function undoMatch() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
   const roundIndex = TournamentApp.currentRoundIndex
   const matchIndex = TournamentApp.currentMatchIndex
 
@@ -2389,6 +2431,12 @@ function generateTournamentId() {
 async function createTournament(initialState) {
   const id = generateTournamentId();
   await db.collection("tournois").doc(id).set({ state: initialState });
+  
+  // S'assurer qu'on n'est PAS en mode spectateur
+  isSpectatorMode = false;
+  localStorage.removeItem('spectatorMode');
+  
+  // Rediriger vers l'URL du tournoi (mode créateur)
   window.location.href = `/tournoi/${id}`;
 }
 
@@ -2420,11 +2468,26 @@ async function updateTournamentState(newState) {
 // 2. Fonctions utilitaires (voir plus haut)
 
 // 3. Création d'un tournoi (à appeler au bon moment)
+function generateTournamentName() {
+  const now = new Date();
+  return "Tournoi du " + now.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+}
+
 async function lancerNouveauTournoi() {
   // Initialiser le bracket et placer les joueurs
   TournamentApp.tournamentStarted = true;
   initBracket();
-  placePlayersRandomly();
+  // Mélange temporaire pour le bracket uniquement
+  const shuffled = [...TournamentApp.players];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  placePlayersRandomly(shuffled);
+
+  // Cacher le message 'Slot ajoutés'
+  const count = document.getElementById('count');
+  if (count) count.style.display = 'none';
 
   // Transforme matches en objet pour Firestore
   const matchesObject = {};
@@ -2433,19 +2496,22 @@ async function lancerNouveauTournoi() {
   }
 
   const initialState = {
+    name: generateTournamentName(),
     players: TournamentApp.players,
-    matches: matchesObject, // plus de tableau imbriqué !
+    matches: matchesObject,
     eliminated: [],
     winner: "",
     tournamentStarted: true,
     eliminationHistory: [],
     previousWinners: [],
-    tournamentCompleted: false
+    tournamentCompleted: false,
+    createdAt: new Date().toISOString()
   };
   await createTournament(initialState);
 }
 
-// 4. Écoute en temps réel (au chargement d'un tournoi)
+// 4. Écoute en temps réel (au chargement d'un tournoi) - SUPPRIMÉ POUR ÉVITER LES CONFLITS
+/*
 document.addEventListener('DOMContentLoaded', () => {
   const id = getTournamentIdFromUrl();
   if (id) {
@@ -2457,6 +2523,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
 });
+*/
 
 // 5. Mise à jour (à chaque action)
 async function onAction(newState) {
@@ -2506,11 +2573,314 @@ function updateTournamentUI(state) {
     document.getElementById("resetButton").style.display = "block";
     document.getElementById("addPlayerContainer").style.display = "none";
     document.getElementById("randomSlotBtn").style.display = "none";
+    // Masquer le message 'Slot ajoutés'
+    const count = document.getElementById('count');
+    if (count) count.style.display = 'none';
   } else {
     if (TournamentApp.players.length === 16) {
       document.getElementById("addPlayerContainer").style.display = "none";
       document.getElementById("randomSlotBtn").style.display = "none";
       document.getElementById("launchDraw").style.display = "block";
     }
+    // Afficher le message 'Slot ajoutés'
+    const count = document.getElementById('count');
+    if (count) count.style.display = '';
+  }
+  
+  // Appliquer les restrictions spectateur si nécessaire
+  if (isSpectatorMode) {
+    setTimeout(() => {
+      disableActionsIfSpectator();
+    }, 50);
+  }
+}
+
+// === AJOUT : Gestion des tournois en cours et mode spectateur ===
+
+// Variables globales pour le mode spectateur
+let isSpectatorMode = false;
+
+// Fonction pour charger les tournois actifs depuis Firestore
+async function loadActiveTournaments() {
+  try {
+    const snapshot = await db.collection("tournois")
+      .where("state.tournamentCompleted", "==", false)
+      .get();
+    const tournaments = [];
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (data.state && !data.state.tournamentCompleted) {
+        tournaments.push({
+          id: doc.id,
+          ...data.state
+        });
+      }
+    });
+    // Trier côté client par date de création (plus récent en premier)
+    tournaments.sort((a, b) => {
+      const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return dateB - dateA;
+    });
+    return tournaments;
+  } catch (error) {
+    console.error("Erreur lors du chargement des tournois actifs:", error);
+    showToast("Erreur", "Impossible de charger les tournois actifs", "error");
+    return [];
+  }
+}
+
+// Fonction pour rejoindre un tournoi en mode spectateur
+function joinTournamentAsSpectator(tournamentId) {
+  isSpectatorMode = true;
+  // Rediriger vers la page d'accueil avec le paramètre du tournoi
+  window.location.href = `/?tournament=${tournamentId}`;
+}
+
+// Désactive les actions si spectateur
+function disableActionsIfSpectator() {
+  if (!isSpectatorMode) return;
+  
+  // Masquer tous les boutons d'action
+  const ids = [
+    'addPlayerContainer','randomSlotBtn','launchDraw','resetButton','clearDataBtn','showPreviousWinnersBtn'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.style) el.style.display = 'none';
+  });
+  
+  // Désactiver tous les clics sur les matches
+  const matches = document.querySelectorAll('.match');
+  matches.forEach(match => {
+    match.style.pointerEvents = 'none';
+    match.style.opacity = '0.7';
+  });
+  
+  // Désactiver tous les boutons de score
+  const scoreButtons = document.querySelectorAll('.score-btn');
+  scoreButtons.forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+  });
+  
+  // Désactiver tous les boutons d'action dans le bracket
+  const bracketButtons = document.querySelectorAll('.bracket button');
+  bracketButtons.forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+  });
+  
+  // Indicateur visuel très visible
+  const sidebar = document.querySelector('.sidebar');
+  if (sidebar && !document.getElementById('spectator-indicator')) {
+    const div = document.createElement('div');
+    div.id = 'spectator-indicator';
+    div.innerHTML = `
+      <div style="background: #ff6b6b; color: white; padding: 15px; margin: 10px 0; border-radius: 8px; text-align: center;">
+        <div style="font-weight: bold; margin-bottom: 10px;">👁️ MODE SPECTATEUR - Lecture seule</div>
+        <button onclick="exitSpectatorMode()" style="background: white; color: #ff6b6b; border: none; padding: 8px 16px; border-radius: 5px; font-weight: bold; cursor: pointer; transition: all 0.3s; margin-bottom: 8px;">
+          🚪 Sortir du mode spectateur
+        </button>
+        <div style="font-size: 12px; opacity: 0.9;">💡 Appuyez sur Échap pour sortir rapidement</div>
+      </div>
+    `;
+    sidebar.prepend(div);
+  }
+  
+  // Ajouter un overlay semi-transparent sur tout le bracket
+  const bracket = document.getElementById('bracket');
+  if (bracket && !document.getElementById('spectator-overlay')) {
+    const overlay = document.createElement('div');
+    overlay.id = 'spectator-overlay';
+    overlay.style.cssText = `
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.1);
+      pointer-events: none;
+      z-index: 1000;
+    `;
+    bracket.style.position = 'relative';
+    bracket.appendChild(overlay);
+  }
+}
+
+// Vérifier si on est en mode spectateur au chargement
+document.addEventListener('DOMContentLoaded', async () => {
+  // Initialiser le mode spectateur depuis le localStorage
+  initializeSpectatorMode();
+  
+  // Mode spectateur UNIQUEMENT si l'URL contient ?tournament=...
+  const tournamentId = getTournamentFromUrl();
+  const urlTournamentId = getTournamentIdFromUrl();
+
+  if (tournamentId) {
+    isSpectatorMode = true;
+    await loadSpecificTournament(tournamentId);
+  } else if (urlTournamentId) {
+    // Mode créateur
+    isSpectatorMode = false;
+    localStorage.removeItem('spectatorMode');
+    await loadTournamentAsCreator(urlTournamentId);
+  }
+
+  // Mettre en place l'écoute Firestore en temps réel pour les mises à jour
+  const currentTournamentId = tournamentId || urlTournamentId;
+  if (currentTournamentId) {
+    db.collection("tournois").doc(currentTournamentId)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          updateTournamentUI(doc.data().state);
+        }
+      });
+  }
+
+  // Appliquer les restrictions spectateur si nécessaire
+  if (isSpectatorMode) {
+    setTimeout(() => {
+      disableActionsIfSpectator();
+    }, 100);
+  }
+
+  // Raccourci clavier pour sortir du mode spectateur (Échap)
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isSpectatorMode) {
+      exitSpectatorMode();
+    }
+  });
+});
+
+// Fonction pour charger un tournoi spécifique depuis Firestore
+async function loadSpecificTournament(tournamentId) {
+  try {
+    const doc = await db.collection("tournois").doc(tournamentId).get();
+    if (doc.exists) {
+      const state = doc.data().state;
+      updateTournamentUI(state);
+      disableActionsIfSpectator();
+      showToast("Mode spectateur", "Vous regardez ce tournoi en mode spectateur", "info");
+    } else {
+      showToast("Erreur", "Tournoi non trouvé", "error");
+    }
+  } catch (error) {
+    console.error("Erreur lors du chargement du tournoi:", error);
+    showToast("Erreur", "Impossible de charger le tournoi", "error");
+  }
+}
+
+// Fonction pour obtenir le paramètre tournament de l'URL
+function getTournamentFromUrl() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('tournament');
+}
+
+// Réactive les actions si pas spectateur
+function enableActionsIfNotSpectator() {
+  if (isSpectatorMode) return;
+  
+  // Afficher tous les boutons d'action
+  const ids = [
+    'addPlayerContainer','randomSlotBtn','launchDraw','resetButton','clearDataBtn','showPreviousWinnersBtn'
+  ];
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.style) el.style.display = '';
+  });
+  
+  // Réactiver tous les clics sur les matches
+  const matches = document.querySelectorAll('.match');
+  matches.forEach(match => {
+    match.style.pointerEvents = '';
+    match.style.opacity = '';
+  });
+  
+  // Réactiver tous les boutons de score
+  const scoreButtons = document.querySelectorAll('.score-btn');
+  scoreButtons.forEach(btn => {
+    btn.style.pointerEvents = '';
+    btn.style.opacity = '';
+  });
+  
+  // Réactiver tous les boutons d'action dans le bracket
+  const bracketButtons = document.querySelectorAll('.bracket button');
+  bracketButtons.forEach(btn => {
+    btn.style.pointerEvents = '';
+    btn.style.opacity = '';
+  });
+  
+  // Supprimer l'indicateur spectateur
+  const indicator = document.getElementById('spectator-indicator');
+  if (indicator) indicator.remove();
+  
+  // Supprimer l'overlay spectateur
+  const overlay = document.getElementById('spectator-overlay');
+  if (overlay) overlay.remove();
+}
+
+// ... existing code ...
+
+// Bascule le mode spectateur
+function toggleSpectatorMode() {
+  isSpectatorMode = !isSpectatorMode;
+  localStorage.setItem('spectatorMode', isSpectatorMode);
+  
+  if (isSpectatorMode) {
+    disableActionsIfSpectator();
+  } else {
+    enableActionsIfNotSpectator();
+  }
+}
+
+// Initialise le mode spectateur
+function initializeSpectatorMode() {
+  const savedMode = localStorage.getItem('spectatorMode');
+  isSpectatorMode = savedMode === 'true';
+  
+  if (isSpectatorMode) {
+    disableActionsIfSpectator();
+  }
+}
+
+// Fonction pour sortir du mode spectateur
+function exitSpectatorMode() {
+  // Demander confirmation
+  if (confirm("Voulez-vous vraiment sortir du mode spectateur ? Vous perdrez la vue en temps réel de ce tournoi.")) {
+    // Réinitialiser le mode spectateur
+    isSpectatorMode = false;
+    localStorage.removeItem('spectatorMode');
+    
+    // Nettoyer l'URL des paramètres
+    const url = new URL(window.location);
+    url.searchParams.delete('tournament');
+    window.history.replaceState({}, '', url);
+    
+    // Réactiver toutes les actions
+    enableActionsIfNotSpectator();
+    
+    // Recharger la page pour repartir de zéro
+    window.location.reload();
+  }
+}
+
+// Fonction pour charger un tournoi en mode créateur
+async function loadTournamentAsCreator(tournamentId) {
+  try {
+    const doc = await db.collection("tournois").doc(tournamentId).get();
+    if (doc.exists) {
+      const state = doc.data().state;
+      updateTournamentUI(state);
+      // S'assurer qu'on n'est PAS en mode spectateur
+      isSpectatorMode = false;
+      localStorage.removeItem('spectatorMode');
+      showToast("Mode créateur", "Vous gérez ce tournoi en mode créateur", "success");
+    } else {
+      showToast("Erreur", "Tournoi non trouvé", "error");
+    }
+  } catch (error) {
+    console.error("Erreur lors du chargement du tournoi:", error);
+    showToast("Erreur", "Impossible de charger le tournoi", "error");
   }
 }
