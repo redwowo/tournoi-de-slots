@@ -76,6 +76,11 @@
             <button id="showPreviousWinnersBtn" onclick="toggleWinnersPanel()" class="previous-winners-btn">
                 <span class="trophy-icon">🏆</span> Résultats tournois précédents
             </button>
+            
+            <!-- Bouton pour accéder à la page des tournois en cours -->
+            <button id="goToTournamentsBtn" class="btn-outline" style="width: 100%; text-align: center; margin-top: 1rem;" onclick="window.location.href='/tournois'">
+                Voir les tournois en cours
+            </button>
         </div>
 
         <!-- Tableau de tournoi à droite -->
@@ -281,3 +286,7 @@
     <script src="/tournament-app.js"></script>
 </body>
 </html>
+
+<style>
+  .btn-tournaments { display: none !important; }
+</style>
