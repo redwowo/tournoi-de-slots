@@ -2630,7 +2630,6 @@ window.addEventListener('resize', () => {
   }
 });
 
-// Remplace les ... par ta vraie config copiée sur la console Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
   authDomain: "tournoi-de-slots.firebaseapp.com",
