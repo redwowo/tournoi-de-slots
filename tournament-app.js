@@ -1,7 +1,7 @@
 // Création de l'objet global TournamentApp
 window.TournamentApp = {
   // Données des machines à sous
-  hacksawGamingMachines: [
+  slotMachines: [
     "2 Wild 2 Die",
     "Aiko and the Wind Spirit",
     "Alpha Eagle",
@@ -223,294 +223,6 @@ window.TournamentApp = {
     "xWays Hoarder xSplit",
   ],
 
-  // BGaming machines (ajoutées)
-  bGamingMachines: [
-    "88 Manki Fortunes",
-    "Alchemist Bonanza",
-    "Alien Fruits",
-    "Alien Fruits 2",
-    "Alice WonderLuck",
-    "All Lucky Clovers",
-    "Aloha King Elvis",
-    "Arrow Slot",
-    "Avalon the Lost Kingdom",
-    "Aztec Clusters",
-    "Aztec Magic Bonanza",
-    "Aztec Magic Deluxe",
-    "Aztec Magic Megaways",
-    "Aztec's Claw Wild Dice",
-    "Beast band",
-    "Big Atlantis Frenzy",
-    "Big Bucks Saloon",
-    "Big Tuna Bonanza",
-    "Blackbeard's Bounty",
-    "Bone Bonanza",
-    "Book of Cats",
-    "Book of Cats Megaways",
-    "Book of Kemet",
-    "Book of Panda Megaways",
-    "Book of Pyramids",
-    "Brüning Chilli X",
-    "Candy Monsta",
-    "Carnival Bonanza",
-    "Cat's Soup",
-    "Catdiana",
-    "Catch the Gold",
-    "Chicken Rush",
-    "Clover Bonanza",
-    "Crystal Clusters",
-    "Deep Sea",
-    "Diamond of Jungle",
-    "Dig Dig Digger",
-    "Disco party",
-    "Doddy & Haddzy Bonanza",
-    "Doomsday Saloon",
-    "Doos of Sol Megaways",
-    "Dominator's Treasure",
-    "Dragon Age",
-    "Dragon Queen Megaways",
-    "Dragon's Gold 100",
-    "Easter Heist",
-    "Elvis Frog",
-    "Elvis Frog in Vegas",
-    "Fire Lightning",
-    "Fiesta Blaze Bonanza",
-    "Forgotten",
-    "Fortune Bells",
-    "Four Lucky Clover",
-    "Four Lucky Diamonds",
-    "Fruit Million",
-    "Gangsterz",
-    "Gemhalla",
-    "Gemza",
-    "Gift Rush",
-    "God of Wealth",
-    "Gold Magnate",
-    "Gold of Minos",
-    "Gold Rush Frog",
-    "Gold Rush Johnny Cash",
-    "Golden Pride",
-    "Grand Mustang",
-    "Grand Patron chance",
-    "Haunted Reels",
-    "Hit the Route",
-    "Hot Chli Bells",
-    "Hottest 666",
-    "Infinity Pull",
-    "Izziart",
-    "Johnny Cash",
-    "Joker Queen",
-    "Joker's Million",
-    "Joker vs Joker",
-    "Keepers of the Secret",
-    "King of Cash",
-    "Kraken's Hunger",
-    "Lady Wolf Moon",
-    "Lady Wolf Moon Megaways",
-    "Loki Loot",
-    "Luck & Magic",
-    "Lucky 8",
-    "Lucky Crew",
-    "Lucky Dama Muerta",
-    "Lucky Dragon",
-    "Lucky Ducky Merge Up",
-    "Lucky Farm Bonanza",
-    "Lucky Lady's Clover",
-    "Lucky Lu",
-    "Lucky Oak",
-    "Maneki Gold",
-    "Mechanical Clover",
-    "Mechanical Orange",
-    "Merge Up",
-    "Mice & Magic",
-    "Miss Cherry Fruits",
-    "Miss Cherry Fruits Jackpot Party",
-    "Monster Hunt",
-    "Mummy's Gold",
-    "Mystery Garden",
-    "OOF The Goldmine Planet",
-    "Penny Pelican",
-    "Platinum Lightning",
-    "Platinum Lightning Deluxe",
-    "Pop Zen",
-    "Potion Spells",
-    "panda Luck",
-    "Rig of Riches",
-    "Road 2 Riches",
-    "Rotating Element",
-    "Royal High Road",
-    "Sakra Riches 60",
-    "Secret Bar",
-    "Slot Machine",
-    "Snoop Dogg Dollars",
-    "Soccer Mania",
-    "Spirit Savage Buffalo",
-    "Spirit Savage Buffalo Megaways",
-    "Spin and Spell",
-    "Sugar Mix",
-    "Sweet Rush Megaways",
-    "Tramp Day",
-    "Tramp Day TRUEWAYS",
-    "Train to Rio Grande",
-    "Trueways Olympus",
-    "Voodoo People Royal Fruits Multilines",
-    "West Town",
-    "Wild Cash",
-    "Wild Cash Dice",
-    "Wild Chicago",
-    "Wild Heart",
-    "Wild Moon Thieves",
-    "Wild Tiger",
-    "Wild West",
-    "Wukd Clusters",
-    "Zeus goes Wild",
-    "Zeus' Sanctuary",
-  ],
-
-  // BGaming machines (ajoutées)
-  bGamingMachines: [
-    "88 Manki Fortunes",
-    "Alchemist Bonanza",
-    "Alien Fruits",
-    "Alien Fruits 2",
-    "Alice WonderLuck",
-    "All Lucky Clovers",
-    "Aloha King Elvis",
-    "Arrow Slot",
-    "Avalon the Lost Kingdom",
-    "Aztec Clusters",
-    "Aztec Magic Bonanza",
-    "Aztec Magic Deluxe",
-    "Aztec Magic Megaways",
-    "Aztec's Claw Wild Dice",
-    "Beast band",
-    "Big Atlantis Frenzy",
-    "Big Bucks Saloon",
-    "Big Tuna Bonanza",
-    "Blackbeard's Bounty",
-    "Bone Bonanza",
-    "Book of Cats",
-    "Book of Cats Megaways",
-    "Book of Kemet",
-    "Book of Panda Megaways",
-    "Book of Pyramids",
-    "Brüning Chilli X",
-    "Candy Monsta",
-    "Carnival Bonanza",
-    "Cat's Soup",
-    "Catdiana",
-    "Catch the Gold",
-    "Chicken Rush",
-    "Clover Bonanza",
-    "Crystal Clusters",
-    "Deep Sea",
-    "Diamond of Jungle",
-    "Dig Dig Digger",
-    "Disco party",
-    "Doddy & Haddzy Bonanza",
-    "Doomsday Saloon",
-    "Doos of Sol Megaways",
-    "Dominator's Treasure",
-    "Dragon Age",
-    "Dragon Queen Megaways",
-    "Dragon's Gold 100",
-    "Easter Heist",
-    "Elvis Frog",
-    "Elvis Frog in Vegas",
-    "Fire Lightning",
-    "Fiesta Blaze Bonanza",
-    "Forgotten",
-    "Fortune Bells",
-    "Four Lucky Clover",
-    "Four Lucky Diamonds",
-    "Fruit Million",
-    "Gangsterz",
-    "Gemhalla",
-    "Gemza",
-    "Gift Rush",
-    "God of Wealth",
-    "Gold Magnate",
-    "Gold of Minos",
-    "Gold Rush Frog",
-    "Gold Rush Johnny Cash",
-    "Golden Pride",
-    "Grand Mustang",
-    "Grand Patron chance",
-    "Haunted Reels",
-    "Hit the Route",
-    "Hot Chli Bells",
-    "Hottest 666",
-    "Infinity Pull",
-    "Izziart",
-    "Johnny Cash",
-    "Joker Queen",
-    "Joker's Million",
-    "Joker vs Joker",
-    "Keepers of the Secret",
-    "King of Cash",
-    "Kraken's Hunger",
-    "Lady Wolf Moon",
-    "Lady Wolf Moon Megaways",
-    "Loki Loot",
-    "Luck & Magic",
-    "Lucky 8",
-    "Lucky Crew",
-    "Lucky Dama Muerta",
-    "Lucky Dragon",
-    "Lucky Ducky Merge Up",
-    "Lucky Farm Bonanza",
-    "Lucky Lady's Clover",
-    "Lucky Lu",
-    "Lucky Oak",
-    "Maneki Gold",
-    "Mechanical Clover",
-    "Mechanical Orange",
-    "Merge Up",
-    "Mice & Magic",
-    "Miss Cherry Fruits",
-    "Miss Cherry Fruits Jackpot Party",
-    "Monster Hunt",
-    "Mummy's Gold",
-    "Mystery Garden",
-    "OOF The Goldmine Planet",
-    "Penny Pelican",
-    "Platinum Lightning",
-    "Platinum Lightning Deluxe",
-    "Pop Zen",
-    "Potion Spells",
-    "panda Luck",
-    "Rig of Riches",
-    "Road 2 Riches",
-    "Rotating Element",
-    "Royal High Road",
-    "Sakra Riches 60",
-    "Secret Bar",
-    "Slot Machine",
-    "Snoop Dogg Dollars",
-    "Soccer Mania",
-    "Spirit Savage Buffalo",
-    "Spirit Savage Buffalo Megaways",
-    "Spin and Spell",
-    "Sugar Mix",
-    "Sweet Rush Megaways",
-    "Tramp Day",
-    "Tramp Day TRUEWAYS",
-    "Train to Rio Grande",
-    "Trueways Olympus",
-    "Voodoo People Royal Fruits Multilines",
-    "West Town",
-    "Wild Cash",
-    "Wild Cash Dice",
-    "Wild Chicago",
-    "Wild Heart",
-    "Wild Moon Thieves",
-    "Wild Tiger",
-    "Wild West",
-    "Wukd Clusters",
-    "Zeus goes Wild",
-    "Zeus' Sanctuary",
-  ],
-
   // Add Pragmatic Play machines
   pragmaticPlayMachines: [
     "5 Lions Megaways 2",
@@ -652,6 +364,155 @@ window.TournamentApp = {
     "Zombie School Megaways",
   ],
 
+  // Add bGaming machines
+  bGamingMachines: [
+    "Big Bucks Saloon",
+    "Cat's Soup",
+    "Lady lucky gun",
+    "Tramp Day",
+    "Dragon Queen Megaways",
+    "Loki Loot",
+    "Mystery Garden",
+    "Trueways Olympus",
+    "Lucky Lu",
+    "Blackbeard's Bounty",
+    "Doomsday Saloon",
+    "Sugar Mix",
+    "Arrow Slot",
+    "Zeus goes Wild",
+    "Wukd Clusters",
+    "Treasure of Anubis",
+    "Fortune Bells",
+    "Alice WonderLuck",
+    "Joker's Million",
+    "Hot Chli Bells",
+    "Disco party",
+    "Sakra Riches 60",
+    "Lucky Ducky Merge Up",
+    "Wild Moon Thieves",
+    "Golden Pride",
+    "Catdiana",
+    "Snoop Dogg Dollars",
+    "Forgotten",
+    "Rotating Element",
+    "Haunted Reels",
+    "Carnival Bonanza",
+    "Aztec's Claw Wild Dice",
+    "Fortuna",
+    "Voodoo People Royal Fruits Multilines",
+    "Train to Rio Grande",
+    "Kraken's Hunger",
+    "Catch the Gold",
+    "Wild West",
+    "Secret Bar",
+    "Gold Magnate",
+    "Grand Patron chance",
+    "Alien Fruits 2",
+    "Dragon Age",
+    "Gold of Minos",
+    "panda Luck",
+    "Chicken Rush",
+    "OOF The Goldmine Planet",
+    "Lucky Dragon",
+    "Diamond of Jungle",
+    "Lucky 8",
+    "Pop Zen",
+    "Aztec Clusters",
+    "Wild Heart",
+    "God of Wealth",
+    "Keepers of the Secret",
+    "Wild Tiger",
+    "Hottest 666",
+    "Gemza",
+    "Slot Machine",
+    "Tramp Day",
+    "Book of Panda Megaways",
+    "Mummy's Gold",
+    "Merge Up",
+    "Monster Hunt",
+    "Mice & Magic",
+    "Bone Bonanza",
+    "Izziart",
+    "88 Manki Fortunes",
+    "Wild Cash Dice",
+    "Spirit Savage Buffalo Megaways",
+    "Dice Million",
+    "Luck & Magic",
+    "Dice Bonanza",
+    "Beast band",
+    "Wild Chicago",
+    "Gemhalla",
+    "Spirit Savage Buffalo",
+    "Lucky Crew",
+    "Royal High Road",
+    "Doddy & Haddzy Bonanza",
+    "Alien Fruits",
+    "Gold Rush Frog",
+    "Easter Heist",
+    "Book of Kemet",
+    "Lucky Oak",
+    "Sweet Rush Megaways",
+    "Potion Spells",
+    "Dominator's Treasure",
+    "Aztec Magic Megaways",
+    "Gift Rush",
+    "Gangsterz",
+    "Brüning Chilli X",
+    "Soccer Mania",
+    "King of Cash",
+    "Book of Cats Megaways",
+    "Elvis Frog",
+    "Halloween Bonanza",
+    "Wild Cash",
+    "Alchemist Bonanza",
+    "Fiesta Blaze Bonanza",
+    "Maneki Gold",
+    "Mirax Circus Queen",
+    "Miss Cherry Fruits",
+    "lady Wolf Moon Megaways",
+    "Doos of Sol Megaways",
+    "Gold Rush Johnny Cash",
+    "Big Atlantis Frenzy",
+    "Penny Pelican",
+    "Zeus' Sanctuary",
+    "Wild Cash",
+    "Lucky Farm Bonanza",
+    "Joker Queen",
+    "Clover Bonanza",
+    "Aztec magic Bonanza",
+    "Aztec Magic Megaways",
+    "Bonanza Billion",
+    "Road 2 Riches",
+    "Lucky Dama Muerta",
+    "Candy Monsta",
+    "Miss Cherry Fruits",
+    "Dragon's Gold 100",
+    "Aloha King Elvis",
+    "Dig Dig Digger",
+    "Rig of Riches",
+    "Fruit Million",
+    "Four Lucky Diamonds",
+    "Lady Wolf Moon",
+    "Hit the Route",
+    "Johnny Cash",
+    "Mechanical Clover",
+    "All Lucky Clovers",
+    "Book of Cats",
+    "Elvis Frog in Vegas",
+    "Four Lucky Clover",
+    "Avalon the Lost Kingdom",
+    "Deep Sea",
+    "Spin and Spell",
+    "Mechanical Orange",
+    "Fire Lightning",
+    "Platinum Lightning Deluxe",
+    "Aztec Magic Deluxe",
+    "Platinum Lightning",
+    "West Town",
+    "Lucky Lady's Clover",
+    "Book of Pyramids"
+  ],
+
   // Variables d'état - MODIFICATION: selectedSlotType devient selectedSlotTypes (tableau)
   players: [],
   matches: [],
@@ -684,18 +545,13 @@ function getMachineURL(machineName, category) {
     prefix = "nolimit-city-"
   } else if (category === "Pragmatic Play") {
     prefix = "pragmatic-play-"
-  } else if (category === "BGaming") {
+  } else if (category === "bGaming") {
     prefix = "bgaming-"
   }
 
   // Formater le nom de la machine pour l'URL
-  // Supprimer les symboles ®, apostrophes et autres caractères spéciaux, convertir en minuscules avec tirets
-  const formattedName = machineName
-    .replace(/®/g, "") // Supprimer le symbole ®
-    .replace(/[''`]/g, "") // Supprimer les apostrophes et guillemets
-    .replace(/[^\w\s-]/g, "") // Supprimer tous les caractères spéciaux sauf lettres, chiffres, espaces et tirets
-    .toLowerCase()
-    .replace(/\s+/g, "-") // Remplacer les espaces par des tirets
+  // Supprimer le symbole ® et convertir en minuscules avec tirets
+  const formattedName = machineName.replace(/®/g, "").toLowerCase().replace(/\s+/g, "-")
 
   // Cas spéciaux pour certaines machines qui pourraient avoir une URL différente
   const specialCases = {
@@ -836,10 +692,10 @@ function toggleTheme() {
 function updateThemeToggleIcon() {
   const themeToggle = document.getElementById("themeToggle")
   if (document.documentElement.className === "dark") {
-    themeToggle.innerHTML = '<img src="/soleil.png" alt="Soleil" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="soleil.png" alt="Soleil" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème clair")
   } else {
-    themeToggle.innerHTML = '<img src="/lune.png" alt="Lune" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="lune.png" alt="Lune" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème sombre")
   }
 }
@@ -905,18 +761,18 @@ function updatePlayersDisplay() {
         categoryBadge.classList.add("hacksaw")
       } else if (player.category === "Nolimit City") {
         categoryBadge.classList.add("nolimit")
-      } else if (player.category === "Pragmatic Play") {
-        categoryBadge.classList.add("pragmatic")
-      } else if (player.category === "BGaming") {
-        categoryBadge.classList.add("bgaming")
-      }
+          } else if (player.category === "Pragmatic Play") {
+      categoryBadge.classList.add("pragmatic")
+    } else if (player.category === "bGaming") {
+      categoryBadge.classList.add("bGaming")
+    }
 
       categoryBadge.textContent = player.category
       playerInfo.appendChild(categoryBadge)
     }
 
     const removeButton = document.createElement("button")
-    removeButton.innerHTML = '<img src="./croix.png" alt="Supprimer" width="16" height="16">'
+    removeButton.innerHTML = '<img src="/croix.png" alt="Supprimer" width="16" height="16">'
     removeButton.className = "remove-btn"
     removeButton.title = "Retirer cette machine"
     removeButton.onclick = () => {
@@ -996,7 +852,7 @@ function showSuggestions(input) {
   }
 
   // Rechercher des correspondances dans les trois listes
-      const hacksawMatches = TournamentApp.hacksawGamingMachines.filter(
+  const hacksawMatches = TournamentApp.slotMachines.filter(
     (machine) =>
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
   )
@@ -1011,7 +867,7 @@ function showSuggestions(input) {
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
   )
 
-  const bGamingMatches = (TournamentApp.bGamingMachines || []).filter(
+  const bGamingMatches = TournamentApp.bGamingMachines.filter(
     (machine) =>
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
   )
@@ -1038,19 +894,19 @@ function showSuggestions(input) {
       const categorySpan = document.createElement("span")
       categorySpan.className = "suggestion-category"
 
-      if (TournamentApp.hacksawGamingMachines.includes(machine)) {
+      if (TournamentApp.slotMachines.includes(machine)) {
         categorySpan.textContent = "Hacksaw"
         categorySpan.classList.add("hacksaw")
       } else if (TournamentApp.nolimitCityMachines.includes(machine)) {
         categorySpan.textContent = "Nolimit"
         categorySpan.classList.add("nolimit")
-      } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
-        categorySpan.textContent = "Pragmatic"
-        categorySpan.classList.add("pragmatic")
-      } else if ((TournamentApp.bGamingMachines || []).includes(machine)) {
-        categorySpan.textContent = "BGaming"
-        categorySpan.classList.add("bgaming")
-      }
+          } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
+      categorySpan.textContent = "Pragmatic"
+      categorySpan.classList.add("pragmatic")
+    } else if (TournamentApp.bGamingMachines.includes(machine)) {
+      categorySpan.textContent = "bGaming"
+      categorySpan.classList.add("bGaming")
+    }
 
       item.appendChild(nameSpan)
       item.appendChild(categorySpan)
@@ -1383,8 +1239,8 @@ function updateSelectedProvidersDisplay() {
       html += '<span class="provider-tag nolimit">Nolimit City</span> '
     } else if (type === "pragmatic") {
       html += '<span class="provider-tag pragmatic">Pragmatic Play</span> '
-    } else if (type === "bgaming") {
-      html += '<span class="provider-tag bgaming">BGaming</span> '
+    } else if (type === "bGaming") {
+      html += '<span class="provider-tag bGaming">bGaming</span> '
     }
   })
   displayElement.innerHTML = html || '<span style="color: var(--muted-text);">Aucun provider sélectionné</span>'
@@ -1396,16 +1252,16 @@ function updateMaxAvailableSlots() {
 
   if (TournamentApp.selectedSlotTypes.includes("all")) {
     const allSlots = [
-      ...TournamentApp.hacksawGamingMachines,
+      ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
-      ...(TournamentApp.bGamingMachines || []),
+      ...TournamentApp.bGamingMachines,
     ]
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
   } else {
     // Combiner les machines des providers sélectionnés
     if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
-      const hacksawSlots = TournamentApp.hacksawGamingMachines.filter(
+      const hacksawSlots = TournamentApp.slotMachines.filter(
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
       )
       availableSlots = availableSlots.concat(hacksawSlots)
@@ -1424,11 +1280,12 @@ function updateMaxAvailableSlots() {
       )
       availableSlots = availableSlots.concat(pragmaticSlots)
     }
-    if (TournamentApp.selectedSlotTypes.includes("bgaming")) {
-      const bgamingSlots = (TournamentApp.bGamingMachines || []).filter(
+
+    if (TournamentApp.selectedSlotTypes.includes("bGaming")) {
+      const bGamingSlots = TournamentApp.bGamingMachines.filter(
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
       )
-      availableSlots = availableSlots.concat(bgamingSlots)
+      availableSlots = availableSlots.concat(bGamingSlots)
     }
   }
 
@@ -1739,10 +1596,10 @@ function addPlayer() {
   // Ajouter le joueur si la limite n'est pas atteinte
   if (TournamentApp.players.length < 16) {
     // Vérifier si la machine est dans l'une des listes
-    const isHacksawGaming = TournamentApp.hacksawGamingMachines.includes(name)
+    const isHacksawGaming = TournamentApp.slotMachines.includes(name)
     const isNolimitCity = TournamentApp.nolimitCityMachines.includes(name)
     const isPragmaticPlay = TournamentApp.pragmaticPlayMachines.includes(name)
-    const isBGaming = (TournamentApp.bGamingMachines || []).includes(name)
+    const isBGaming = TournamentApp.bGamingMachines.includes(name)
 
     // Déterminer la catégorie
     let category = ""
@@ -1753,7 +1610,7 @@ function addPlayer() {
     } else if (isPragmaticPlay) {
       category = "Pragmatic Play"
     } else if (isBGaming) {
-      category = "BGaming"
+      category = "bGaming"
     }
 
     // Ajouter le joueur avec sa catégorie
@@ -2311,15 +2168,15 @@ function selectRandomSlot() {
 
   if (TournamentApp.selectedSlotTypes.includes("all")) {
     const allSlots = [
-      ...TournamentApp.hacksawGamingMachines,
+      ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
-      ...(TournamentApp.bGamingMachines || []),
+      ...TournamentApp.bGamingMachines,
     ];
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot));
   } else {
     if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
-      const hacksawSlots = TournamentApp.hacksawGamingMachines.filter(
+      const hacksawSlots = TournamentApp.slotMachines.filter(
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
       );
       availableSlots = availableSlots.concat(hacksawSlots);
@@ -2336,11 +2193,11 @@ function selectRandomSlot() {
       );
       availableSlots = availableSlots.concat(pragmaticSlots);
     }
-    if (TournamentApp.selectedSlotTypes.includes("bgaming")) {
-      const bgamingSlots = (TournamentApp.bGamingMachines || []).filter(
+    if (TournamentApp.selectedSlotTypes.includes("bGaming")) {
+      const bGamingSlots = TournamentApp.bGamingMachines.filter(
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      );
-      availableSlots = availableSlots.concat(bgamingSlots);
+      )
+      availableSlots = availableSlots.concat(bGamingSlots)
     }
   }
 
@@ -2389,14 +2246,14 @@ function selectRandomSlot() {
   // Sinon, on crée la liste aléatoire complète
   const selectedSlots = availableSlots.slice(0, actualCount).map((slot) => {
     let category = "";
-    if (TournamentApp.hacksawGamingMachines.includes(slot)) {
+    if (TournamentApp.slotMachines.includes(slot)) {
       category = "Hacksaw Gaming";
     } else if (TournamentApp.nolimitCityMachines.includes(slot)) {
       category = "Nolimit City";
     } else if (TournamentApp.pragmaticPlayMachines.includes(slot)) {
       category = "Pragmatic Play";
-    } else if ((TournamentApp.bGamingMachines || []).includes(slot)) {
-      category = "BGaming";
+    } else if (TournamentApp.bGamingMachines.includes(slot)) {
+      category = "bGaming";
     }
     return { name: slot, category };
   });
@@ -2657,8 +2514,8 @@ function afficherMachineCourante() {
       categoryElement.classList.add("nolimit");
     } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
       categoryElement.classList.add("pragmatic");
-    } else if (TournamentApp.randomSlotCategory === "BGaming") {
-      categoryElement.classList.add("bgaming");
+    } else if (TournamentApp.randomSlotCategory === "bGaming") {
+      categoryElement.classList.add("bGaming");
     }
   } else {
     categoryElement.textContent = "";
