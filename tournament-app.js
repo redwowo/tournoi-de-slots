@@ -772,7 +772,7 @@ function updatePlayersDisplay() {
     }
 
     const removeButton = document.createElement("button")
-    removeButton.innerHTML = '<img src="/croix.png" alt="Supprimer" width="16" height="16">'
+    removeButton.innerHTML = '<img src="croix.png" alt="Supprimer" width="16" height="16">'
     removeButton.className = "remove-btn"
     removeButton.title = "Retirer cette machine"
     removeButton.onclick = () => {
@@ -2635,7 +2635,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
   authDomain: "tournoi-de-slots.firebaseapp.com",
   projectId: "tournoi-de-slots",
-  storageBucket: "tournoi-de-slots.appspot.com", // <-- CORRIGÉ
+  storageBucket: "tournoi-de-slots.firebasestorage.app",
   messagingSenderId: "834358073654",
   appId: "1:834358073654:web:6d935be1322c9450e37b97",
   measurementId: "G-MZKD5K781T"
