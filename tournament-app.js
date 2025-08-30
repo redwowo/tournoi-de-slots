@@ -772,7 +772,7 @@ function updatePlayersDisplay() {
     }
 
     const removeButton = document.createElement("button")
-    removeButton.innerHTML = '<img src="croix.png" alt="Supprimer" width="16" height="16">'
+    removeButton.innerHTML = '<img src="/croix.png" alt="Supprimer" width="16" height="16">'
     removeButton.className = "remove-btn"
     removeButton.title = "Retirer cette machine"
     removeButton.onclick = () => {
