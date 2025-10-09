@@ -1,304 +1,124 @@
 <!DOCTYPE html>
-<html lang="fr" class="light">
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournoi 16 joueurs - Suivi des éliminations</title>
-    <link rel="icon" type="image/png" href="fly.png">
-    <link rel="stylesheet" href="/styles.css">
-    <!-- Firebase App (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <!-- Firestore (compat) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tournois en cours</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body>
-    <!-- Theme toggle button -->
-    <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">🌓</button>
+<body class="dark">
+  <h1 style="text-align:center; color: #e11d48; font-family: Arial, sans-serif; margin-top: 2rem; margin-bottom: 2rem; letter-spacing: 1px; font-size: 2.2rem;">
+    <img src="/sept.png" alt="Slot" style="height: 32px; vertical-align: middle; margin-right: 0.5em;">Tournois en cours
+  </h1>
+  <div class="sidebar" style="margin: 0 auto; max-width: 400px;">
+    <div id="tournamentsList"><p>Chargement en cours...</p></div>
+    <div id="pagination" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem;"></div>
+    <button onclick="redirectToHome()" class="btn-outline" style="width: 100%; margin-top: 2rem;">Retour à l'accueil</button>
+  </div>
+  <script>
+    function redirectToHome() {
+      window.location.href = '/';
+    }
 
-    <!-- Titre -->
-    <h1>
-        <img src="/sept.png" alt="Slot Machine" width="32" height="32">
-        Tournoi de Slots
-        <img src="/sept.png" alt="Slot Machine" width="32" height="32">
-    </h1>
+    // Fonction pour rejoindre un tournoi en mode spectateur (copiée depuis tournament-app.js)
+    function joinTournamentAsSpectator(tournamentId) {
+      localStorage.setItem('spectatorMode', 'true');
+      window.location.href = `/?tournament=${tournamentId}`;
+    }
+    
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
+      authDomain: "tournoi-de-slots.firebaseapp.com",
+      projectId: "tournoi-de-slots",
+      storageBucket: "tournoi-de-slots.appspot.com",
+      messagingSenderId: "834358073654",
+      appId: "1:834358073654:web:6d935be1322c9450e37b97",
+      measurementId: "G-MZKD5K781T"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    <!-- Conteneur principal -->
-    <div class="main-container">
+    let allTournaments = [];
+    let currentPage = 1;
+    const perPage = 10;
 
-        <!-- Sidebar gauche -->
-        <div class="sidebar">
-            <h3>👥 Participants :</h3>
-            <ul id="playersDisplay"></ul>
-            
-            <div class="divider"></div>
-            
-            <div id="addPlayerContainer" class="input-container">
-                <input type="text" id="playerName" placeholder="✍️ Nom de la machine">
-		<div class="suggestions-container" id="suggestionsList"></div>
-                <button id="addPlayerBtn" onclick="addPlayer()" class="btn-add">
-                    <span class="add-icon">
-    			<img src="/slot.png" 
-         		alt="Slot Machine" width="20" height="20">
-		    </span> 
-		    Ajouter la Slot
-                </button>
-            </div>
-            
-            <p id="count">Slot ajoutés : 0/16</p>
-            
-            <button id="randomSlotBtn" onclick="showRandomSlotDialog()" class="btn-outline" style="width: 100%;">
-                <span class="shuffle-icon">
-    		<img src="/de.png" 
-         	alt="Dé" class="dice-icon">
-		</span> 
-		Choisir une slot aléatoire
-            </button>
-            
-            <!-- Remplaçons le bouton de tirage pour s'assurer qu'il fonctionne correctement -->
-            <button id="launchDraw" onclick="lancerNouveauTournoi()" style="display: none; width: 100%;">
-                <span class="shuffle-icon">
-                    <img src="de.png" 
-                     alt="Dé" class="dice-icon">
-                </span> 
-                Lancer le tirage
-            </button>
-            
-            <button id="resetButton" onclick="showResetConfirmDialog()" class="btn-outline" style="display: none; width: 100%; margin-top: 1rem;">
-                Réinitialiser le tournoi
-            </button>
-            
-            <!-- Bouton pour effacer toutes les données -->
-            <button id="clearDataBtn" onclick="showConfirmDialog('Effacer toutes les données', 'Êtes-vous sûr de vouloir effacer toutes les données ? Cette action est irréversible.', clearAllData)" class="btn-outline" style="width: 100%;">
-                <img src="/poubelle.png" alt="Poubelle" width="16" height="16" style="margin-right: 0.5rem;"> Effacer toutes les données
-            </button>
-            
-            <!-- Bouton pour afficher les résultats des tournois précédents -->
-            <button id="showPreviousWinnersBtn" onclick="toggleWinnersPanel()" class="previous-winners-btn">
-                <span class="trophy-icon">🏆</span> Résultats tournois précédents
-            </button>
-            
-            <!-- Bouton pour accéder à la page des tournois en cours -->
-            <button id="goToTournamentsBtn" class="btn-outline" style="width: 100%; text-align: center; margin-top: 1rem;" onclick="window.location.href='/tournois'">
-                Voir les tournois en cours
-            </button>
-        </div>
+    async function loadActiveTournaments() {
+      const container = document.getElementById('tournamentsList');
+      container.innerHTML = '<p>Chargement en cours...</p>';
+      try {
+        const snapshot = await db.collection("tournois")
+          .where("state.tournamentCompleted", "==", false)
+          .get();
+        const tournaments = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.state && !data.state.tournamentCompleted) {
+            tournaments.push({
+              id: doc.id,
+              ...data.state
+            });
+          }
+        });
+        tournaments.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+          return dateB - dateA;
+        });
+        allTournaments = tournaments;
+        currentPage = 1;
+        renderTournamentsPage();
+      } catch (error) {
+        container.innerHTML = '<p style="color:red">Erreur lors du chargement des tournois.</p>';
+      }
+    }
 
-        <!-- Tableau de tournoi à droite -->
-        <div class="bracket" id="bracket" style="display: none;"></div>
-    </div>
+    function renderTournamentsPage() {
+      const container = document.getElementById('tournamentsList');
+      const pagination = document.getElementById('pagination');
+      const total = allTournaments.length;
+      const totalPages = Math.ceil(total / perPage);
+      if (total === 0) {
+        container.innerHTML = '<p>Aucun tournoi en cours.</p>';
+        pagination.innerHTML = '';
+        return;
+      }
+      const start = (currentPage - 1) * perPage;
+      const end = start + perPage;
+      const pageTournaments = allTournaments.slice(start, end);
+      container.innerHTML = pageTournaments.map(t => `
+        <div style="background: var(--item-bg); border-radius: 0.5rem; box-shadow: 0 2px 10px var(--shadow-color); padding: 1.1rem 1.2rem; margin-bottom: 1.2rem; border: 1.5px solid #e11d48;">
+          <div style="font-weight: bold; color: #ffb86b; font-size: 1.1em; margin-bottom: 0.2em;">${t.name ? t.name : 'Tournoi sans nom'}</div>
+          <div style="font-size: 0.97em; color: var(--muted-text); margin-bottom: 0.2em;"><b>ID:</b> ${t.id}</div>
+          <div style="font-size: 1em; color: var(--text-color); margin-bottom: 0.7em;"><b>Joueurs:</b> ${t.players ? t.players.length : 0}/16</div>
+          <button class="btn-outline" style="width: 100%;" onclick="joinTournamentAsSpectator('${t.id}')">Spectate</button>
+        </div>
+      `).join('');
+      // Pagination
+      pagination.innerHTML = '';
+      if (totalPages > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn-outline';
+        prevBtn.textContent = 'Précédent';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => { currentPage--; renderTournamentsPage(); };
+        pagination.appendChild(prevBtn);
+        const pageInfo = document.createElement('span');
+        pageInfo.style.margin = '0 1em';
+        pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+        pagination.appendChild(pageInfo);
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-outline';
+        nextBtn.textContent = 'Suivant';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => { currentPage++; renderTournamentsPage(); };
+        pagination.appendChild(nextBtn);
+      }
+    }
 
-    <!-- Overlay et message de victoire -->
-    <div id="overlay"></div>
-    <div id="victoryMessage">
-        <span class="trophy-icon">🏆</span>
-        <p id="winnerText"></p>
-        <button onclick="closeVictoryMessage()" style="margin-top: 1rem;">Fermer</button>
-    </div>
-    <canvas id="confetti-canvas" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10000;"></canvas>
-    
-    <!-- Loading overlay -->
-    <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--overlay-bg); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
-        <img src="chargement.svg" alt="Chargement" style="width: 100px; height: 100px; margin-bottom: 20px;">
-        <p id="loadingText" style="color: white; font-size: 1.2rem; font-weight: bold; text-align: center;">Préparation du tournoi en cours...</p>
-        <div style="width: 250px; height: 10px; background-color: rgba(255,255,255,0.2); border-radius: 5px; margin-top: 15px; overflow: hidden;">
-            <div id="loadingProgress" style="width: 0%; height: 100%; background-color: var(--primary-color); border-radius: 5px; transition: width 2s linear;"></div>
-        </div>
-    </div>
-    
-    <!-- Toast container -->
-    <div class="toast-container" id="toastContainer"></div>
-    
-    <!-- Confirmation dialog -->
-    <div class="confirm-dialog" id="confirmDialog">
-        <div class="confirm-dialog-title" id="confirmDialogTitle"></div>
-        <div class="confirm-dialog-message" id="confirmDialogMessage"></div>
-        <div class="confirm-dialog-buttons">
-            <button class="btn-outline" onclick="closeConfirmDialog()">Annuler</button>
-            <button class="btn-danger" id="confirmDialogConfirmBtn">Confirmer</button>
-        </div>
-    </div>
-    
-    <!-- Reset dialog -->
-    <div class="reset-dialog" id="resetDialog">
-        <div class="reset-dialog-title">Réinitialiser le tournoi</div>
-        <div class="reset-dialog-message">Comment souhaitez-vous réinitialiser le tournoi ?</div>
-        <div class="reset-dialog-buttons">
-            <button onclick="resetTournamentWithOption(true)">Conserver la liste des joueurs</button>
-            <button class="btn-danger" onclick="resetTournamentWithOption(false)">Tout réinitialiser</button>
-            <button class="btn-outline" onclick="closeResetDialog()">Annuler</button>
-        </div>
-    </div>
-    
-    <!-- Modal des gagnants précédents -->
-    <div class="winners-modal" id="winnersPanel">
-        <div class="winners-modal-overlay" onclick="toggleWinnersPanel()"></div>
-        <div class="winners-modal-content">
-            <div class="winners-modal-header">
-                <div>
-                    <div class="winners-modal-title">
-                        <span class="trophy-icon">🏆</span> Anciens Gagnants
-                    </div>
-                    <div class="winners-modal-description">Palmarès des vainqueurs des tournois précédents</div>
-                </div>
-            </div>
-            <div class="winners-modal-body">
-                <ul class="winners-list" id="winnersList">
-                    <li class="no-winners">Aucun gagnant enregistré</li>
-                </ul>
-            </div>
-            <div class="winners-modal-footer">
-                <button onclick="toggleWinnersPanel()">Fermer</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Confirmation d'annulation de match -->
-    <div class="undo-confirm-dialog" id="undoConfirmDialog">
-        <div class="undo-confirm-title">
-            <span>⚠️</span> Annuler le résultat du match
-        </div>
-        <div class="undo-confirm-message" id="undoConfirmMessage">
-            Êtes-vous sûr de vouloir annuler le résultat de ce match ? Cette action peut avoir des conséquences sur les tours suivants.
-        </div>
-        <div class="undo-confirm-buttons">
-            <button class="btn-outline" onclick="closeUndoConfirmDialog()">Annuler</button>
-            <button class="btn-warning" id="undoConfirmBtn" onclick="undoMatch()">Confirmer l'annulation</button>
-        </div>
-    </div>
-    
-    <!-- Modal AMÉLIORÉ de sélection aléatoire de slot avec sélection multiple -->
-    <div class="random-slot-dialog" id="randomSlotDialog">
-        <div class="random-slot-header">
-            <div class="random-slot-title">
-                <img src="de.png" alt="Dé" class="random-slot-title-icon">
-                Sélection aléatoire de machine
-            </div>
-            <button class="random-slot-close" onclick="closeRandomSlotDialog()">
-                <img src="/croix.png" alt="Fermer" width="16" height="16">
-            </button>
-        </div>
-        
-        <div class="random-slot-content">
-            <div class="random-slot-description">
-                Sélectionnez les types de machines à sous que vous souhaitez inclure dans la sélection aléatoire. Vous pouvez choisir plusieurs providers en même temps.
-            </div>
-            
-            <div class="slot-type-selection" id="slotTypeSelection">
-                <div class="slot-type-option selected" data-value="all" onclick="toggleSlotType(this, 'all')">
-                    <div class="slot-type-checkbox">
-                        <input type="checkbox" id="checkbox-all" checked>
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="slot-type-label">
-                        <span class="slot-type-name">Toutes les machines</span>
-                    </div>
-                </div>
-                
-                <div class="slot-type-option" data-value="hacksaw" onclick="toggleSlotType(this, 'hacksaw')">
-                    <div class="slot-type-checkbox">
-                        <input type="checkbox" id="checkbox-hacksaw">
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                            <img src="/hacksawlogo.png" alt="Hacksaw Gaming" class="provider-logo">
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="slot-type-option" data-value="nolimit" onclick="toggleSlotType(this, 'nolimit')">
-                    <div class="slot-type-checkbox">
-                        <input type="checkbox" id="checkbox-nolimit">
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                            <img src="/nolimitcitylogo.png" alt="Nolimit City" class="provider-logo">
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="slot-type-option" data-value="pragmatic" onclick="toggleSlotType(this, 'pragmatic')">
-                    <div class="slot-type-checkbox">
-                        <input type="checkbox" id="checkbox-pragmatic">
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                            <img src="/pragmaticplaylogo.png" alt="Pragmatic Play" class="provider-logo">
-                        </span>
-                    </div>
-                </div>
-                
-                <div class="slot-type-option" data-value="bGaming" onclick="toggleSlotType(this, 'bGaming')">
-                    <div class="slot-type-checkbox">
-                        <input type="checkbox" id="checkbox-bGaming">
-                        <span class="checkmark">✓</span>
-                    </div>
-                    <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                        <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
-                            <img src="/bgaminglogo.png" alt="bGaming" class="provider-logo">
-                        </span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Sélecteur de nombre de machines -->
-            <div class="number-selection">
-                <label for="slotCount" class="number-selection-label">Nombre de machines à sélectionner :</label>
-                <div class="number-selection-input">
-                    <input type="number" id="slotCount" min="1" max="16" value="1" oninput="validateSlotCount(this)">
-                    <span class="number-selection-info">Maximum: <span id="maxAvailable">0</span> machines disponibles</span>
-                </div>
-            </div>
-            
-            <div class="slot-selecting" id="slotSelecting">
-                <!-- Les éléments seront ajoutés dynamiquement pendant l'animation -->
-            </div>
-            
-            <div class="random-slot-result" id="randomSlotResult">
-                <img src="slot.png" alt="Slot Machine" class="random-slot-icon">
-                <div class="random-slot-name" id="randomSlotName"></div>
-                <div class="random-slot-category" id="randomSlotCategory"></div>
-            </div>
-        </div>
-        
-        <div class="random-slot-footer" style="flex-direction: column; align-items: center;">
-            <div style="display: flex; gap: 1.2rem; justify-content: center; width: 100%; margin-bottom: 0.5rem;">
-                <button class="btn-refuser" id="rejectSlotBtn" onclick="rejectCurrentSlot()" style="display: none; min-width: 120px;">
-                    Refuser
-                </button>
-                <button class="btn-gris" id="selectAnotherBtn" onclick="selectRandomSlot()" style="display: none; min-width: 180px;">
-                    Sélectionner une autre machine
-                </button>
-                <button class="btn-accepter" id="acceptSlotBtn" onclick="acceptCurrentSlot()" style="display: none; min-width: 120px;">
-                    Accepter
-                </button>
-            </div>
-            <button class="btn-primary" id="selectRandomBtn" onclick="selectRandomSlot()">
-                <img src="de.png" alt="Dé" width="16" height="16">
-                Sélectionner aléatoirement
-            </button>
-            <button class="btn-primary btn-add-slot" id="addRandomSlotBtn" onclick="addRandomSlot()" style="display: none;">
-                <img src="slot.png" alt="Slot Machine" width="16" height="16">
-                Ajouter cette machine
-            </button>
-        </div>
-    </div>
-
-    <!-- Mention légale -->
-    <div class="legal-notice-icon" id="legalNoticeIcon" style="position: fixed; bottom: 20px; left: 20px; z-index: 51; cursor: pointer;">
-        <img src="/about-us.png" alt="Mentions légales" style="width: 40px; height: 40px;">
-    </div>
-    <div class="legal-notice-slide" id="legalNoticeSlide">
-        Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
-    </div>
-
-    <!-- Scripts -->
-    <script src="/tournament-app.js"></script>
+    window.onload = loadActiveTournaments;
+  </script>
 </body>
 </html>
-
-<style>
-  .btn-tournaments { display: none !important; }
-</style>
