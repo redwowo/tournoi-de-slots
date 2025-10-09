@@ -2,225 +2,220 @@
 window.TournamentApp = {
   // Données des machines à sous
   slotMachines: [
-    "2 Wild 2 Die",
-    "Aiko and the Wind Spirit",
-    "Alpha Eagle",
-    "Aztec Twist",
-    "Beam Boys",
-    "Beast Below",
-    "Benny the Beer",
-    "Book of Time",
-    "Born Wild",
     "Booze Bash",
-    "Bouncy Bombs",
-    "Break Bones",
-    "Buffalo Stack'n'Sync",
-    "Bullets and Bounty",
-    "Cash Compass",
-    "Cash Crew",
-    "Cash Quest",
-    "Chaos Crew",
-    "Chaos Crew 2",
-    "Cloud Princess",
-    "Cubes",
-    "Cubes 2",
-    "Cursed Crypt",
-    "Cursed Seas",
-    "Dark Summoning",
-    "Dawn of Kings",
-    "Densho",
-    "Divine Drop",
-    "Donny Dough",
-    "Donut Division",
-    "Double Rainbow",
-    "Dork Unit",
-    "Dorks of the Deep",
-    "Dragon's Domain",
-    "Drop'em",
-    "Duel at Dawn",
-    "Evil Eyes",
-    "Eye of Medusa",
-    "Eye of the Panda",
-    "Fear the Dark",
-    "Feel the Beat",
-    "Fighter Pit",
-    "Fire my Laser",
-    "Fist of Destruction",
-    "Forest Fortune",
-    "Frank's Farm",
-    "Fred's Food Truck",
-    "FRKN Bananas",
-    "Fruit Duel",
-    "Get the CHEESE",
-    "Gladiator Legends",
-    "Gronk's Gems",
-    "Hand Of Anubis",
-    "Harvest Wilds",
-    "Hop'N'Pop",
-    "Hounds of Hell",
-    "Immortal Desire",
-    "Invictus",
-    "Itero",
-    "Jelly Slice",
-    "Joker Bombs",
-    "Keep 'em Cool",
-    "Keep'em",
-    "King Carrot",
-    "Klowns",
-    "Le Bandit",
-    "Le King",
-    "Le Pharaoh",
-    "Le Viking",
-    "Let It Snow",
-    "Life and Death",
-    "Magic Piggy",
-    "Marlin Masters",
-    "Marlin Masters: The Big Haul",
-    "Mayan Stackways",
-    "Miami Mayhem",
-    "Miami Multiplier",
-    "Mighty Masks",
-    "Mystery Motel",
-    "Octo Attack",
-    "OmNom",
-    "Orb of Destiny",
-    "Outlaws Inc.",
-    "Phoenix DuelReels",
-    "Pray for Three",
-    "Pug Life",
-    "Rad Maxx",
-    "Rainbow Princess",
-    "Rise of Ymir",
-    "Rocket Reels",
-    "Ronin Stackways",
-    "Rotten",
-    "Rusty & Curly",
-    "Shaolin Master",
-    "SixSixSix",
-    "Slayers Inc",
-    "Snow Slingers",
-    "Spinman",
-    "Stack'Em",
-    "Stick'Em",
-    "Stormforged",
-    "Strength of Hercules",
-    "Tai the Toad",
-    "Tasty Treats",
-    "Temple of Torment",
-    "The Bowery Boys",
-    "The Luxe",
-    "The Respinners",
-    "Time Spinners",
-    "Toshi Video Club",
-    "Twisted Lab",
     "Ultimate Slot of America",
-    "Undead Fortune",
-    "Vending Machine",
-    "Wanted Dead Or a Wild",
-    "Warrior Ways",
-    "Wings of Horus",
+    "Spinman",
+    "Pray for Three",
+    "Danny Dollar",
+    "Rad Maxx",
+    "Reign of Rome",
+    "Fighter Pit",
     "Wishbringer",
-    "Xmas Drop",
-    "Xpander",
+    "Life and Death",
+    "Dorks of the Deep",
+    "Strength of Hercules",
+    "Hounds of Hell",
+    "FRKN Bananas",
+    "Marlin Masters",
+    "Phoenix DuelReels",
+    "Le Viking",
+    "Klowns",
+    "Fire my Laser",
+    "Donut Division",
+    "Shaolin Master",
+    "Snow Slingers",
+    "Duel at Dawn",
+    "Wings of Horus",
+    "Rise of Ymir",
+    "Get the CHEESE",
+    "Cloud Princess",
+    "Le Pharaoh",
+    "Evil Eyes",
+    "Octo Attack",
+    "Donny Dough",
+    "Dragon's Domain",
+    "SixSixSix",
+    "Tai the Toad",
+    "Twisted Lab",
     "Ze Zeus",
+    "Cursed Crypt",
+    "Slayers Inc",
+    "Jelly Slice",
+    "Keep'em",
+    "Divine Drop",
+    "Orb of Destiny",
+    "Cash Crew",
+    "Rusty & Curly",
+    "Bouncy Bombs",
+    "Dawn of Kings",
+    "Fist of Destruction",
+    "Beam Boys",
+    "Feel the Beat",
+    "2 Wild 2 Die",
+    "Dark Summoning",
+    "Xmas Drop",
+    "Immortal Desire",
+    "Eye of the Panda",
+    "Benny the Beer",
+    "Chaos Crew 2",
+    "Densho",
+    "Le Bandit",
+    "Ronin Stackways",
+    "Drop'em",
+    "Vending Machine",
+    "Beast Below",
+    "Mighty Masks",
+    "Temple of Torment",
+    "Mayan Stackways",
+    "Cursed Seas",
+    "Fear the Dark",
+    "Stormforged",
+    "Keep 'em Cool",
+    "Magic Piggy",
+    "Bloodthirst",
+    "Frank's Farm",
+    "Rip City",
+    "Rotten",
+    "Gronk's Gems",
+    "Book of Time",
+    "Pug Life",
+    "Undead Fortune",
+    "Break Bones",
+    "Alpha Eagle",
+    "Forest Fortune",
+    "Time Spinners",
+    "Fruit Duel",
+    "Dork Unit",
+    "Born Wild",
+    "Outlaws Inc.",
+    "Buffalo Stack'n'Sync",
+    "Itero",
+    "Hand Of Anubis",
+    "Gladiator Legends",
+    "Warrior Ways",
+    "Double Rainbow",
+    "The Bowery Boys",
+    "Harvest Wilds",
+    "King Carrot",
+    "Joker Bombs",
+    "Tasty Treats",
+    "Cash Quest",
+    "Wanted Dead Or a Wild",
+    "Rocket Reels",
+    "Toshi Video Club",
+    "Xpander",
+    "Hop'N'Pop",
+    "Stack'Em",
+    "Frutz",
+    "Aztec Twist",
+    "Cubes 2",
+    "Let It Snow",
+    "Mystery Motel",
+    "Chaos Crew",
+    "The Respinners",
+    "Cash Compass",
+    "Cubes",
+    "Miami Multiplier",
+    "OmNom",
+    "Stick'Em",
   ],
 
   nolimitCityMachines: [
-    "Apocalypse Super xNudge®",
-    "Barbarian Fury",
-    "Beheaded",
-    "Blood & Shadow",
-    "Blood & Shadow 2",
-    "Blood Diamond",
-    "Bonus Bunnies",
-    "Book of Shadows",
-    "BRICK SNAKE 2000",
-    "Brute Force",
-    "Brute Force: Alien Onslaught",
-    "Buffalo Hunter",
-    "Bushido Ways xNudge®",
-    "D-Day",
-    "Das xBoot",
-    "Dead Canary",
-    "Dead, Dead Or Deader",
-    "Deadwood R.I.P",
-    "Deadwood xNudge®",
-    "Devil's Crossroad",
-    "DJ Psycho",
-    "Dragon Tribe",
-    "Duck Hunters",
-    "East Coast VS West Coast",
-    "Evil Goblins xBomb®",
-    "Fire In The Hole",
-    "Fire in the Hole 2",
-    "Fire in the Hole 3",
-    "Flight Mode",
-    "Folsom Prison",
-    "Gaelic Gold",
-    "Gator Hunters",
-    "Golden Genie And The Walking Wilds",
-    "Gluttony",
-    "Harlequin Carnival",
-    "Highway to Hell",
-    "Home of the Brave",
-    "Immortal Fruits",
-    "Infectious 5 xWays®",
-    "Jingle Balls",
-    "Karen Maneater",
-    "Kenneth Must Die",
-    "Kill Em All",
-    "Kiss My Chainsaw",
-    "Land Of The Free",
-    "Legion X",
-    "Little Bighorn",
-    "Loner",
-    "Manhattan Goes Wild",
-    "Mental",
-    "Mental II",
-    "Misery Mining",
-    "Monkey's Gold xPays",
-    "Munchies",
-    "Nine To Five",
-    "Outsourced",
-    "Outsourced: Payday",
-    "Outsourced: Slash Game",
-    "Pearl Harbor",
-    "Poison Eve",
-    "Possessed",
-    "Punk Rocker",
-    "Punk Rocker 2",
-    "Punk Toilet",
-    "Remember Gulag",
-    "Road Rage",
-    "Roadkill",
-    "Rock Bottom",
-    "San Quentin 2: Death Row",
-    "San Quentin xWays®",
-    "Seamen",
-    "Serial",
-    "Skate or Die",
-    "Space Donkey",
-    "Stockholm Syndrome",
-    "Tanked",
-    "The Border",
-    "The Cage",
-    "The Crypt",
-    "The Rave",
-    "Tomb of Akhenaten",
-    "Tomb of Néfertiti",
-    "Tombstone R.I.P",
-    "Tombstone Slaughter: El Gordo's Revenge",
-    "Tombstone: No Mercy",
     "Tractor Beam",
-    "True Grit Redemption",
-    "True Kult",
-    "Tsar Wars",
-    "Ugliest Catch",
-    "Walk of Shame",
-    "Warrior Graveyard xNudge",
-    "Whacked!",
+    "Fire in the Hole 3",
+    "Kill Em All",
+    "Highway to Hell",
+    "Blood Diamond",
+    "Mental II",
+    "Home of the Brave",
+    "Dead, Dead Or Deader",
+    "Duck Hunters",
+    "Tombstone Slaughter: El Gordo's Revenge",
     "xWays Hoarder 2",
+    "Outsourced: Payday",
+    "Tanked",
+    "Munchies",
+    "Outsourced: Slash Game",
+    "Blood & Shadow 2",
+    "Brute Force",
+    "San Quentin 2: Death Row",
+    "Skate or Die",
+    "Stockholm Syndrome",
+    "Outsourced",
+    "Apocalypse Super xNudge®",
+    "Punk Rocker 2",
+    "Beheaded",
+    "Deadwood R.I.P",
+    "Loner",
+    "Kenneth Must Die",
+    "Tombstone: No Mercy",
+    "BRICK SNAKE 2000",
+    "Possessed",
+    "Fire in the Hole 2",
+    "D-Day",
+    "Land Of The Free",
+    "Devil's Crossroad",
+    "Jingle Balls",
+    "Nine To Five",
+    "Roadkill",
+    "Ugliest Catch",
+    "Space Donkey",
+    "The Crypt",
+    "DJ Psycho",
+    "True Kult",
+    "Bounty Hunters",
+    "The Cage",
+    "Gluttony",
+    "Whacked!",
+    "Disturbed",
+    "Kiss My Chainsaw",
+    "Blood & Shadow",
+    "Benji Killed In Vegas",
+    "Walk of Shame",
+    "Dead Canary",
+    "Pearl Harbor",
+    "Rock Bottom",
+    "Serial",
+    "Little Bighorn",
+    "The Border",
+    "Road Rage",
+    "The Rave",
+    "Folsom Prison",
+    "Karen Maneater",
+    "Remember Gulag",
+    "Misery Mining",
+    "Punk Toilet",
+    "Tombstone R.I.P",
+    "True Grit Redemption",
+    "Legion X",
+    "Evil Goblins xBomb®",
+    "Das xBoot",
+    "Mental",
     "xWays Hoarder xSplit",
+    "Infectious 5 xWays®",
+    "El Paso Gunfight xNudge®",
+    "Bushido Ways xNudge®",
+    "Fire In The Hole",
+    "East Coast VS West Coast",
+    "San Quentin xWays®",
+    "Tomb of Akhenaten",
+    "Warrior Graveyard xNudge",
+    "Monkey's Gold xPays",
+    "Buffalo Hunter",
+    "Book of Shadows",
+    "Immortal Fruits",
+    "Golden Genie And The Walking Wilds",
+    "Milky Ways",
+    "Bonus Bunnies",
+    "Deadwood xNudge®",
+    "Harlequin Carnival",
+    "Gaelic Gold",
+    "Barbarian Fury",
+    "Punk Rocker",
+    "Poison Eve",
+    "Dragon Tribe",
+    "Tomb of Néfertiti",
+    "Manhattan Goes Wild",
   ],
 
   // Add Pragmatic Play machines
@@ -229,26 +224,17 @@ window.TournamentApp = {
     "5 Lions Reborn",
     "6 Jokers",
     "7 Clovers of Fortune",
-    "Alien Invaders",
     "Ancient Island Megaways",
     "Angel vs Sinner",
-    "Argonauts",
     "Aztec Gems Megaways",
     "Aztec Smash",
     "Aztec Treasure Hunt",
-    "Baba Yaga Megaways",
-    "Baba Yaga Megaways 2",
-    "Baba Yaga Megaways 3",
-    "Baba Yaga Megaways 4",
-    "Baba Yaga Megaways 5",
-    "Baba Yaga Megaways 6",
     "Badge Blitz",
     "Bandit Megaways",
     "Big Bass Bonanza 1000",
     "Big Bass Bonanza 3 Reeler",
     "Big Bass Boxing Bonus Round",
     "Big Bass Halloween 2",
-    "Big Bass Reel Repeat",
     "Big Bass Return to the Races",
     "Big Bass Vegas Double Down Deluxe",
     "Big Bass Xmas Extreme",
@@ -260,11 +246,8 @@ window.TournamentApp = {
     "Candy Corner",
     "Cash Surge",
     "Chests of Cai Shen",
-    "Chilli Heat Spicy Spins",
-    "Club Tropicana – Happy Hour",
     "Congo Cash XL",
     "Crank It Up",
-    "Dino Drop",
     "Dragon Gold 88",
     "Dragon King Hot Pots",
     "Dynamite Diggin Doug",
@@ -274,27 +257,19 @@ window.TournamentApp = {
     "Eye of Spartacus",
     "Fangtastic Freespins",
     "Fiesta Fortune",
-    "Finger Lick'n Free Spins",
-    "Fire Stampede 2",
     "Floating Dragon Year of the Snake",
     "Fonzos Feline Fortunes",
     "Forging Wilds",
     "Fortune Hitn Roll",
-    "Fortune of Aztec",
     "Gates of Hades",
     "Gates of Olympus Super Scatter",
     "Gates of Olympus Xmas 1000",
     "Gem Elevator",
-    "Gem Fire Fortune",
-    "Gem Trio",
-    "Gold Party 2 – After Hours",
     "Greedy Fortune Pig",
     "Hand of Midas 2",
     "Himalayan Wild",
     "Hot to Burn 7 Deadly Free Spins",
-    "Ice Mints",
     "Irish Crown",
-    "Jackpot Blaze",
     "Jackpot Hunter",
     "Jelly Candy",
     "John Hunter and Galileos Secrets",
@@ -312,7 +287,6 @@ window.TournamentApp = {
     "Luckys Wild Pub",
     "Mahjong Wins Super Scatter",
     "Majestic Express Gold Run",
-    "Master Gems",
     "Might of Freya Megaways",
     "Mining Rush",
     "Moleionaire",
@@ -324,7 +298,6 @@ window.TournamentApp = {
     "Oodles of Noodles",
     "Penguins Christmas Party Time",
     "Peppes Pepperoni Pizza Plaza",
-    "Pig Farm",
     "Plushie Wins",
     "Raging Waterfall Megaways",
     "Ratinho Sortudo",
@@ -336,10 +309,7 @@ window.TournamentApp = {
     "Santas Xmas Rush",
     "Savannah Legend",
     "Sleeping Dragon",
-    "Spellmaster",
-    "Starlight Wins",
     "Sumo Supreme Megaways",
-    "Sweet Bonanza Super Scatter",
     "Sweet Kingdom",
     "Temple Guardians",
     "The Dog House Muttley Crew",
@@ -349,7 +319,6 @@ window.TournamentApp = {
     "Triple Pot Gold",
     "Vampy Party",
     "Volcano Goddess",
-    "Waves of Poseidon",
     "Wealthy Frog",
     "Wild West Gold Blazing Bounty",
     "Wild Wild Joker",
@@ -357,160 +326,8 @@ window.TournamentApp = {
     "Wild Wildebeest Wins",
     "Wisdom of Athena 1000",
     "Witch Heart Megaways",
-    "Wolf Gold 4 Pack",
     "Wolf Gold Ultimate",
     "Yeti Quest",
-    "You Can Piggy Bank On It",
-    "Zombie School Megaways",
-  ],
-
-  // Add bGaming machines
-  bGamingMachines: [
-    "Big Bucks Saloon",
-    "Cat's Soup",
-    "Lady lucky gun",
-    "Tramp Day",
-    "Dragon Queen Megaways",
-    "Loki Loot",
-    "Mystery Garden",
-    "Trueways Olympus",
-    "Lucky Lu",
-    "Blackbeard's Bounty",
-    "Doomsday Saloon",
-    "Sugar Mix",
-    "Arrow Slot",
-    "Zeus goes Wild",
-    "Wukd Clusters",
-    "Treasure of Anubis",
-    "Fortune Bells",
-    "Alice WonderLuck",
-    "Joker's Million",
-    "Hot Chli Bells",
-    "Disco party",
-    "Sakra Riches 60",
-    "Lucky Ducky Merge Up",
-    "Wild Moon Thieves",
-    "Golden Pride",
-    "Catdiana",
-    "Snoop Dogg Dollars",
-    "Forgotten",
-    "Rotating Element",
-    "Haunted Reels",
-    "Carnival Bonanza",
-    "Aztec's Claw Wild Dice",
-    "Fortuna",
-    "Voodoo People Royal Fruits Multilines",
-    "Train to Rio Grande",
-    "Kraken's Hunger",
-    "Catch the Gold",
-    "Wild West",
-    "Secret Bar",
-    "Gold Magnate",
-    "Grand Patron chance",
-    "Alien Fruits 2",
-    "Dragon Age",
-    "Gold of Minos",
-    "panda Luck",
-    "Chicken Rush",
-    "OOF The Goldmine Planet",
-    "Lucky Dragon",
-    "Diamond of Jungle",
-    "Lucky 8",
-    "Pop Zen",
-    "Aztec Clusters",
-    "Wild Heart",
-    "God of Wealth",
-    "Keepers of the Secret",
-    "Wild Tiger",
-    "Hottest 666",
-    "Gemza",
-    "Slot Machine",
-    "Tramp Day",
-    "Book of Panda Megaways",
-    "Mummy's Gold",
-    "Merge Up",
-    "Monster Hunt",
-    "Mice & Magic",
-    "Bone Bonanza",
-    "Izziart",
-    "88 Manki Fortunes",
-    "Wild Cash Dice",
-    "Spirit Savage Buffalo Megaways",
-    "Dice Million",
-    "Luck & Magic",
-    "Dice Bonanza",
-    "Beast band",
-    "Wild Chicago",
-    "Gemhalla",
-    "Spirit Savage Buffalo",
-    "Lucky Crew",
-    "Royal High Road",
-    "Doddy & Haddzy Bonanza",
-    "Alien Fruits",
-    "Gold Rush Frog",
-    "Easter Heist",
-    "Book of Kemet",
-    "Lucky Oak",
-    "Sweet Rush Megaways",
-    "Potion Spells",
-    "Dominator's Treasure",
-    "Aztec Magic Megaways",
-    "Gift Rush",
-    "Gangsterz",
-    "Brüning Chilli X",
-    "Soccer Mania",
-    "King of Cash",
-    "Book of Cats Megaways",
-    "Elvis Frog",
-    "Halloween Bonanza",
-    "Wild Cash",
-    "Alchemist Bonanza",
-    "Fiesta Blaze Bonanza",
-    "Maneki Gold",
-    "Mirax Circus Queen",
-    "Miss Cherry Fruits",
-    "lady Wolf Moon Megaways",
-    "Doos of Sol Megaways",
-    "Gold Rush Johnny Cash",
-    "Big Atlantis Frenzy",
-    "Penny Pelican",
-    "Zeus' Sanctuary",
-    "Wild Cash",
-    "Lucky Farm Bonanza",
-    "Joker Queen",
-    "Clover Bonanza",
-    "Aztec magic Bonanza",
-    "Aztec Magic Megaways",
-    "Bonanza Billion",
-    "Road 2 Riches",
-    "Lucky Dama Muerta",
-    "Candy Monsta",
-    "Miss Cherry Fruits",
-    "Dragon's Gold 100",
-    "Aloha King Elvis",
-    "Dig Dig Digger",
-    "Rig of Riches",
-    "Fruit Million",
-    "Four Lucky Diamonds",
-    "Lady Wolf Moon",
-    "Hit the Route",
-    "Johnny Cash",
-    "Mechanical Clover",
-    "All Lucky Clovers",
-    "Book of Cats",
-    "Elvis Frog in Vegas",
-    "Four Lucky Clover",
-    "Avalon the Lost Kingdom",
-    "Deep Sea",
-    "Spin and Spell",
-    "Mechanical Orange",
-    "Fire Lightning",
-    "Platinum Lightning Deluxe",
-    "Aztec Magic Deluxe",
-    "Platinum Lightning",
-    "West Town",
-    "Lucky Lady's Clover",
-    "Book of Pyramids"
   ],
 
   // Variables d'état - MODIFICATION: selectedSlotType devient selectedSlotTypes (tableau)
@@ -545,8 +362,6 @@ function getMachineURL(machineName, category) {
     prefix = "nolimit-city-"
   } else if (category === "Pragmatic Play") {
     prefix = "pragmatic-play-"
-  } else if (category === "bGaming") {
-    prefix = "bgaming-"
   }
 
   // Formater le nom de la machine pour l'URL
@@ -588,6 +403,12 @@ function saveDataToLocalStorage() {
 
 // Fonction pour charger les données depuis localStorage
 function loadDataFromLocalStorage() {
+  // CORRECTION: Empêcher le chargement depuis localStorage si le mode spectateur est actif.
+  // La logique est déjà couverte par l'initialisation du DOM, mais c'est une sécurité supplémentaire.
+  if (isSpectatorMode) {
+      return;
+  }
+  
   const savedData = localStorage.getItem("tournamentData")
   if (savedData) {
     try {
@@ -692,30 +513,135 @@ function toggleTheme() {
 function updateThemeToggleIcon() {
   const themeToggle = document.getElementById("themeToggle")
   if (document.documentElement.className === "dark") {
-    themeToggle.innerHTML = '<img src="soleil.png" alt="Soleil" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="/soleil.png" alt="Soleil" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème clair")
   } else {
-    themeToggle.innerHTML = '<img src="lune.png" alt="Lune" width="20" height="20">'
+    themeToggle.innerHTML = '<img src="/lune.png" alt="Lune" width="20" height="20">'
     themeToggle.setAttribute("aria-label", "Passer au thème sombre")
   }
 }
 
-// Modification de la structure des données pour inclure des URLs
-// Ajoutez cette fonction pour définir les URLs des machines
-function setMachineURL(machineName, url) {
-  // Trouver la machine dans la liste des joueurs
-  const machineIndex = TournamentApp.players.findIndex((player) => player.name === machineName)
+// Modifier la fonction addPlayer pour s'assurer que le bouton de tirage apparaît correctement
+function addPlayer() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
+  const nameInput = document.getElementById("playerName")
+  const name = nameInput.value.trim()
 
-  if (machineIndex !== -1) {
-    // Ajouter ou mettre à jour l'URL
-    TournamentApp.players[machineIndex].url = url
+  // Vérifier si le nom est vide
+  if (!name) {
+    showToast("Nom invalide", "Veuillez entrer un nom de machine valide.", "error")
+    return
+  }
+
+  // Vérifier si le joueur existe déjà (insensible à la casse)
+  const playerExists = TournamentApp.players.some((player) => player.name.toLowerCase() === name.toLowerCase())
+
+  if (playerExists) {
+    showToast("Machine déjà inscrite", "Cette machine est déjà inscrite au tournoi !", "error")
+    // Mettre en surbrillance le champ de saisie
+    nameInput.focus()
+    nameInput.classList.add("input-error")
+    // Retirer la classe après un délai
+    setTimeout(() => {
+      nameInput.classList.remove("input-error")
+    }, 2000)
+    return
+  }
+
+  // Ajouter le joueur si la limite n'est pas atteinte
+  if (TournamentApp.players.length < 16) {
+    // Vérifier si la machine est dans l'une des listes
+    const isHacksawGaming = TournamentApp.slotMachines.includes(name)
+    const isNolimitCity = TournamentApp.nolimitCityMachines.includes(name)
+    const isPragmaticPlay = TournamentApp.pragmaticPlayMachines.includes(name)
+
+    // Déterminer la catégorie
+    let category = ""
+    if (isHacksawGaming) {
+      category = "Hacksaw Gaming"
+    } else if (isNolimitCity) {
+      category = "Nolimit City"
+    } else if (isPragmaticPlay) {
+      category = "Pragmatic Play"
+    }
+
+    // Ajouter le joueur avec sa catégorie
+    TournamentApp.players.push({
+      name: name,
+      category: category,
+    })
+    nameInput.value = ""
+    document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
+    updatePlayersDisplay()
+
     // Sauvegarder les données
     saveDataToLocalStorage()
-    // Mettre à jour l'affichage
-    updatePlayersDisplay()
-    return true
+    updateTournamentState({
+      players: TournamentApp.players,
+      matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+      eliminated: TournamentApp.eliminated,
+      winner: TournamentApp.winner,
+      tournamentStarted: TournamentApp.tournamentStarted,
+      eliminationHistory: TournamentApp.eliminationHistory,
+      previousWinners: TournamentApp.previousWinners,
+      tournamentCompleted: TournamentApp.tournamentCompleted
+    })
+
+    console.log("Nombre de joueurs:", TournamentApp.players.length) // Débogage
+
+    // Vérifier si on a atteint 16 joueurs
+    if (TournamentApp.players.length >= 16) {
+      console.log("16 joueurs atteints, affichage du bouton de tirage") // Débogage
+      // Cacher le conteneur d'ajout de joueurs
+      document.getElementById("addPlayerContainer").style.display = "none"
+      document.getElementById("randomSlotBtn").style.display = "none"
+      // Afficher le bouton de tirage
+      document.getElementById("launchDraw").style.display = "block"
+    }
+
+    showToast("Machine ajoutée", `${name} a été ajoutée au tournoi.`, "success")
+  } else if (TournamentApp.players.length >= 16) {
+    showToast("Limite atteinte", "Le tournoi est limité à 16 machines !", "error")
   }
-  return false
+}
+
+// NOUVELLE FONCTION: Fonction pour supprimer un joueur
+function removePlayer(index) {
+  if (TournamentApp.tournamentStarted) {
+    showToast("Action impossible", "Impossible de retirer une machine une fois le tournoi commencé.", "error")
+    return
+  }
+
+  const removedPlayer = TournamentApp.players[index]
+  TournamentApp.players.splice(index, 1)
+
+  updatePlayersDisplay()
+  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
+
+  // Réafficher les contrôles d'ajout si nécessaire
+  if (TournamentApp.players.length < 16) {
+    document.getElementById("addPlayerContainer").style.display = "block"
+    document.getElementById("randomSlotBtn").style.display = "block"
+    document.getElementById("launchDraw").style.display = "none"
+  }
+
+  saveDataToLocalStorage()
+  showToast("Machine retirée", `${removedPlayer.name} a été retirée du tournoi.`, "success")
+  updateTournamentState({
+    players: TournamentApp.players,
+    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
+    eliminated: TournamentApp.eliminated,
+    winner: TournamentApp.winner,
+    tournamentStarted: TournamentApp.tournamentStarted,
+    eliminationHistory: TournamentApp.eliminationHistory,
+    previousWinners: TournamentApp.previousWinners,
+    tournamentCompleted: TournamentApp.tournamentCompleted
+  });
 }
 
 // Modifier la fonction updatePlayersDisplay pour ajouter des liens
@@ -761,11 +687,9 @@ function updatePlayersDisplay() {
         categoryBadge.classList.add("hacksaw")
       } else if (player.category === "Nolimit City") {
         categoryBadge.classList.add("nolimit")
-          } else if (player.category === "Pragmatic Play") {
-      categoryBadge.classList.add("pragmatic")
-    } else if (player.category === "bGaming") {
-      categoryBadge.classList.add("bGaming")
-    }
+      } else if (player.category === "Pragmatic Play") {
+        categoryBadge.classList.add("pragmatic")
+      }
 
       categoryBadge.textContent = player.category
       playerInfo.appendChild(categoryBadge)
@@ -867,13 +791,8 @@ function showSuggestions(input) {
       machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
   )
 
-  const bGamingMatches = TournamentApp.bGamingMachines.filter(
-    (machine) =>
-      machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
-  )
-
   // Combiner les résultats et limiter à 10 suggestions
-  const allMatches = [...hacksawMatches, ...nolimitMatches, ...pragmaticMatches, ...bGamingMatches].slice(0, 10)
+  const allMatches = [...hacksawMatches, ...nolimitMatches, ...pragmaticMatches].slice(0, 10)
 
   // Si aucune correspondance, afficher un message
   if (allMatches.length === 0) {
@@ -900,13 +819,10 @@ function showSuggestions(input) {
       } else if (TournamentApp.nolimitCityMachines.includes(machine)) {
         categorySpan.textContent = "Nolimit"
         categorySpan.classList.add("nolimit")
-          } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
-      categorySpan.textContent = "Pragmatic"
-      categorySpan.classList.add("pragmatic")
-    } else if (TournamentApp.bGamingMachines.includes(machine)) {
-      categorySpan.textContent = "bGaming"
-      categorySpan.classList.add("bGaming")
-    }
+      } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
+        categorySpan.textContent = "Pragmatic"
+        categorySpan.classList.add("pragmatic")
+      }
 
       item.appendChild(nameSpan)
       item.appendChild(categorySpan)
@@ -1239,8 +1155,6 @@ function updateSelectedProvidersDisplay() {
       html += '<span class="provider-tag nolimit">Nolimit City</span> '
     } else if (type === "pragmatic") {
       html += '<span class="provider-tag pragmatic">Pragmatic Play</span> '
-    } else if (type === "bGaming") {
-      html += '<span class="provider-tag bGaming">bGaming</span> '
     }
   })
   displayElement.innerHTML = html || '<span style="color: var(--muted-text);">Aucun provider sélectionné</span>'
@@ -1255,7 +1169,6 @@ function updateMaxAvailableSlots() {
       ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
-      ...TournamentApp.bGamingMachines,
     ]
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
   } else {
@@ -1279,13 +1192,6 @@ function updateMaxAvailableSlots() {
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
       )
       availableSlots = availableSlots.concat(pragmaticSlots)
-    }
-
-    if (TournamentApp.selectedSlotTypes.includes("bGaming")) {
-      const bGamingSlots = TournamentApp.bGamingMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      )
-      availableSlots = availableSlots.concat(bGamingSlots)
     }
   }
 
@@ -1561,227 +1467,29 @@ function renderMatchButtons(i, j) {
   return matchHtml
 }
 
-// Modifions la fonction addPlayer pour s'assurer que le bouton de tirage apparaît correctement
-function addPlayer() {
-  // Empêcher les actions en mode spectateur
-  if (isSpectatorMode) {
-    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
-    return;
-  }
-  
-  const nameInput = document.getElementById("playerName")
-  const name = nameInput.value.trim()
+// NOUVELLE FONCTION pour vérifier et propager les annulations aux tours suivants
+function checkAndPropagateUndos(roundIndex, matchIndex, playerName) {
+  if (roundIndex >= 3) return // Arrêter à la finale
 
-  // Vérifier si le nom est vide
-  if (!name) {
-    showToast("Nom invalide", "Veuillez entrer un nom de machine valide.", "error")
-    return
-  }
+  const nextRound = roundIndex + 1
+  const nextMatchIndex = Math.floor(matchIndex / 2)
 
-  // Vérifier si le joueur existe déjà (insensible à la casse)
-  const playerExists = TournamentApp.players.some((player) => player.name.toLowerCase() === name.toLowerCase())
+  if (nextRound < TournamentApp.matches.length) {
+    const nextMatch = TournamentApp.matches[nextRound][nextMatchIndex]
 
-  if (playerExists) {
-    showToast("Machine déjà inscrite", "Cette machine est déjà inscrite au tournoi !", "error")
-    // Mettre en surbrillance le champ de saisie
-    nameInput.focus()
-    nameInput.classList.add("input-error")
-    // Retirer la classe après un délai
-    setTimeout(() => {
-      nameInput.classList.remove("input-error")
-    }, 2000)
-    return
-  }
-
-  // Ajouter le joueur si la limite n'est pas atteinte
-  if (TournamentApp.players.length < 16) {
-    // Vérifier si la machine est dans l'une des listes
-    const isHacksawGaming = TournamentApp.slotMachines.includes(name)
-    const isNolimitCity = TournamentApp.nolimitCityMachines.includes(name)
-    const isPragmaticPlay = TournamentApp.pragmaticPlayMachines.includes(name)
-    const isBGaming = TournamentApp.bGamingMachines.includes(name)
-
-    // Déterminer la catégorie
-    let category = ""
-    if (isHacksawGaming) {
-      category = "Hacksaw Gaming"
-    } else if (isNolimitCity) {
-      category = "Nolimit City"
-    } else if (isPragmaticPlay) {
-      category = "Pragmatic Play"
-    } else if (isBGaming) {
-      category = "bGaming"
-    }
-
-    // Ajouter le joueur avec sa catégorie
-    TournamentApp.players.push({
-      name: name,
-      category: category,
-    })
-    nameInput.value = ""
-    document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
-    updatePlayersDisplay()
-
-    // Sauvegarder les données
-    saveDataToLocalStorage()
-    updateTournamentState({
-      players: TournamentApp.players,
-      matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
-      eliminated: TournamentApp.eliminated,
-      winner: TournamentApp.winner,
-      tournamentStarted: TournamentApp.tournamentStarted,
-      eliminationHistory: TournamentApp.eliminationHistory,
-      previousWinners: TournamentApp.previousWinners,
-      tournamentCompleted: TournamentApp.tournamentCompleted
-    })
-
-    console.log("Nombre de joueurs:", TournamentApp.players.length) // Débogage
-
-    // Vérifier si on a atteint 16 joueurs
-    if (TournamentApp.players.length >= 16) {
-      console.log("16 joueurs atteints, affichage du bouton de tirage") // Débogage
-      // Cacher le conteneur d'ajout de joueurs
-      document.getElementById("addPlayerContainer").style.display = "none"
-      document.getElementById("randomSlotBtn").style.display = "none"
-      // Afficher le bouton de tirage
-      document.getElementById("launchDraw").style.display = "block"
-    }
-
-    showToast("Machine ajoutée", `${name} a été ajoutée au tournoi.`, "success")
-  } else if (TournamentApp.players.length >= 16) {
-    showToast("Limite atteinte", "Le tournoi est limité à 16 machines !", "error")
-  }
-}
-
-// Améliorons la fonction launchDraw pour s'assurer qu'elle fonctionne correctement
-function launchDraw() {
-  // Empêcher les actions en mode spectateur
-  if (isSpectatorMode) {
-    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
-    return;
-  }
-  
-  console.log("Lancement du tirage...") // Débogage
-
-  // Afficher l'animation de chargement
-  document.getElementById("loadingOverlay").style.display = "flex"
-  updateLoadingProgress()
-
-  try {
-    // Utiliser setTimeout pour simuler un temps de chargement plus court
-    setTimeout(() => {
-      console.log("Première étape du tirage") // Débogage
-
-      // Première étape - simuler le traitement
-      setTimeout(() => {
-        console.log("Deuxième étape du tirage") // Débogage
-
-        // Deuxième étape - continuer le traitement
-        setTimeout(() => {
-          console.log("Troisième étape du tirage") // Débogage
-
-          try {
-            // Troisième étape - finaliser et afficher le tournoi
-            TournamentApp.tournamentStarted = true
-            shufflePlayers()
-            initBracket() // Initialiser le bracket avant de placer les joueurs
-            placePlayersRandomly()
-
-            // Mettre à jour l'interface
-            document.getElementById("bracket").style.display = "flex"
-            document.getElementById("launchDraw").style.display = "none"
-            document.getElementById("resetButton").style.display = "block"
-            document.getElementById("addPlayerContainer").style.display = "none"
-            document.getElementById("randomSlotBtn").style.display = "none"
-
-            // Mettre à jour l'affichage pour désactiver les boutons de suppression
-            updatePlayersDisplay()
-
-            // Sauvegarder les données
-            saveDataToLocalStorage()
-
-            // Masquer l'animation de chargement
-            const loadingOverlay = document.getElementById("loadingOverlay");
-            if (loadingOverlay) loadingOverlay.style.display = "none";
-
-            showToast(
-              "Tournoi lancé !",
-              "Le tirage au sort a été effectué. Que la meilleure machine gagne !",
-              "success",
-            )
-
-            console.log("Tournoi lancé avec succès") // Débogage
-          } catch (error) {
-            console.error("Erreur lors de la finalisation du tournoi:", error)
-            const loadingOverlay = document.getElementById("loadingOverlay");
-            if (loadingOverlay) loadingOverlay.style.display = "none";
-            showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
-          }
-        }, 500) // Délai réduit à 0.5 seconde pour la troisième étape
-      }, 500) // Délai réduit à 0.5 seconde pour la deuxième étape
-    }, 500) // Délai réduit à 0.5 seconde pour la première étape
-  } catch (error) {
-    console.error("Erreur lors du lancement du tirage:", error)
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    if (loadingOverlay) loadingOverlay.style.display = "none";
-    showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
-  }
-}
-
-// Ajouter cette fonction après la fonction launchDraw()
-function updateLoadingProgress() {
-  const progressBar = document.getElementById("loadingProgress")
-  const loadingText = document.getElementById("loadingText")
-
-  // Démarrer l'animation de la barre de progression
-  progressBar.style.width = "0%"
-
-  // Forcer un reflow pour que la transition fonctionne
-  void progressBar.offsetWidth
-
-  // Animer jusqu'à 100%
-  progressBar.style.width = "100%"
-
-  // Mettre à jour le texte pendant le chargement
-  setTimeout(() => {
-    loadingText.textContent = "Mélange des machines..."
-  }, 500)
-
-  setTimeout(() => {
-    loadingText.textContent = "Création des matchs..."
-  }, 1000)
-
-  setTimeout(() => {
-    loadingText.textContent = "Finalisation du tournoi..."
-  }, 1500)
-}
-
-// Mélanger les joueurs
-function shufflePlayers() {
-  for (let i = TournamentApp.players.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[TournamentApp.players[i], TournamentApp.players[j]] = [TournamentApp.players[j], TournamentApp.players[i]]
-  }
-}
-
-// Nouvelle version : placer les joueurs aléatoirement à partir d'un tableau donné
-function placePlayersRandomly(playersArray) {
-  for (let i = 0; i < playersArray.length; i++) {
-    const matchIndex = Math.floor(i / 2)
-    if (i % 2 === 0) {
-      TournamentApp.matches[0][matchIndex].p1 = playersArray[i].name
-      TournamentApp.matches[0][matchIndex].score1 = ""
-    } else {
-      TournamentApp.matches[0][matchIndex].p2 = playersArray[i].name
-      TournamentApp.matches[0][matchIndex].score2 = ""
+    // Vérifier si le joueur est présent dans le match suivant
+    if (nextMatch.p1 === playerName) {
+      nextMatch.p1 = ""
+      nextMatch.score1 = ""
+      // Continuer la propagation
+      checkAndPropagateUndos(nextRound, nextMatchIndex, playerName)
+    } else if (nextMatch.p2 === playerName) {
+      nextMatch.p2 = ""
+      nextMatch.score2 = ""
+      // Continuer la propagation
+      checkAndPropagateUndos(nextRound, nextMatchIndex, playerName)
     }
   }
-  renderBracket()
-}
-
-// Fonction utilitaire pour générer un id CSS sûr à partir d'un nom
-function toSafeId(name) {
-  return name.replace(/[^a-zA-Z0-9_-]/g, "-");
 }
 
 // Définir le gagnant d'un match
@@ -1791,7 +1499,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
     showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
     return;
   }
-  
+
   // Vérifier si le tournoi est déjà terminé
   if (TournamentApp.tournamentCompleted) {
     showToast("Action impossible", "Le tournoi est déjà terminé avec un gagnant déclaré !", "error")
@@ -2136,31 +1844,6 @@ function undoMatch() {
   showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success")
 }
 
-// Nouvelle fonction pour vérifier et propager les annulations aux tours suivants
-function checkAndPropagateUndos(roundIndex, matchIndex, playerName) {
-  if (roundIndex >= 3) return // Arrêter à la finale
-
-  const nextRound = roundIndex + 1
-  const nextMatchIndex = Math.floor(matchIndex / 2)
-
-  if (nextRound < TournamentApp.matches.length) {
-    const nextMatch = TournamentApp.matches[nextRound][nextMatchIndex]
-
-    // Vérifier si le joueur est présent dans le match suivant
-    if (nextMatch.p1 === playerName) {
-      nextMatch.p1 = ""
-      nextMatch.score1 = ""
-      // Continuer la propagation
-      checkAndPropagateUndos(nextRound, nextMatchIndex, playerName)
-    } else if (nextMatch.p2 === playerName) {
-      nextMatch.p2 = ""
-      nextMatch.score2 = ""
-      // Continuer la propagation
-      checkAndPropagateUndos(nextRound, nextMatchIndex, playerName)
-    }
-  }
-}
-
 // MODIFICATION: Fonction selectRandomSlot pour gérer la sélection multiple
 function selectRandomSlot() {
   const slotCount = Number.parseInt(document.getElementById("slotCount").value) || 1;
@@ -2171,7 +1854,6 @@ function selectRandomSlot() {
       ...TournamentApp.slotMachines,
       ...TournamentApp.nolimitCityMachines,
       ...TournamentApp.pragmaticPlayMachines,
-      ...TournamentApp.bGamingMachines,
     ];
     availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot));
   } else {
@@ -2192,12 +1874,6 @@ function selectRandomSlot() {
         (slot) => !TournamentApp.players.some((player) => player.name === slot),
       );
       availableSlots = availableSlots.concat(pragmaticSlots);
-    }
-    if (TournamentApp.selectedSlotTypes.includes("bGaming")) {
-      const bGamingSlots = TournamentApp.bGamingMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      )
-      availableSlots = availableSlots.concat(bGamingSlots)
     }
   }
 
@@ -2252,8 +1928,6 @@ function selectRandomSlot() {
       category = "Nolimit City";
     } else if (TournamentApp.pragmaticPlayMachines.includes(slot)) {
       category = "Pragmatic Play";
-    } else if (TournamentApp.bGamingMachines.includes(slot)) {
-      category = "bGaming";
     }
     return { name: slot, category };
   });
@@ -2266,6 +1940,137 @@ function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[array[i], array[j]] = [array[j], array[i]]
+  }
+}
+
+// Nouvelle version : placer les joueurs aléatoirement à partir d'un tableau donné
+function placePlayersRandomly(playersArray) {
+  for (let i = 0; i < playersArray.length; i++) {
+    const matchIndex = Math.floor(i / 2)
+    if (i % 2 === 0) {
+      TournamentApp.matches[0][matchIndex].p1 = playersArray[i].name
+      TournamentApp.matches[0][matchIndex].score1 = ""
+    } else {
+      TournamentApp.matches[0][matchIndex].p2 = playersArray[i].name
+      TournamentApp.matches[0][matchIndex].score2 = ""
+    }
+  }
+  renderBracket()
+}
+
+// Fonction utilitaire pour générer un id CSS sûr à partir d'un nom
+function toSafeId(name) {
+  return name.replace(/[^a-zA-Z0-9_-]/g, "-");
+}
+
+// Améliorons la fonction launchDraw pour s'assurer qu'elle fonctionne correctement
+function launchDraw() {
+  // Empêcher les actions en mode spectateur
+  if (isSpectatorMode) {
+    showToast("Mode spectateur", "Vous ne pouvez pas modifier le tournoi en mode spectateur", "warning");
+    return;
+  }
+  
+  console.log("Lancement du tirage...") // Débogage
+
+  // Afficher l'animation de chargement
+  document.getElementById("loadingOverlay").style.display = "flex"
+  updateLoadingProgress()
+
+  try {
+    // Utiliser setTimeout pour simuler un temps de chargement plus court
+    setTimeout(() => {
+      console.log("Première étape du tirage") // Débogage
+
+      // Première étape - simuler le traitement
+      setTimeout(() => {
+        console.log("Deuxième étape du tirage") // Débogage
+
+        // Deuxième étape - continuer le traitement
+        setTimeout(() => {
+          console.log("Troisième étape du tirage") // Débogage
+
+          try {
+            // Troisième étape - finaliser et afficher le tournoi
+            TournamentApp.tournamentStarted = true
+            shufflePlayers()
+            initBracket() // Initialiser le bracket avant de placer les joueurs
+            placePlayersRandomly(TournamentApp.players) // Utilisez le tableau mélangé de TournamentApp.players
+
+            // Mettre à jour l'interface
+            document.getElementById("bracket").style.display = "flex"
+            document.getElementById("launchDraw").style.display = "none"
+            document.getElementById("resetButton").style.display = "block"
+            document.getElementById("addPlayerContainer").style.display = "none"
+            document.getElementById("randomSlotBtn").style.display = "none"
+
+            // Mettre à jour l'affichage pour désactiver les boutons de suppression
+            updatePlayersDisplay()
+
+            // Sauvegarder les données
+            saveDataToLocalStorage()
+
+            // Masquer l'animation de chargement
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            if (loadingOverlay) loadingOverlay.style.display = "none";
+
+            showToast(
+              "Tournoi lancé !",
+              "Le tirage au sort a été effectué. Que la meilleure machine gagne !",
+              "success",
+            )
+
+            console.log("Tournoi lancé avec succès") // Débogage
+          } catch (error) {
+            console.error("Erreur lors de la finalisation du tournoi:", error)
+            const loadingOverlay = document.getElementById("loadingOverlay");
+            if (loadingOverlay) loadingOverlay.style.display = "none";
+            showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
+          }
+        }, 500) // Délai réduit à 0.5 seconde pour la troisième étape
+      }, 500) // Délai réduit à 0.5 seconde pour la deuxième étape
+    }, 500) // Délai réduit à 0.5 seconde pour la première étape
+  } catch (error) {
+    console.error("Erreur lors du lancement du tirage:", error)
+    const loadingOverlay = document.getElementById("loadingOverlay");
+    if (loadingOverlay) loadingOverlay.style.display = "none";
+    showToast("Erreur", "Une erreur est survenue lors du lancement du tournoi.", "error")
+  }
+}
+
+// Ajouter cette fonction après la fonction launchDraw()
+function updateLoadingProgress() {
+  const progressBar = document.getElementById("loadingProgress")
+  const loadingText = document.getElementById("loadingText")
+
+  // Démarrer l'animation de la barre de progression
+  progressBar.style.width = "0%"
+
+  // Forcer un reflow pour que la transition fonctionne
+  void progressBar.offsetWidth
+
+  // Animer jusqu'à 100%
+  progressBar.style.width = "100%"
+
+  // Mettre à jour le texte pendant le chargement
+  setTimeout(() => {
+    loadingText.textContent = "Mélange des machines..."
+  }, 500)
+
+  setTimeout(() => {
+    loadingText.textContent = "Création des matchs..."
+  }, 1000)
+
+  setTimeout(() => {
+    loadingText.textContent = "Finalisation du tournoi..."
+  }, 1500)
+}
+
+// Mélanger les joueurs
+function shufflePlayers() {
+  for (let i = TournamentApp.players.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[TournamentApp.players[i], TournamentApp.players[j]] = [TournamentApp.players[j], TournamentApp.players[i]]
   }
 }
 
@@ -2317,47 +2122,13 @@ function addRandomSlot() {
 
   // Vérifier si on a atteint 16 joueurs
   if (TournamentApp.players.length >= 16) {
-    document.getElementById("addPlayerContainer").style.display = "none"
-    document.getElementById("randomSlotBtn").style.display = "none"
-    document.getElementById("launchDraw").style.display = "block"
+    document.getElementById("addPlayerContainer").style.display = "none";
+    document.getElementById("randomSlotBtn").style.display = "none";
+    document.getElementById("launchDraw").style.display = "block";
   }
 
   // Sauvegarder les données
-  saveDataToLocalStorage()
-  updateTournamentState({
-    players: TournamentApp.players,
-    matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
-    eliminated: TournamentApp.eliminated,
-    winner: TournamentApp.winner,
-    tournamentStarted: TournamentApp.tournamentStarted,
-    eliminationHistory: TournamentApp.eliminationHistory,
-    previousWinners: TournamentApp.previousWinners,
-    tournamentCompleted: TournamentApp.tournamentCompleted
-  });
-}
-
-// Fonction pour supprimer un joueur
-function removePlayer(index) {
-  if (TournamentApp.tournamentStarted) {
-    showToast("Action impossible", "Impossible de retirer une machine une fois le tournoi commencé.", "error")
-    return
-  }
-
-  const removedPlayer = TournamentApp.players[index]
-  TournamentApp.players.splice(index, 1)
-
-  updatePlayersDisplay()
-  document.getElementById("count").innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`
-
-  // Réafficher les contrôles d'ajout si nécessaire
-  if (TournamentApp.players.length < 16) {
-    document.getElementById("addPlayerContainer").style.display = "block"
-    document.getElementById("randomSlotBtn").style.display = "block"
-    document.getElementById("launchDraw").style.display = "none"
-  }
-
-  saveDataToLocalStorage()
-  showToast("Machine retirée", `${removedPlayer.name} a été retirée du tournoi.`, "success")
+  saveDataToLocalStorage();
   updateTournamentState({
     players: TournamentApp.players,
     matches: (() => { const o={}; for(let i=0;i<TournamentApp.matches.length;i++){o['round'+i]=TournamentApp.matches[i];} return o; })(),
@@ -2514,8 +2285,6 @@ function afficherMachineCourante() {
       categoryElement.classList.add("nolimit");
     } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
       categoryElement.classList.add("pragmatic");
-    } else if (TournamentApp.randomSlotCategory === "bGaming") {
-      categoryElement.classList.add("bGaming");
     }
   } else {
     categoryElement.textContent = "";
@@ -2630,11 +2399,12 @@ window.addEventListener('resize', () => {
   }
 });
 
+// Remplace les ... par ta vraie config copiée sur la console Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
   authDomain: "tournoi-de-slots.firebaseapp.com",
   projectId: "tournoi-de-slots",
-  storageBucket: "tournoi-de-slots.firebasestorage.app",
+  storageBucket: "tournoi-de-slots.appspot.com", // <-- CORRIGÉ
   messagingSenderId: "834358073654",
   appId: "1:834358073654:web:6d935be1322c9450e37b97",
   measurementId: "G-MZKD5K781T"
@@ -2805,11 +2575,9 @@ function updateTournamentUI(state) {
     if (count) count.style.display = '';
   }
   
-  // Appliquer les restrictions spectateur si nécessaire
+  // CORRECTION: Assurez-vous que les restrictions du mode spectateur sont toujours appliquées après une mise à jour.
   if (isSpectatorMode) {
-    setTimeout(() => {
-      disableActionsIfSpectator();
-    }, 50);
+    disableActionsIfSpectator();
   }
 }
 
@@ -3005,7 +2773,7 @@ function enableActionsIfNotSpectator() {
   ];
   ids.forEach(id => {
     const el = document.getElementById(id);
-    if (el && el.style) el.style.display = '';
+    if (el) el.style.display = ''; // Ne pas utiliser style.display = '' car cela peut être surchargé par d'autres classes
   });
   
   // Réactiver tous les clics sur les matches
