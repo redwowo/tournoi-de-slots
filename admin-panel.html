@@ -116,9 +116,27 @@
                             </div>
                         </div>
 
+                        <!-- Actions en masse -->
+                        <div class="admin-bulk-actions" id="bulkActionsContainer" style="display: none;">
+                            <div class="admin-bulk-actions-info">
+                                <span id="selectedCount">0</span> tournoi(s) sélectionné(s)
+                            </div>
+                            <div class="admin-bulk-actions-buttons">
+                                <button class="admin-btn admin-btn-primary" id="exportSelectedBtn" onclick="exportSelectedTournaments()" disabled>
+                                    📥 Exporter les sélectionnés
+                                </button>
+                                <button class="admin-btn admin-btn-danger" id="deleteSelectedBtn" onclick="confirmDeleteSelected()" disabled>
+                                    🗑️ Supprimer les sélectionnés
+                                </button>
+                            </div>
+                        </div>
+
                         <table id="tournamentsTable">
                             <thead>
                                 <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" class="admin-checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                                    </th>
                                     <th>Nom</th>
                                     <th>Créateur</th>
                                     <th>Créé le</th>

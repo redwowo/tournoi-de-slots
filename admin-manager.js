@@ -5,6 +5,7 @@ class AdminManager {
     this.adminHistory = [];
     this.currentPage = 1;
     this.itemsPerPage = 10;
+    this.selectedTournaments = new Set(); // IDs des tournois sélectionnés
     this.loadAdminHistory();
   }
 
@@ -334,7 +335,9 @@ class AdminManager {
       'delete': 'Suppression',
       'update': 'Modification',
       'purge': 'Purge',
-      'export': 'Export'
+      'export': 'Export',
+      'bulk_delete': 'Suppression en masse',
+      'bulk_export': 'Export en masse'
     };
     return labels[type] || type;
   }
@@ -349,6 +352,173 @@ class AdminManager {
       activeTournaments: this.tournaments.filter(t => t.status === 'En cours').length,
       pendingTournaments: this.tournaments.filter(t => t.status === 'En attente').length
     };
+  }
+
+  // Gestion de la sélection multiple
+  toggleTournamentSelection(tournamentId) {
+    if (this.selectedTournaments.has(tournamentId)) {
+      this.selectedTournaments.delete(tournamentId);
+    } else {
+      this.selectedTournaments.add(tournamentId);
+    }
+    this.updateBulkActionsUI();
+  }
+
+  selectAllTournaments(select = true) {
+    if (select) {
+      // Sélectionner tous les tournois actuellement affichés (filtrés)
+      const search = document.getElementById('tournamentSearch')?.value || '';
+      const status = document.getElementById('statusFilter')?.value || '';
+      const filtered = this.filterTournaments({
+        search: search,
+        status: status || undefined
+      });
+      filtered.forEach(tournament => {
+        this.selectedTournaments.add(tournament.id);
+      });
+    } else {
+      this.selectedTournaments.clear();
+    }
+    this.updateBulkActionsUI();
+  }
+
+  updateBulkActionsUI() {
+    const count = this.selectedTournaments.size;
+    const bulkActionsContainer = document.getElementById('bulkActionsContainer');
+    const selectedCount = document.getElementById('selectedCount');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    const exportSelectedBtn = document.getElementById('exportSelectedBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    // Mettre à jour le compteur
+    if (selectedCount) {
+      selectedCount.textContent = count;
+    }
+
+    // Afficher/cacher les actions en masse
+    if (bulkActionsContainer) {
+      if (count > 0) {
+        bulkActionsContainer.style.display = 'flex';
+        deleteSelectedBtn.disabled = false;
+        exportSelectedBtn.disabled = false;
+      } else {
+        bulkActionsContainer.style.display = 'none';
+        deleteSelectedBtn.disabled = true;
+        exportSelectedBtn.disabled = true;
+      }
+    }
+
+    // Mettre à jour le checkbox "sélectionner tout"
+    if (selectAllCheckbox) {
+      const search = document.getElementById('tournamentSearch')?.value || '';
+      const status = document.getElementById('statusFilter')?.value || '';
+      const filtered = this.filterTournaments({
+        search: search,
+        status: status || undefined
+      });
+      
+      if (filtered.length === 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+      } else if (this.selectedTournaments.size === filtered.length) {
+        selectAllCheckbox.checked = true;
+        selectAllCheckbox.indeterminate = false;
+      } else if (this.selectedTournaments.size > 0) {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = true;
+      } else {
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+      }
+    }
+  }
+
+  // Supprimer les tournois sélectionnés
+  async deleteSelectedTournaments() {
+    if (this.selectedTournaments.size === 0) {
+      showAdminToast('Erreur', 'Aucun tournoi sélectionné', 'error');
+      return false;
+    }
+
+    const selectedIds = Array.from(this.selectedTournaments);
+    const selectedTournaments = this.tournaments.filter(t => selectedIds.includes(t.id));
+    const count = selectedTournaments.length;
+
+    if (!confirm(`Êtes-vous sûr de vouloir supprimer ${count} tournoi(s) ? Cette action est irréversible.`)) {
+      return false;
+    }
+
+    let deleted = 0;
+    let failed = 0;
+
+    for (const tournament of selectedTournaments) {
+      try {
+        // Exporter avant suppression
+        const exportData = this.exportTournament(tournament);
+        this.saveExportedData(exportData);
+
+        // Supprimer de Firestore
+        await db.collection('tournois').doc(tournament.id).delete();
+        deleted++;
+      } catch (error) {
+        console.error(`Error deleting tournament ${tournament.id}:`, error);
+        failed++;
+      }
+    }
+
+    // Mettre à jour le tableau local
+    this.tournaments = this.tournaments.filter(t => !selectedIds.includes(t.id));
+
+    // Vider la sélection
+    this.selectedTournaments.clear();
+    this.updateBulkActionsUI();
+
+    // Logger l'action
+    this.logAction({
+      type: 'bulk_delete',
+      details: `Suppression en masse de ${deleted} tournoi(s)${failed > 0 ? ` (${failed} erreur(s))` : ''}`,
+      count: deleted,
+      failed: failed
+    });
+
+    const message = `${deleted} tournoi(s) supprimé(s) avec succès${failed > 0 ? ` (${failed} erreur(s))` : ''}`;
+    showAdminToast('Succès', message, failed > 0 ? 'error' : 'success');
+    return deleted > 0;
+  }
+
+  // Exporter les tournois sélectionnés
+  exportSelectedTournaments() {
+    if (this.selectedTournaments.size === 0) {
+      showAdminToast('Erreur', 'Aucun tournoi sélectionné', 'error');
+      return;
+    }
+
+    const selectedIds = Array.from(this.selectedTournaments);
+    const selectedTournaments = this.tournaments.filter(t => selectedIds.includes(t.id));
+    
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      count: selectedTournaments.length,
+      tournaments: selectedTournaments.map(t => this.exportTournament(t))
+    };
+
+    // Créer et télécharger le fichier JSON
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+      type: 'application/json;charset=utf-8;' 
+    });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `tournaments-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+
+    // Logger l'action
+    this.logAction({
+      type: 'bulk_export',
+      details: `Export de ${selectedTournaments.length} tournoi(s)`,
+      count: selectedTournaments.length
+    });
+
+    showAdminToast('Succès', `${selectedTournaments.length} tournoi(s) exporté(s) avec succès`, 'success');
   }
 }
 
