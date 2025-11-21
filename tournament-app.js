@@ -651,7 +651,7 @@ function updatePlayersDisplay() {
 
   TournamentApp.players.forEach((player, index) => {
     const li = document.createElement("li")
-    li.id = `player-list-${player.name.replace(/\s+/g, "-")} `
+    li.id = `player-list-${toSafeId(player.name)}`
 
     const playerItem = document.createElement("div")
     playerItem.className = "player-item"
@@ -1528,7 +1528,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
   // Ajouter le perdant à la liste des éliminés s'il n'y est pas déjà
   if (!TournamentApp.eliminated.includes(loserName)) {
     TournamentApp.eliminated.push(loserName)
-    const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} span`)
+    const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} .player-item a`)
     if (playerElement) playerElement.classList.add("eliminated")
 
     // Ajouter à l'historique des éliminations
@@ -1545,6 +1545,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
     // document.getElementById("eliminationHistoryBtn").style.display = "block"
 
     showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success")
+    updatePlayersDisplay()
   }
 
   // Marquer le match actuel comme terminé
@@ -1797,8 +1798,9 @@ function undoMatch() {
   )
 
   // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
-  const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} span`)
+  const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} .player-item a`)
   if (playerElement) playerElement.classList.remove("eliminated")
+  updatePlayersDisplay()
 
   // NOUVEAU : Retirer le joueur de TOUS les matchs des tours suivants
   for (let r = roundIndex + 1; r < TournamentApp.matches.length; r++) {
