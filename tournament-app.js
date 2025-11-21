@@ -453,7 +453,10 @@ function loadDataFromLocalStorage() {
         document.getElementById("randomSlotBtn").style.display = "none"
 
         if (TournamentApp.eliminationHistory.length > 0) {
-          document.getElementById("eliminationHistoryBtn").style.display = "block"
+          const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn")
+          if (eliminationHistoryBtn) {
+            eliminationHistoryBtn.style.display = "block"
+          }
         }
 
         renderBracket()
@@ -899,6 +902,8 @@ function closeConfirmDialog() {
 // Afficher l'historique des éliminations
 function showEliminationHistory() {
   const eliminationList = document.getElementById("eliminationList")
+  if (!eliminationList) return
+  
   eliminationList.innerHTML = ""
 
   if (TournamentApp.eliminationHistory.length > 0) {
@@ -942,14 +947,18 @@ function showEliminationHistory() {
     eliminationList.appendChild(emptyMessage)
   }
 
-  document.getElementById("eliminationHistoryModal").style.display = "block"
-  document.getElementById("overlay").style.display = "block"
+  const eliminationHistoryModal = document.getElementById("eliminationHistoryModal")
+  const overlay = document.getElementById("overlay")
+  if (eliminationHistoryModal) eliminationHistoryModal.style.display = "block"
+  if (overlay) overlay.style.display = "block"
 }
 
 // Fermer l'historique des éliminations
 function closeEliminationHistory() {
-  document.getElementById("eliminationHistoryModal").style.display = "none"
-  document.getElementById("overlay").style.display = "none"
+  const eliminationHistoryModal = document.getElementById("eliminationHistoryModal")
+  const overlay = document.getElementById("overlay")
+  if (eliminationHistoryModal) eliminationHistoryModal.style.display = "none"
+  if (overlay) overlay.style.display = "none"
 }
 
 // Afficher/masquer le panneau des gagnants précédents
@@ -1542,7 +1551,10 @@ function setWinner(roundIndex, matchIndex, winnerName) {
     })
 
     // Afficher le bouton d'historique des éliminations s'il n'est déjà visible
-    // document.getElementById("eliminationHistoryBtn").style.display = "block"
+    const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn")
+    if (eliminationHistoryBtn) {
+      eliminationHistoryBtn.style.display = "block"
+    }
 
     showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success")
     updatePlayersDisplay()
@@ -1656,6 +1668,7 @@ function resetTournamentWithOption(keepPlayers) {
   TournamentApp.players = keepPlayers ? savedPlayers : []
   TournamentApp.matches = []
   TournamentApp.eliminated = []
+  TournamentApp.eliminationHistory = []
   TournamentApp.winner = ""
   TournamentApp.tournamentStarted = false
   TournamentApp.tournamentCompleted = false // Réinitialiser l'état de complétion du tournoi
