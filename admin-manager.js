@@ -337,7 +337,12 @@ class AdminManager {
       'purge': 'Purge',
       'export': 'Export',
       'bulk_delete': 'Suppression en masse',
-      'bulk_export': 'Export en masse'
+      'bulk_export': 'Export en masse',
+      'add_category': 'Ajout Catégorie',
+      'delete_category': 'Suppression Catégorie',
+      'add_player': 'Ajout Joueur',
+      'edit_player': 'Modification Joueur',
+      'delete_player': 'Suppression Joueur'
     };
     return labels[type] || type;
   }

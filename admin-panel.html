@@ -30,6 +30,14 @@
                     <span class="admin-nav-icon">🏆</span>
                     <span>Tous les Tournois</span>
                 </div>
+                <div class="admin-nav-item" data-page="categories">
+                    <span class="admin-nav-icon">📂</span>
+                    <span>Catégories</span>
+                </div>
+                <div class="admin-nav-item" data-page="players">
+                    <span class="admin-nav-icon">👥</span>
+                    <span>Joueurs</span>
+                </div>
                 <div class="admin-nav-item" data-page="purge">
                     <span class="admin-nav-icon">🗑️</span>
                     <span>Purge</span>
@@ -151,6 +159,39 @@
                         </table>
 
                         <div class="admin-pagination" id="tournamentsPagination"></div>
+                    </div>
+                </div>
+
+                <!-- Categories Page -->
+                <div id="categoriesPage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Gestion des Catégories</h2>
+                            <button class="admin-btn admin-btn-primary" onclick="showAddCategoryModal()">
+                                ➕ Ajouter une Catégorie
+                            </button>
+                        </div>
+
+                        <div id="categoriesListContainer">
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                Chargement des catégories...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players Page -->
+                <div id="playersPage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Gestion des Joueurs</h2>
+                        </div>
+
+                        <div id="playersListContainer">
+                            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                Chargement des joueurs...
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -288,6 +329,100 @@
         </div>
     </div>
 
+    <!-- Add Category Modal -->
+    <div class="admin-modal" id="addCategoryModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Ajouter une Catégorie</h2>
+                <button class="admin-modal-close" onclick="closeAddCategoryModal()">✕</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="addCategoryForm">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Nom de la Catégorie</label>
+                        <input 
+                            type="text" 
+                            id="categoryNameInput" 
+                            class="admin-form-input"
+                            placeholder="Ex: Hacksawgaming"
+                            required
+                        >
+                        <div class="admin-form-error" id="addCategoryError"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeAddCategoryModal()">Annuler</button>
+                <button class="btn-primary" onclick="saveNewCategory()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Player Modal -->
+    <div class="admin-modal" id="addPlayerModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Ajouter un Joueur</h2>
+                <button class="admin-modal-close" onclick="closeAddPlayerModal()">✕</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="addPlayerForm">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Catégorie</label>
+                        <p id="addPlayerCategoryDisplay" style="margin: 0; font-weight: 500; color: var(--primary-color);"></p>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Nom du Joueur</label>
+                        <input 
+                            type="text" 
+                            id="playerNameInput" 
+                            class="admin-form-input"
+                            placeholder="Ex: Jean Dupont"
+                            required
+                        >
+                        <div class="admin-form-error" id="addPlayerError"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeAddPlayerModal()">Annuler</button>
+                <button class="btn-primary" onclick="saveNewPlayer()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Player Modal -->
+    <div class="admin-modal" id="editPlayerModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Modifier un Joueur</h2>
+                <button class="admin-modal-close" onclick="closeEditPlayerModal()">✕</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="editPlayerForm">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Catégorie</label>
+                        <p id="editPlayerCategoryDisplay" style="margin: 0; font-weight: 500; color: var(--primary-color);"></p>
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Nom du Joueur</label>
+                        <input 
+                            type="text" 
+                            id="editPlayerNameInput" 
+                            class="admin-form-input"
+                            required
+                        >
+                        <div class="admin-form-error" id="editPlayerError"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeEditPlayerModal()">Annuler</button>
+                <button class="btn-primary" onclick="saveEditedPlayer()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script>
@@ -306,6 +441,7 @@
     </script>
     <script src="/admin-auth.js"></script>
     <script src="/admin-manager.js"></script>
+    <script src="/admin-players-manager.js"></script>
     <script src="/admin-panel.js"></script>
 </body>
 </html>

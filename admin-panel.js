@@ -2,6 +2,8 @@
 
 let currentDetailTournament = null;
 let currentEditTournament = null;
+let currentAddPlayerCategory = null;
+let currentEditPlayer = null;
 
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -13,6 +15,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize admin manager
   await adminManager.init();
+
+  // Initialize players manager
+  await adminPlayersManager.loadPlayers();
 
   // Setup navigation
   setupNavigation();
@@ -51,6 +56,8 @@ function showPage(page) {
   const pageTitle = {
     'dashboard': 'Dashboard',
     'tournaments': 'Tous les Tournois',
+    'categories': 'Gestion des Catégories',
+    'players': 'Gestion des Joueurs',
     'purge': 'Purge en Masse',
     'history': 'Historique des Actions'
   };
@@ -63,6 +70,12 @@ function showPage(page) {
       break;
     case 'tournaments':
       showTournaments();
+      break;
+    case 'categories':
+      showCategories();
+      break;
+    case 'players':
+      showPlayers();
       break;
     case 'purge':
       showPurge();
@@ -553,4 +566,293 @@ function confirmDeleteSelected() {
 
 function exportSelectedTournaments() {
   adminManager.exportSelectedTournaments();
+}
+
+// ============ CATEGORIES MANAGEMENT ============
+
+function showCategories() {
+  document.getElementById('categoriesPage').style.display = 'block';
+  renderCategories();
+}
+
+function renderCategories() {
+  const categories = adminPlayersManager.getCategories();
+  const container = document.getElementById('categoriesListContainer');
+
+  if (categories.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+        <div style="font-size: 3rem; margin-bottom: 16px;">📂</div>
+        <p>Aucune catégorie créée</p>
+        <p style="font-size: 0.9rem;">Cliquez sur "Ajouter une Catégorie" pour commencer</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '<div class="admin-categories-grid">';
+
+  categories.forEach(category => {
+    const playerCount = adminPlayersManager.getPlayersInCategory(category).length;
+    const playerText = playerCount === 1 ? 'joueur' : 'joueurs';
+    
+    html += `
+      <div class="admin-category-card">
+        <div class="admin-category-header">
+          <h3 class="admin-category-title">${escapeHtml(category)}</h3>
+          <span class="admin-category-badge">${playerCount} ${playerText}</span>
+        </div>
+        <div class="admin-category-actions">
+          <button class="admin-btn admin-btn-secondary" onclick="showAddPlayerModal('${escapeHtml(category)}')">
+            ➕ Ajouter Joueur
+          </button>
+          <button class="admin-btn admin-btn-danger" onclick="confirmDeleteCategory('${escapeHtml(category)}')">
+            🗑️ Supprimer
+          </button>
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function showAddCategoryModal() {
+  document.getElementById('addCategoryError').textContent = '';
+  document.getElementById('categoryNameInput').value = '';
+  document.getElementById('addCategoryModal').classList.add('show');
+  setTimeout(() => document.getElementById('categoryNameInput').focus(), 100);
+  
+  const input = document.getElementById('categoryNameInput');
+  input.onkeypress = (e) => {
+    if (e.key === 'Enter') {
+      saveNewCategory();
+    }
+  };
+}
+
+function closeAddCategoryModal() {
+  document.getElementById('addCategoryModal').classList.remove('show');
+  document.getElementById('addCategoryError').textContent = '';
+}
+
+function saveNewCategory() {
+  const categoryName = document.getElementById('categoryNameInput').value.trim();
+  const errorDiv = document.getElementById('addCategoryError');
+  errorDiv.textContent = '';
+
+  if (!categoryName) {
+    errorDiv.textContent = 'Le nom de la catégorie est requis';
+    return;
+  }
+
+  const result = adminPlayersManager.addCategory(categoryName);
+  
+  if (!result.success) {
+    errorDiv.textContent = result.error;
+    return;
+  }
+
+  showAdminToast('Succès', `Catégorie "${categoryName}" ajoutée avec succès`, 'success');
+  closeAddCategoryModal();
+  renderCategories();
+}
+
+function confirmDeleteCategory(categoryName) {
+  const playerCount = adminPlayersManager.getPlayersInCategory(categoryName).length;
+  const playerText = playerCount === 1 ? 'joueur' : 'joueurs';
+  const message = playerCount > 0 
+    ? `Êtes-vous sûr de vouloir supprimer la catégorie "${categoryName}" ? (${playerCount} ${playerText} seront supprimés)`
+    : `Êtes-vous sûr de vouloir supprimer la catégorie "${categoryName}" ?`;
+
+  if (confirm(message)) {
+    const result = adminPlayersManager.deleteCategory(categoryName);
+    
+    if (result.success) {
+      showAdminToast('Succès', `Catégorie supprimée avec succès`, 'success');
+      renderCategories();
+    } else {
+      showAdminToast('Erreur', result.error, 'error');
+    }
+  }
+}
+
+// ============ PLAYERS MANAGEMENT ============
+
+function showPlayers() {
+  document.getElementById('playersPage').style.display = 'block';
+  renderPlayers();
+}
+
+function renderPlayers() {
+  const categories = adminPlayersManager.getCategories();
+  const container = document.getElementById('playersListContainer');
+
+  if (categories.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+        <div style="font-size: 3rem; margin-bottom: 16px;">👥</div>
+        <p>Aucune catégorie disponible</p>
+        <p style="font-size: 0.9rem;">Créez d'abord une catégorie dans la section "Catégories"</p>
+      </div>
+    `;
+    return;
+  }
+
+  let html = '<div class="admin-players-sections">';
+
+  categories.forEach(category => {
+    const players = adminPlayersManager.getPlayersInCategory(category);
+    
+    html += `
+      <div class="admin-player-section">
+        <div class="admin-section-header">
+          <h3 class="admin-section-title">${escapeHtml(category)}</h3>
+          <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="showAddPlayerModal('${escapeHtml(category)}')">
+            ➕ Ajouter
+          </button>
+        </div>
+        
+        ${players.length === 0 ? `
+          <div style="padding: 30px; text-align: center; color: var(--text-secondary); background: var(--hover-bg); border-radius: 6px;">
+            Aucun joueur dans cette catégorie
+          </div>
+        ` : `
+          <div class="admin-players-list">
+            ${players.map(player => `
+              <div class="admin-player-item">
+                <div class="admin-player-info">
+                  <div class="admin-player-id">ID: ${player.id}</div>
+                  <div class="admin-player-name">${escapeHtml(player.name)}</div>
+                </div>
+                <div class="admin-player-actions">
+                  <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="showEditPlayerModal('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
+                    ✏️
+                  </button>
+                  <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="confirmDeletePlayer('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `}
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function showAddPlayerModal(categoryName) {
+  currentAddPlayerCategory = categoryName;
+  document.getElementById('addPlayerError').textContent = '';
+  document.getElementById('playerNameInput').value = '';
+  document.getElementById('addPlayerCategoryDisplay').textContent = categoryName;
+  document.getElementById('addPlayerModal').classList.add('show');
+  setTimeout(() => document.getElementById('playerNameInput').focus(), 100);
+  
+  const input = document.getElementById('playerNameInput');
+  input.onkeypress = (e) => {
+    if (e.key === 'Enter') {
+      saveNewPlayer();
+    }
+  };
+}
+
+function closeAddPlayerModal() {
+  document.getElementById('addPlayerModal').classList.remove('show');
+  document.getElementById('addPlayerError').textContent = '';
+  currentAddPlayerCategory = null;
+}
+
+function saveNewPlayer() {
+  if (!currentAddPlayerCategory) {
+    showAdminToast('Erreur', 'Aucune catégorie sélectionnée', 'error');
+    return;
+  }
+
+  const playerName = document.getElementById('playerNameInput').value.trim();
+  const errorDiv = document.getElementById('addPlayerError');
+  errorDiv.textContent = '';
+
+  if (!playerName) {
+    errorDiv.textContent = 'Le nom du joueur est requis';
+    return;
+  }
+
+  const result = adminPlayersManager.addPlayer(currentAddPlayerCategory, playerName);
+
+  if (!result.success) {
+    errorDiv.textContent = result.error;
+    return;
+  }
+
+  showAdminToast('Succès', `Joueur "${playerName}" ajouté avec succès`, 'success');
+  closeAddPlayerModal();
+  renderPlayers();
+}
+
+function showEditPlayerModal(categoryName, playerId, playerName) {
+  currentEditPlayer = { categoryName, playerId };
+  document.getElementById('editPlayerError').textContent = '';
+  document.getElementById('editPlayerNameInput').value = playerName;
+  document.getElementById('editPlayerCategoryDisplay').textContent = categoryName;
+  document.getElementById('editPlayerModal').classList.add('show');
+  setTimeout(() => document.getElementById('editPlayerNameInput').focus(), 100);
+  
+  const input = document.getElementById('editPlayerNameInput');
+  input.onkeypress = (e) => {
+    if (e.key === 'Enter') {
+      saveEditedPlayer();
+    }
+  };
+}
+
+function closeEditPlayerModal() {
+  document.getElementById('editPlayerModal').classList.remove('show');
+  document.getElementById('editPlayerError').textContent = '';
+  currentEditPlayer = null;
+}
+
+function saveEditedPlayer() {
+  if (!currentEditPlayer) {
+    showAdminToast('Erreur', 'Aucun joueur sélectionné', 'error');
+    return;
+  }
+
+  const newName = document.getElementById('editPlayerNameInput').value.trim();
+  const errorDiv = document.getElementById('editPlayerError');
+  errorDiv.textContent = '';
+
+  if (!newName) {
+    errorDiv.textContent = 'Le nom du joueur est requis';
+    return;
+  }
+
+  const result = adminPlayersManager.editPlayer(currentEditPlayer.categoryName, currentEditPlayer.playerId, newName);
+
+  if (!result.success) {
+    errorDiv.textContent = result.error;
+    return;
+  }
+
+  showAdminToast('Succès', `Joueur modifié avec succès`, 'success');
+  closeEditPlayerModal();
+  renderPlayers();
+}
+
+function confirmDeletePlayer(categoryName, playerId, playerName) {
+  if (confirm(`Êtes-vous sûr de vouloir supprimer le joueur "${playerName}" ?`)) {
+    const result = adminPlayersManager.deletePlayer(categoryName, playerId);
+
+    if (result.success) {
+      showAdminToast('Succès', `Joueur supprimé avec succès`, 'success');
+      renderPlayers();
+    } else {
+      showAdminToast('Erreur', result.error, 'error');
+    }
+  }
 }
