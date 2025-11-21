@@ -483,6 +483,153 @@ tbody tr:hover {
   background: var(--hover-bg);
 }
 
+.admin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Bulk Actions */
+.admin-bulk-actions {
+  padding: 16px 24px;
+  background: var(--hover-bg);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideDown 0.3s ease;
+}
+
+.admin-bulk-actions-info {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  font-weight: 500;
+}
+
+.admin-bulk-actions-info #selectedCount {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.admin-bulk-actions-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+/* Checkboxes */
+.admin-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--input-bg);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.admin-checkbox:checked {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.admin-checkbox:checked::after {
+  content: '✓';
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.admin-checkbox:hover:not(:checked) {
+  border-color: var(--primary-color);
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.admin-checkbox:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Checkbox dans le header */
+thead th .admin-checkbox {
+  margin: 0 auto;
+}
+
+/* Table row selection */
+tbody tr.selected {
+  background: rgba(102, 126, 234, 0.1) !important;
+  border-left: 3px solid var(--primary-color);
+}
+
+tbody tr.selected:hover {
+  background: rgba(102, 126, 234, 0.2) !important;
+}
+
+/* Animation for bulk actions */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.admin-bulk-actions.hiding {
+  animation: slideUp 0.3s ease forwards;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-bulk-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .admin-bulk-actions-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .admin-bulk-actions-buttons .admin-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .admin-table-container {
+    overflow-x: auto;
+  }
+  
+  .admin-table-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .admin-search-input {
+    width: 100%;
+    min-width: auto;
+  }
+}
+
 /* Modal Dialogs */
 .admin-modal {
   position: fixed;

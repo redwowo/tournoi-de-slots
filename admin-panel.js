@@ -118,8 +118,9 @@ function renderTournaments(page = 1) {
   tbody.innerHTML = '';
 
   if (paginated.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px;">Aucun tournoi trouvé</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 40px;">Aucun tournoi trouvé</td></tr>';
     document.getElementById('tournamentsPagination').innerHTML = '';
+    adminManager.updateBulkActionsUI();
     return;
   }
 
@@ -127,8 +128,19 @@ function renderTournaments(page = 1) {
     const row = document.createElement('tr');
     const statusColor = tournament.status === 'Terminé' ? '#10b981' : 
                        tournament.status === 'En cours' ? '#3b82f6' : '#a0a0a0';
+    
+    const isSelected = adminManager.selectedTournaments.has(tournament.id);
+    if (isSelected) {
+      row.classList.add('selected');
+    }
 
     row.innerHTML = `
+      <td>
+        <input type="checkbox" 
+               class="admin-checkbox" 
+               ${isSelected ? 'checked' : ''} 
+               onchange="toggleTournamentSelection('${tournament.id}')">
+      </td>
       <td><strong>${escapeHtml(tournament.name)}</strong></td>
       <td>${escapeHtml(tournament.creator)}</td>
       <td>${tournament.createdAt.toLocaleDateString('fr-FR')}</td>
@@ -164,6 +176,9 @@ function renderTournaments(page = 1) {
 
   // Pagination
   renderPagination('tournamentsPagination', filtered.length, page, (p) => renderTournaments(p));
+  
+  // Mettre à jour l'UI des actions en masse
+  adminManager.updateBulkActionsUI();
 }
 
 // View tournament detail
@@ -514,4 +529,28 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Fonctions pour la sélection multiple
+function toggleTournamentSelection(tournamentId) {
+  adminManager.toggleTournamentSelection(tournamentId);
+  renderTournaments(1); // Re-render pour mettre à jour les classes CSS
+}
+
+function toggleSelectAll() {
+  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+  // Si le checkbox est indeterminate et qu'on clique, on considère qu'on veut tout sélectionner
+  const shouldSelectAll = selectAllCheckbox.indeterminate ? true : selectAllCheckbox.checked;
+  adminManager.selectAllTournaments(shouldSelectAll);
+  renderTournaments(1); // Re-render pour mettre à jour les classes CSS
+}
+
+function confirmDeleteSelected() {
+  adminManager.deleteSelectedTournaments().then(() => {
+    renderTournaments(1);
+  });
+}
+
+function exportSelectedTournaments() {
+  adminManager.exportSelectedTournaments();
 }
