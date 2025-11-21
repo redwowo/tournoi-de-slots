@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Gestion des Tournois</title>
+    <link rel="icon" type="image/png" href="/fly.png">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">🌓</button>
+
+    <div class="admin-panel-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="admin-sidebar-header">
+                <h2 class="admin-sidebar-title">Admin Panel</h2>
+                <p class="admin-sidebar-subtitle">Gestion des Tournois</p>
+            </div>
+
+            <nav class="admin-nav">
+                <div class="admin-nav-item active" data-page="dashboard">
+                    <span class="admin-nav-icon">📊</span>
+                    <span>Dashboard</span>
+                </div>
+                <div class="admin-nav-item" data-page="tournaments">
+                    <span class="admin-nav-icon">🏆</span>
+                    <span>Tous les Tournois</span>
+                </div>
+                <div class="admin-nav-item" data-page="purge">
+                    <span class="admin-nav-icon">🗑️</span>
+                    <span>Purge</span>
+                </div>
+                <div class="admin-nav-item" data-page="history">
+                    <span class="admin-nav-icon">📋</span>
+                    <span>Historique</span>
+                </div>
+            </nav>
+
+            <div class="admin-sidebar-footer">
+                <button class="admin-logout-btn" onclick="adminAuthManager.logout('Vous avez été déconnecté.')">
+                    Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <!-- Topbar -->
+            <div class="admin-topbar">
+                <h1 class="admin-topbar-title" id="pageTitle">Dashboard</h1>
+                <div class="admin-topbar-info">
+                    <div class="admin-session-timer" id="sessionTimer">Session active</div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="admin-content">
+                <!-- Dashboard Page -->
+                <div id="dashboardPage" class="admin-page">
+                    <div class="admin-stats-grid" id="statsGrid">
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">🏆</div>
+                            <div class="admin-stat-label">Total Tournois</div>
+                            <div class="admin-stat-value" id="statTotalTournaments">0</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">👥</div>
+                            <div class="admin-stat-label">Joueurs Totaux</div>
+                            <div class="admin-stat-value" id="statTotalPlayers">0</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">⚔️</div>
+                            <div class="admin-stat-label">Matchs Totaux</div>
+                            <div class="admin-stat-value" id="statTotalMatches">0</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">✅</div>
+                            <div class="admin-stat-label">Tournois Terminés</div>
+                            <div class="admin-stat-value" id="statCompletedTournaments">0</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">🔄</div>
+                            <div class="admin-stat-label">En Cours</div>
+                            <div class="admin-stat-value" id="statActiveTournaments">0</div>
+                        </div>
+                        <div class="admin-stat-card">
+                            <div class="admin-stat-icon">⏳</div>
+                            <div class="admin-stat-label">En Attente</div>
+                            <div class="admin-stat-value" id="statPendingTournaments">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tournaments Page -->
+                <div id="tournamentsPage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Tous les Tournois</h2>
+                            <div class="admin-table-toolbar">
+                                <input 
+                                    type="text" 
+                                    class="admin-search-input" 
+                                    id="tournamentSearch" 
+                                    placeholder="Rechercher par nom ou créateur..."
+                                >
+                                <select class="admin-search-input" id="statusFilter" style="min-width: 150px;">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="En attente">En attente</option>
+                                    <option value="En cours">En cours</option>
+                                    <option value="Terminé">Terminé</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <table id="tournamentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Créateur</th>
+                                    <th>Créé le</th>
+                                    <th>Statut</th>
+                                    <th>Joueurs</th>
+                                    <th>Matchs</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tournamentsTableBody">
+                            </tbody>
+                        </table>
+
+                        <div class="admin-pagination" id="tournamentsPagination"></div>
+                    </div>
+                </div>
+
+                <!-- Purge Page -->
+                <div id="purgePage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container" style="max-width: 600px;">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Purge en Masse</h2>
+                        </div>
+
+                        <div class="admin-modal-body">
+                            <div class="admin-form-group">
+                                <label class="admin-form-label">Sélectionner une date</label>
+                                <p style="color: var(--text-secondary); margin: 0 0 12px 0; font-size: 0.9rem;">
+                                    Les tournois créés AVANT cette date seront supprimés.
+                                </p>
+                                <input 
+                                    type="date" 
+                                    id="purgeDate" 
+                                    class="admin-form-input"
+                                >
+                            </div>
+
+                            <div id="purgePreview" style="display: none;">
+                                <div class="admin-form-group">
+                                    <label class="admin-form-label">Aperçu de la purge</label>
+                                    <div style="background: var(--hover-bg); padding: 16px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                        <p style="margin: 0 0 8px 0;">
+                                            <strong id="purgeTournamentCount">0</strong> tournoi(s) seront supprimés
+                                        </p>
+                                        <p style="margin: 0 0 8px 0;">
+                                            Espace économisé: <strong id="purgeSpaceEstimate">0 KB</strong>
+                                        </p>
+                                        <p style="margin: 0; font-size: 0.85rem; color: var(--text-secondary);">
+                                            Cette action est irréversible. Les données seront exportées avant suppression.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div class="admin-form-group">
+                                    <button class="btn-outline" onclick="hidePurgePreview()">Annuler</button>
+                                    <button class="btn-danger" onclick="confirmPurge()" style="margin-left: 8px;">
+                                        Confirmer la Purge
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="purgeNotPreview">
+                                <button class="btn-primary" onclick="previewPurge()" style="width: 100%;">
+                                    Prévisualiser la Purge
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Page -->
+                <div id="historyPage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Historique des Actions</h2>
+                            <button class="admin-btn admin-btn-primary" onclick="adminManager.exportHistoryAsCSV()">
+                                📥 Exporter en CSV
+                            </button>
+                        </div>
+
+                        <table id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Heure</th>
+                                    <th>Type</th>
+                                    <th>Détails</th>
+                                    <th>Tournoi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                            </tbody>
+                        </table>
+
+                        <div class="admin-pagination" id="historyPagination"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tournament Detail Modal -->
+    <div class="admin-modal" id="tournamentDetailModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title" id="detailModalTitle">Détails du Tournoi</h2>
+                <button class="admin-modal-close" onclick="closeTournamentDetail()">✕</button>
+            </div>
+            <div class="admin-modal-body" id="detailModalBody">
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeTournamentDetail()">Fermer</button>
+                <button class="btn-danger" id="deleteDetailBtn" onclick="deleteTournamentFromDetail()">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Tournament Modal -->
+    <div class="admin-modal" id="editTournamentModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Modifier le Tournoi</h2>
+                <button class="admin-modal-close" onclick="closeEditTournament()">✕</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="editTournamentForm">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Nom du Tournoi</label>
+                        <input 
+                            type="text" 
+                            id="editTournamentName" 
+                            class="admin-form-input"
+                            required
+                        >
+                    </div>
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Description</label>
+                        <textarea 
+                            id="editTournamentDescription" 
+                            class="admin-form-textarea"
+                        ></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeEditTournament()">Annuler</button>
+                <button class="btn-primary" onclick="saveEditedTournament()">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script>
+      // Initialize Firebase for admin panel
+      const firebaseConfig = {
+        apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
+        authDomain: "tournoi-de-slots.firebaseapp.com",
+        projectId: "tournoi-de-slots",
+        storageBucket: "tournoi-de-slots.appspot.com",
+        messagingSenderId: "834358073654",
+        appId: "1:834358073654:web:6d935be1322c9450e37b97",
+        measurementId: "G-MZKD5K781T"
+      };
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+    </script>
+    <script src="/admin-auth.js"></script>
+    <script src="/admin-manager.js"></script>
+    <script src="/admin-panel.js"></script>
+</body>
+</html>
