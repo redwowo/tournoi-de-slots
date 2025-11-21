@@ -9,24 +9,47 @@ class AdminPlayersManager {
   // Load players from localStorage or file
   async loadPlayers() {
     try {
-      // Try to load from localStorage first
+      // Always load from players.json first as the base data
+      const response = await fetch('/players.json');
+      if (response.ok) {
+        const baseData = await response.json();
+        
+        // Check if localStorage has user modifications
+        const stored = localStorage.getItem('adminPlayers');
+        const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
+        
+        if (stored && hasModifications) {
+          // User has made modifications, use localStorage data
+          this.categories = JSON.parse(stored);
+        } else {
+          // No modifications or old data, use players.json
+          this.categories = baseData;
+          // Clear any old localStorage data
+          localStorage.removeItem('adminPlayers');
+          localStorage.removeItem('adminPlayersModified');
+        }
+        
+        this.updateNextPlayerId();
+      } else {
+        // Fallback to localStorage if players.json can't be loaded
+        const stored = localStorage.getItem('adminPlayers');
+        if (stored) {
+          this.categories = JSON.parse(stored);
+          this.updateNextPlayerId();
+        } else {
+          this.categories = {};
+        }
+      }
+    } catch (error) {
+      console.error('Error loading players:', error);
+      // Fallback to localStorage on error
       const stored = localStorage.getItem('adminPlayers');
       if (stored) {
         this.categories = JSON.parse(stored);
         this.updateNextPlayerId();
-        return;
+      } else {
+        this.categories = {};
       }
-
-      // Otherwise, fetch from players.json
-      const response = await fetch('/players.json');
-      if (response.ok) {
-        this.categories = await response.json();
-        this.updateNextPlayerId();
-        this.savePlayers();
-      }
-    } catch (error) {
-      console.error('Error loading players:', error);
-      this.categories = {};
     }
   }
 
@@ -46,6 +69,21 @@ class AdminPlayersManager {
   // Save players to localStorage
   savePlayers() {
     localStorage.setItem('adminPlayers', JSON.stringify(this.categories));
+    // Mark that user has made modifications
+    localStorage.setItem('adminPlayersModified', 'true');
+  }
+
+  // Reset to base data from players.json (clear all modifications)
+  async resetToBaseData() {
+    try {
+      localStorage.removeItem('adminPlayers');
+      localStorage.removeItem('adminPlayersModified');
+      await this.loadPlayers();
+      return { success: true };
+    } catch (error) {
+      console.error('Error resetting to base data:', error);
+      return { success: false, error: 'Erreur lors de la réinitialisation' };
+    }
   }
 
   // Get all categories
