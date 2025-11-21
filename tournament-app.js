@@ -384,6 +384,54 @@ function getMachineURL(machineName, category) {
   return baseURL + prefix + formattedName
 }
 
+// ===== NORMALISATEUR DE DATES FIRESTORE =====
+
+// Helper function to normalize dates from Firestore state
+// Converts Firestore Timestamps and date strings to Date objects
+function normalizeStateDates(state) {
+  if (!state) return state;
+
+  // Helper to convert a single date/timestamp value
+  const convertToDate = (value) => {
+    if (!value) return value;
+    
+    // If it's already a Date object, return as is
+    if (value instanceof Date) {
+      return value;
+    }
+    
+    // If it has a toDate method (Firestore Timestamp), use it
+    if (value && typeof value.toDate === 'function') {
+      return value.toDate();
+    }
+    
+    // If it's a string, parse it as a Date
+    if (typeof value === 'string') {
+      return new Date(value);
+    }
+    
+    return value;
+  };
+
+  // Normalize previousWinners dates
+  if (state.previousWinners && Array.isArray(state.previousWinners)) {
+    state.previousWinners = state.previousWinners.map(winner => ({
+      ...winner,
+      date: convertToDate(winner.date)
+    }));
+  }
+
+  // Normalize eliminationHistory times
+  if (state.eliminationHistory && Array.isArray(state.eliminationHistory)) {
+    state.eliminationHistory = state.eliminationHistory.map(elimination => ({
+      ...elimination,
+      time: convertToDate(elimination.time)
+    }));
+  }
+
+  return state;
+}
+
 // ===== FONCTIONS UI =====
 
 // Fonction pour sauvegarder les données dans localStorage
@@ -418,21 +466,20 @@ function loadDataFromLocalStorage() {
       TournamentApp.eliminated = tournamentData.eliminated || []
       TournamentApp.winner = tournamentData.winner || ""
       TournamentApp.tournamentStarted = tournamentData.tournamentStarted || false
-      TournamentApp.eliminationHistory = tournamentData.eliminationHistory || []
       TournamentApp.tournamentCompleted = tournamentData.tournamentCompleted || false
+      TournamentApp.eliminationHistory = tournamentData.eliminationHistory || []
+      TournamentApp.previousWinners = tournamentData.previousWinners || []
 
-      // Convertir les dates de chaîne en objets Date
+      // Normalize dates from localStorage (handle both strings and Date objects)
       TournamentApp.eliminationHistory.forEach((item) => {
-        if (typeof item.time === "string") {
+        if (typeof item.time === "string" || (item.time && typeof item.time.toDate === 'function')) {
           item.time = new Date(item.time)
         }
       })
 
-      TournamentApp.previousWinners = tournamentData.previousWinners || []
-
-      // Convertir les dates de chaîne en objets Date pour les gagnants précédents
+      // Normalize dates from localStorage for previous winners
       TournamentApp.previousWinners.forEach((item) => {
-        if (typeof item.date === "string") {
+        if (typeof item.date === "string" || (item.date && typeof item.date.toDate === 'function')) {
           item.date = new Date(item.date)
         }
       })
@@ -2576,6 +2623,9 @@ async function onAction(newState) {
 }
 
 function updateTournamentUI(state) {
+  // Normalize dates from Firestore (convert Timestamps and strings to Date objects)
+  state = normalizeStateDates(state);
+
   // Met à jour l'état du tournoi à partir de l'objet reçu de Firestore
   TournamentApp.players = state.players || [];
   TournamentApp.eliminated = state.eliminated || [];
