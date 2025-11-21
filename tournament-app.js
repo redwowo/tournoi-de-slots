@@ -61,6 +61,13 @@ function getMachineURL(machineName, category) {
 
 // ===== FONCTIONS DE CHARGEMENT DES MACHINES =====
 
+// Variable pour stocker les données complètes des machines par catégorie
+let machinesData = {
+  "Hacksaw Gaming": [],
+  "Nolimit City": [],
+  "Pragmatic Play": []
+};
+
 // Fonction pour charger les machines depuis players.json
 async function loadMachinesFromPlayersJson() {
   try {
@@ -70,10 +77,15 @@ async function loadMachinesFromPlayersJson() {
     }
     const data = await response.json();
     
+    // Stocker les données complètes et extraire les noms
+    machinesData["Hacksaw Gaming"] = data["Hacksaw Gaming"] || [];
+    machinesData["Nolimit City"] = data["Nolimit City"] || [];
+    machinesData["Pragmatic Play"] = data["Pragmatic Play"] || [];
+    
     // Extraire les noms des machines par catégorie
-    TournamentApp.slotMachines = data["Hacksaw Gaming"] ? data["Hacksaw Gaming"].map(machine => machine.name) : [];
-    TournamentApp.nolimitCityMachines = data["Nolimit City"] ? data["Nolimit City"].map(machine => machine.name) : [];
-    TournamentApp.pragmaticPlayMachines = data["Pragmatic Play"] ? data["Pragmatic Play"].map(machine => machine.name) : [];
+    TournamentApp.slotMachines = machinesData["Hacksaw Gaming"].map(machine => machine.name);
+    TournamentApp.nolimitCityMachines = machinesData["Nolimit City"].map(machine => machine.name);
+    TournamentApp.pragmaticPlayMachines = machinesData["Pragmatic Play"].map(machine => machine.name);
     
     console.log('Machines chargées depuis players.json:', {
       'Hacksaw Gaming': TournamentApp.slotMachines.length,
@@ -88,6 +100,50 @@ async function loadMachinesFromPlayersJson() {
     TournamentApp.slotMachines = [];
     TournamentApp.nolimitCityMachines = [];
     TournamentApp.pragmaticPlayMachines = [];
+  }
+}
+
+// Fonction pour recharger les machines quand l'admin fait des modifications
+async function reloadMachinesFromAdminChanges() {
+  console.log('Reloading machines due to admin changes...');
+  await loadMachinesFromPlayersJson();
+  
+  // Mettre à jour le dialogue de sélection aléatoire si ouvert
+  updateRandomSlotDialogOptions();
+  updateMaxAvailableSlots();
+  
+  // Mettre à jour les suggestions si le champ de saisie est visible
+  const playerNameInput = document.getElementById('playerName');
+  if (playerNameInput && playerNameInput.value) {
+    showSuggestions(playerNameInput);
+  }
+}
+
+// Fonction pour mettre à jour les options du dialogue de sélection aléatoire
+function updateRandomSlotDialogOptions() {
+  const slotTypeSelection = document.getElementById('slotTypeSelection');
+  if (!slotTypeSelection) return;
+
+  // Récupérer les catégories actuellement disponibles
+  const categories = {
+    'hacksaw': TournamentApp.slotMachines.length > 0 ? 'Hacksaw Gaming' : null,
+    'nolimit': TournamentApp.nolimitCityMachines.length > 0 ? 'Nolimit City' : null,
+    'pragmatic': TournamentApp.pragmaticPlayMachines.length > 0 ? 'Pragmatic Play' : null
+  };
+
+  // Mettre à jour la visibilité de chaque catégorie
+  const hacksawOption = slotTypeSelection.querySelector('[data-value="hacksaw"]');
+  const nolimitOption = slotTypeSelection.querySelector('[data-value="nolimit"]');
+  const pragmaticOption = slotTypeSelection.querySelector('[data-value="pragmatic"]');
+
+  if (hacksawOption) {
+    hacksawOption.style.display = categories.hacksaw ? 'flex' : 'none';
+  }
+  if (nolimitOption) {
+    nolimitOption.style.display = categories.nolimit ? 'flex' : 'none';
+  }
+  if (pragmaticOption) {
+    pragmaticOption.style.display = categories.pragmatic ? 'flex' : 'none';
   }
 }
 
@@ -808,6 +864,8 @@ function showRandomSlotDialog() {
     }
   })
 
+  // Mettre à jour les options du dialogue (au cas où les catégories auraient changé)
+  updateRandomSlotDialogOptions()
   updateMaxAvailableSlots()
 
   document.getElementById("randomSlotDialog").style.display = "flex"
@@ -2033,6 +2091,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isSpectatorMode) {
       exitSpectatorMode();
+    }
+  });
+
+  // 11. Écouter les changements de données de joueurs/machines depuis l'admin
+  window.addEventListener('adminPlayersUpdated', async (event) => {
+    console.log('Admin players data updated, reloading machines...');
+    await reloadMachinesFromAdminChanges();
+  });
+
+  // Aussi écouter les changements localStorage depuis d'autres onglets
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'adminPlayersLastUpdate') {
+      console.log('Admin players data changed in another tab, reloading...');
+      reloadMachinesFromAdminChanges();
     }
   });
 });
