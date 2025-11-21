@@ -960,7 +960,7 @@ tbody tr.selected:hover {
 .accordion-content {
   padding: 16px;
   border-top: 1px solid var(--border-color);
-  max-height: 1000px;
+  max-height: 50000px;
   overflow: hidden;
   transition: all 0.3s ease;
 }
