@@ -680,6 +680,25 @@ function confirmDeleteCategory(categoryName) {
 
 // ============ PLAYERS MANAGEMENT ============
 
+// Get collapsed categories from localStorage
+function getCollapsedCategories() {
+  const stored = localStorage.getItem('adminPlayerCategoriesCollapsed');
+  return stored ? JSON.parse(stored) : {};
+}
+
+// Save collapsed categories to localStorage
+function saveCollapsedCategories(collapsed) {
+  localStorage.setItem('adminPlayerCategoriesCollapsed', JSON.stringify(collapsed));
+}
+
+// Toggle category collapse state
+function toggleCategoryCollapse(category) {
+  const collapsed = getCollapsedCategories();
+  collapsed[category] = !collapsed[category];
+  saveCollapsedCategories(collapsed);
+  renderPlayers();
+}
+
 function showPlayers() {
   document.getElementById('playersPage').style.display = 'block';
   renderPlayers();
@@ -688,6 +707,7 @@ function showPlayers() {
 function renderPlayers() {
   const categories = adminPlayersManager.getCategories();
   const container = document.getElementById('playersListContainer');
+  const collapsedCategories = getCollapsedCategories();
 
   if (categories.length === 0) {
     container.innerHTML = `
@@ -704,40 +724,50 @@ function renderPlayers() {
 
   categories.forEach(category => {
     const players = adminPlayersManager.getPlayersInCategory(category);
+    // Sort players alphabetically by name (A-Z)
+    const sortedPlayers = [...players].sort((a, b) => a.name.localeCompare(b.name, 'fr', { numeric: true }));
+    
+    const isCollapsed = collapsedCategories[category] === true;
+    const chevronRotation = isCollapsed ? '0deg' : '90deg';
     
     html += `
-      <div class="admin-player-section">
-        <div class="admin-section-header">
-          <h3 class="admin-section-title">${escapeHtml(category)}</h3>
-          <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="showAddPlayerModal('${escapeHtml(category)}')">
+      <div class="admin-player-section ${isCollapsed ? 'collapsed' : ''}">
+        <div class="admin-section-header accordion-header" onclick="toggleCategoryCollapse('${escapeHtml(category).replace(/'/g, "\\'")}')">
+          <div class="admin-section-header-title">
+            <span class="accordion-chevron" style="transform: rotate(${chevronRotation}); transition: transform 0.2s ease;">▶</span>
+            <h3 class="admin-section-title">${escapeHtml(category)}</h3>
+          </div>
+          <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="event.stopPropagation(); showAddPlayerModal('${escapeHtml(category)}')">
             ➕ Ajouter
           </button>
         </div>
         
-        ${players.length === 0 ? `
-          <div style="padding: 30px; text-align: center; color: var(--text-secondary); background: var(--hover-bg); border-radius: 6px;">
-            Aucun joueur dans cette catégorie
-          </div>
-        ` : `
-          <div class="admin-players-list">
-            ${players.map(player => `
-              <div class="admin-player-item">
-                <div class="admin-player-info">
-                  <div class="admin-player-id">ID: ${player.id}</div>
-                  <div class="admin-player-name">${escapeHtml(player.name)}</div>
+        <div class="accordion-content ${isCollapsed ? 'collapsed' : ''}">
+          ${sortedPlayers.length === 0 ? `
+            <div style="padding: 30px; text-align: center; color: var(--text-secondary); background: var(--hover-bg); border-radius: 6px;">
+              Aucun joueur dans cette catégorie
+            </div>
+          ` : `
+            <div class="admin-players-list">
+              ${sortedPlayers.map(player => `
+                <div class="admin-player-item">
+                  <div class="admin-player-info">
+                    <div class="admin-player-id">ID: ${player.id}</div>
+                    <div class="admin-player-name">${escapeHtml(player.name)}</div>
+                  </div>
+                  <div class="admin-player-actions">
+                    <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="showEditPlayerModal('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
+                      ✏️
+                    </button>
+                    <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="confirmDeletePlayer('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
+                      🗑️
+                    </button>
+                  </div>
                 </div>
-                <div class="admin-player-actions">
-                  <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="showEditPlayerModal('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
-                    ✏️
-                  </button>
-                  <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="confirmDeletePlayer('${escapeHtml(category)}', ${player.id}, '${escapeHtml(player.name)}')">
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `}
+              `).join('')}
+            </div>
+          `}
+        </div>
       </div>
     `;
   });
