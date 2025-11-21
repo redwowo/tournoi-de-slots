@@ -848,6 +848,141 @@ tbody tr.selected:hover {
 }
 
 /* Theme Variables - Light */
+/* Categories and Players Management Styles */
+
+.admin-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.admin-category-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.admin-category-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-category-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.admin-category-badge {
+  background: var(--primary-color)20;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.admin-category-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-players-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 0;
+}
+
+.admin-player-section {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.admin-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.admin-section-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.admin-players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-player-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: var(--hover-bg);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.admin-player-item:hover {
+  background: var(--active-bg);
+}
+
+.admin-player-info {
+  flex: 1;
+}
+
+.admin-player-id {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.admin-player-name {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.admin-player-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-form-error {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 8px;
+  min-height: 20px;
+  animation: slideIn 0.2s ease;
+}
+
+.admin-btn-sm {
+  padding: 6px 12px;
+  font-size: 0.85rem;
+}
+
 html.light {
   --bg-color: #f5f5f5;
   --text-color: #1a1a1a;

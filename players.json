@@ -1,0 +1,14 @@
+{
+  "Hacksawgaming": [
+    { "id": 1, "name": "Jean" },
+    { "id": 2, "name": "Marie" },
+    { "id": 3, "name": "Pierre" }
+  ],
+  "Nolimit City": [
+    { "id": 4, "name": "Bob" },
+    { "id": 5, "name": "Alice" }
+  ],
+  "Pragmatic Play": [
+    { "id": 6, "name": "Charlie" }
+  ]
+}
