@@ -68,14 +68,28 @@ let machinesData = {
   "Pragmatic Play": []
 };
 
-// Fonction pour charger les machines depuis players.json
+// Fonction pour charger les machines depuis players.json ou localStorage admin
 async function loadMachinesFromPlayersJson() {
   try {
-    const response = await fetch('/players.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    let data;
+    
+    // Vérifier d'abord si l'admin a fait des modifications dans localStorage
+    const stored = localStorage.getItem('adminPlayers');
+    const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
+    
+    if (stored && hasModifications) {
+      // Utiliser les données modifiées de l'admin
+      data = JSON.parse(stored);
+      console.log('Utilisation des données modifiées depuis localStorage admin');
+    } else {
+      // Charger depuis players.json
+      const response = await fetch('/players.json');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      data = await response.json();
+      console.log('Chargement des machines depuis players.json');
     }
-    const data = await response.json();
     
     // Stocker les données complètes et extraire les noms
     machinesData["Hacksaw Gaming"] = data["Hacksaw Gaming"] || [];
@@ -87,14 +101,14 @@ async function loadMachinesFromPlayersJson() {
     TournamentApp.nolimitCityMachines = machinesData["Nolimit City"].map(machine => machine.name);
     TournamentApp.pragmaticPlayMachines = machinesData["Pragmatic Play"].map(machine => machine.name);
     
-    console.log('Machines chargées depuis players.json:', {
+    console.log('Machines chargées:', {
       'Hacksaw Gaming': TournamentApp.slotMachines.length,
       'Nolimit City': TournamentApp.nolimitCityMachines.length,
       'Pragmatic Play': TournamentApp.pragmaticPlayMachines.length
     });
   } catch (error) {
-    console.error('Erreur lors du chargement des machines depuis players.json:', error);
-    showToast('Erreur', 'Impossible de charger les machines depuis players.json', 'error');
+    console.error('Erreur lors du chargement des machines:', error);
+    showToast('Erreur', 'Impossible de charger les machines', 'error');
     
     // En cas d'erreur, utiliser des tableaux vides pour éviter les erreurs
     TournamentApp.slotMachines = [];
@@ -106,6 +120,8 @@ async function loadMachinesFromPlayersJson() {
 // Fonction pour recharger les machines quand l'admin fait des modifications
 async function reloadMachinesFromAdminChanges() {
   console.log('Reloading machines due to admin changes...');
+  
+  // Recharger les machines (la fonction gère automatiquement localStorage vs players.json)
   await loadMachinesFromPlayersJson();
   
   // Mettre à jour le dialogue de sélection aléatoire si ouvert
@@ -116,6 +132,18 @@ async function reloadMachinesFromAdminChanges() {
   const playerNameInput = document.getElementById('playerName');
   if (playerNameInput && playerNameInput.value) {
     showSuggestions(playerNameInput);
+  }
+}
+
+// Fonction pour mettre à jour le nombre maximum de machines disponibles
+function updateMaxAvailableSlots() {
+  const totalMachines = TournamentApp.slotMachines.length + 
+                       TournamentApp.nolimitCityMachines.length + 
+                       TournamentApp.pragmaticPlayMachines.length;
+  
+  const countElement = document.getElementById('count');
+  if (countElement) {
+    countElement.textContent = `Slot ajoutés : ${TournamentApp.players.length}/16 (${totalMachines} machines disponibles)`;
   }
 }
 
