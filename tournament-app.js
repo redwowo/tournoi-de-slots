@@ -423,8 +423,12 @@ function loadDataFromLocalStorage() {
 
       // Convertir les dates de chaîne en objets Date
       TournamentApp.eliminationHistory.forEach((item) => {
-        if (typeof item.time === "string") {
-          item.time = new Date(item.time)
+        if (item && item.time) {
+          if (typeof item.time === "string") {
+            item.time = new Date(item.time)
+          } else if (typeof item.time.toDate === "function") {
+            item.time = item.time.toDate()
+          }
         }
       })
 
@@ -436,6 +440,8 @@ function loadDataFromLocalStorage() {
           item.date = new Date(item.date)
         }
       })
+
+      updateEliminationHistoryButtonVisibility()
 
       // Mettre à jour l'affichage des gagnants précédents
       updateWinnersDisplay()
@@ -451,10 +457,6 @@ function loadDataFromLocalStorage() {
         document.getElementById("launchDraw").style.display = "none"
         document.getElementById("addPlayerContainer").style.display = "none"
         document.getElementById("randomSlotBtn").style.display = "none"
-
-        if (TournamentApp.eliminationHistory.length > 0) {
-          document.getElementById("eliminationHistoryBtn").style.display = "block"
-        }
 
         renderBracket()
       } else {
@@ -872,6 +874,17 @@ function showToast(title, message, type = "default") {
   }, 3000)
 }
 
+function updateEliminationHistoryButtonVisibility() {
+  const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn")
+  if (!eliminationHistoryBtn) {
+    return
+  }
+
+  const hasHistory = Array.isArray(TournamentApp.eliminationHistory) && TournamentApp.eliminationHistory.length > 0
+  eliminationHistoryBtn.style.display = hasHistory ? "flex" : "none"
+  eliminationHistoryBtn.setAttribute("aria-hidden", hasHistory ? "false" : "true")
+}
+
 // Afficher la boîte de dialogue de confirmation
 function showConfirmDialog(title, message, confirmCallback) {
   const dialog = document.getElementById("confirmDialog")
@@ -899,10 +912,22 @@ function closeConfirmDialog() {
 // Afficher l'historique des éliminations
 function showEliminationHistory() {
   const eliminationList = document.getElementById("eliminationList")
+  const modal = document.getElementById("eliminationHistoryModal")
+  const overlay = document.getElementById("overlay")
+
+  if (!eliminationList || !modal) {
+    if (overlay) {
+      overlay.style.display = "none"
+    }
+    return
+  }
+
   eliminationList.innerHTML = ""
 
-  if (TournamentApp.eliminationHistory.length > 0) {
-    TournamentApp.eliminationHistory.forEach((elimination, index) => {
+  const hasHistory = Array.isArray(TournamentApp.eliminationHistory) && TournamentApp.eliminationHistory.length > 0
+
+  if (hasHistory) {
+    TournamentApp.eliminationHistory.forEach((elimination) => {
       const li = document.createElement("li")
       li.className = "elimination-item"
 
@@ -915,18 +940,27 @@ function showEliminationHistory() {
 
       const round = document.createElement("span")
       round.className = "elimination-round"
-      round.textContent = elimination.roundName
+      round.textContent = elimination.roundName || "Tour du tournoi"
 
       header.appendChild(eliminatedPlayer)
       header.appendChild(round)
 
       const details = document.createElement("div")
       details.className = "elimination-details"
-      details.textContent = `Éliminée par ${elimination.winner}`
+      details.textContent = `Éliminée par ${elimination.winner || "?"}`
 
       const time = document.createElement("div")
       time.className = "elimination-time"
-      time.textContent = elimination.time.toLocaleString()
+      let eliminationTime = elimination.time instanceof Date ? elimination.time : null
+      if (!eliminationTime && elimination.time && typeof elimination.time.toDate === "function") {
+        eliminationTime = elimination.time.toDate()
+      } else if (!eliminationTime && elimination.time) {
+        eliminationTime = new Date(elimination.time)
+      }
+      if (!(eliminationTime instanceof Date) || Number.isNaN(eliminationTime.getTime())) {
+        eliminationTime = new Date()
+      }
+      time.textContent = eliminationTime.toLocaleString()
 
       li.appendChild(header)
       li.appendChild(details)
@@ -942,14 +976,22 @@ function showEliminationHistory() {
     eliminationList.appendChild(emptyMessage)
   }
 
-  document.getElementById("eliminationHistoryModal").style.display = "block"
-  document.getElementById("overlay").style.display = "block"
+  modal.style.display = "flex"
+  if (overlay) {
+    overlay.style.display = "block"
+  }
 }
 
 // Fermer l'historique des éliminations
 function closeEliminationHistory() {
-  document.getElementById("eliminationHistoryModal").style.display = "none"
-  document.getElementById("overlay").style.display = "none"
+  const modal = document.getElementById("eliminationHistoryModal")
+  if (modal) {
+    modal.style.display = "none"
+  }
+  const overlay = document.getElementById("overlay")
+  if (overlay) {
+    overlay.style.display = "none"
+  }
 }
 
 // Afficher/masquer le panneau des gagnants précédents
@@ -1541,8 +1583,7 @@ function setWinner(roundIndex, matchIndex, winnerName) {
       time: new Date(),
     })
 
-    // Afficher le bouton d'historique des éliminations s'il n'est déjà visible
-    // document.getElementById("eliminationHistoryBtn").style.display = "block"
+    updateEliminationHistoryButtonVisibility()
 
     showToast(`${loserName} éliminée !`, `${winnerName} remporte le match et avance au prochain tour.`, "success")
   }
@@ -1658,6 +1699,7 @@ function resetTournamentWithOption(keepPlayers) {
   TournamentApp.winner = ""
   TournamentApp.tournamentStarted = false
   TournamentApp.tournamentCompleted = false // Réinitialiser l'état de complétion du tournoi
+  TournamentApp.eliminationHistory = []
 
   // Réinitialiser l'interface
   const bracket = document.getElementById("bracket");
@@ -1666,8 +1708,7 @@ function resetTournamentWithOption(keepPlayers) {
   if (resetButton) resetButton.style.display = "none";
   const launchDraw = document.getElementById("launchDraw");
   if (launchDraw) launchDraw.style.display = keepPlayers && TournamentApp.players.length === 16 ? "block" : "none";
-  const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn");
-  if (eliminationHistoryBtn) eliminationHistoryBtn.style.display = TournamentApp.eliminationHistory && TournamentApp.eliminationHistory.length > 0 ? "block" : "none";
+  updateEliminationHistoryButtonVisibility();
   const count = document.getElementById("count");
   if (count) count.innerText = `Slot ajoutés : ${TournamentApp.players.length}/16`;
 
@@ -1795,6 +1836,7 @@ function undoMatch() {
   TournamentApp.eliminationHistory = TournamentApp.eliminationHistory.filter(
     (item) => !(item.winner === winnerName && item.loser === loserName && item.round === roundIndex),
   )
+  updateEliminationHistoryButtonVisibility()
 
   // Mettre à jour l'affichage des joueurs pour retirer la classe eliminated
   const playerElement = document.querySelector(`#player-list-${toSafeId(loserName)} span`)
@@ -2526,7 +2568,26 @@ function updateTournamentUI(state) {
   TournamentApp.tournamentStarted = state.tournamentStarted || false;
   TournamentApp.tournamentCompleted = state.tournamentCompleted || false;
   TournamentApp.eliminationHistory = state.eliminationHistory || [];
+  TournamentApp.eliminationHistory.forEach((item) => {
+    if (item && item.time) {
+      if (typeof item.time === "string") {
+        item.time = new Date(item.time);
+      } else if (typeof item.time.toDate === "function") {
+        item.time = item.time.toDate();
+      }
+    }
+  });
   TournamentApp.previousWinners = state.previousWinners || [];
+  TournamentApp.previousWinners.forEach((item) => {
+    if (item && item.date) {
+      if (typeof item.date === "string") {
+        item.date = new Date(item.date);
+      } else if (typeof item.date.toDate === "function") {
+        item.date = item.date.toDate();
+      }
+    }
+  });
+  updateEliminationHistoryButtonVisibility();
 
   // Reconstruit le tableau imbriqué à partir de l'objet matches
   if (state.matches && typeof state.matches === 'object' && !Array.isArray(state.matches)) {
