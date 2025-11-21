@@ -2143,18 +2143,38 @@ function addRandomSlot() {
   });
 }
 
-// Initialisation au chargement de la page
-document.addEventListener("DOMContentLoaded", () => {
-  // Initialiser le thème
-  initTheme()
+// Initialisation unifiée au chargement de la page
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Initialiser le thème (doit être fait en premier pour éviter le flash)
+  initTheme();
 
-  // Charger les données sauvegardées
-  loadDataFromLocalStorage()
+  // 2. Détecter le mode spectateur AVANT tout chargement de données
+  initializeSpectatorMode();
+  
+  // 3. Vérifier les paramètres URL pour déterminer le mode
+  const tournamentId = getTournamentFromUrl();
 
-  // Initialiser le bracket
-  initBracket()
+  if (tournamentId) {
+    // Mode spectateur forcé par l'URL
+    isSpectatorMode = true;
+    localStorage.setItem('spectatorMode', 'true');
+    await loadSpecificTournament(tournamentId);
+  } else {
+    // Mode créateur ou normal: pas de paramètre tournament dans l'URL
+    isSpectatorMode = false;
+    localStorage.removeItem('spectatorMode');
+  }
 
-  // S'assurer que la fenêtre de sélection aléatoire est fermée au démarrage
+  // 4. Charger les données locales SEULEMENT si pas en mode spectateur
+  if (!isSpectatorMode) {
+    loadDataFromLocalStorage();
+    updateWinnersDisplay();
+  }
+
+  // 5. Initialiser le bracket
+  initBracket();
+
+  // 6. S'assurer que la fenêtre de sélection aléatoire est fermée au démarrage
   const randomSlotDialog = document.getElementById("randomSlotDialog")
   const overlay = document.getElementById("overlay")
   if (randomSlotDialog) {
@@ -2164,7 +2184,7 @@ document.addEventListener("DOMContentLoaded", () => {
     overlay.style.display = "none"
   }
 
-  // Ajouter les événements
+  // 7. Ajouter les événements UI
   document.getElementById("themeToggle").addEventListener("click", toggleTheme)
 
   // Ajouter l'événement pour les suggestions
@@ -2223,7 +2243,29 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
-})
+
+  // 8. Mettre en place l'écoute Firestore en temps réel pour les mises à jour
+  if (tournamentId) {
+    db.collection("tournois").doc(tournamentId)
+      .onSnapshot((doc) => {
+        if (doc.exists) {
+          updateTournamentUI(doc.data().state);
+        }
+      });
+  }
+
+  // 9. Appliquer les restrictions spectateur si nécessaire
+  if (isSpectatorMode) {
+    disableActionsIfSpectator();
+  }
+
+  // 10. Raccourci clavier pour sortir du mode spectateur (Échap)
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isSpectatorMode) {
+      exitSpectatorMode();
+    }
+  });
+});
 
 // Accepter la machine affichée et l'ajouter au tournoi
 function acceptCurrentSlot() {
@@ -2696,51 +2738,6 @@ function disableActionsIfSpectator() {
   }
 }
 
-// Vérifier si on est en mode spectateur au chargement
-document.addEventListener('DOMContentLoaded', async () => {
-  // Initialiser le mode spectateur depuis le localStorage
-  initializeSpectatorMode();
-  
-  // Mode spectateur UNIQUEMENT si l'URL contient ?tournament=...
-  const tournamentId = getTournamentFromUrl();
-  const urlTournamentId = getTournamentIdFromUrl();
-
-  if (tournamentId) {
-    isSpectatorMode = true;
-    await loadSpecificTournament(tournamentId);
-  } else if (urlTournamentId) {
-    // Mode créateur
-    isSpectatorMode = false;
-    localStorage.removeItem('spectatorMode');
-    await loadTournamentAsCreator(urlTournamentId);
-  }
-
-  // Mettre en place l'écoute Firestore en temps réel pour les mises à jour
-  const currentTournamentId = tournamentId || urlTournamentId;
-  if (currentTournamentId) {
-    db.collection("tournois").doc(currentTournamentId)
-      .onSnapshot((doc) => {
-        if (doc.exists) {
-          updateTournamentUI(doc.data().state);
-        }
-      });
-  }
-
-  // Appliquer les restrictions spectateur si nécessaire
-  if (isSpectatorMode) {
-    setTimeout(() => {
-      disableActionsIfSpectator();
-    }, 100);
-  }
-
-  // Raccourci clavier pour sortir du mode spectateur (Échap)
-  document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && isSpectatorMode) {
-      exitSpectatorMode();
-    }
-  });
-});
-
 // Fonction pour charger un tournoi spécifique depuis Firestore
 async function loadSpecificTournament(tournamentId) {
   try {
@@ -2822,14 +2819,11 @@ function toggleSpectatorMode() {
   }
 }
 
-// Initialise le mode spectateur
+// Initialise le mode spectateur (détecte seulement, n'applique pas les restrictions)
 function initializeSpectatorMode() {
   const savedMode = localStorage.getItem('spectatorMode');
   isSpectatorMode = savedMode === 'true';
-  
-  if (isSpectatorMode) {
-    disableActionsIfSpectator();
-  }
+  // Note: Les restrictions seront appliquées plus tard dans le flux d'initialisation
 }
 
 // Fonction pour sortir du mode spectateur
@@ -2850,25 +2844,5 @@ function exitSpectatorMode() {
     
     // Recharger la page pour repartir de zéro
     window.location.reload();
-  }
-}
-
-// Fonction pour charger un tournoi en mode créateur
-async function loadTournamentAsCreator(tournamentId) {
-  try {
-    const doc = await db.collection("tournois").doc(tournamentId).get();
-    if (doc.exists) {
-      const state = doc.data().state;
-      updateTournamentUI(state);
-      // S'assurer qu'on n'est PAS en mode spectateur
-      isSpectatorMode = false;
-      localStorage.removeItem('spectatorMode');
-      showToast("Mode créateur", "Vous gérez ce tournoi en mode créateur", "success");
-    } else {
-      showToast("Erreur", "Tournoi non trouvé", "error");
-    }
-  } catch (error) {
-    console.error("Erreur lors du chargement du tournoi:", error);
-    showToast("Erreur", "Impossible de charger le tournoi", "error");
   }
 }

@@ -102,14 +102,6 @@ document.addEventListener("keydown", (e) => {
   }
 })
 
-// Initialiser le thème et le bracket au chargement
-document.addEventListener("DOMContentLoaded", () => {
-  initTheme()
-  initBracket()
-  loadDataFromLocalStorage()
-  updateWinnersDisplay()
-})
-
 // Initialiser le thème immédiatement pour éviter un flash de thème incorrect
 initTheme()
 // Initialiser le bracket au chargement
