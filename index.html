@@ -28,13 +28,13 @@
             
             <div id="addPlayerContainer" class="input-container">
                 <input type="text" id="playerName" placeholder="✍️ Nom de la machine">
-		<div class="suggestions-container" id="suggestionsList"></div>
+        <div class="suggestions-container" id="suggestionsList"></div>
                 <button id="addPlayerBtn" onclick="addPlayer()" class="btn-add">
                     <span class="add-icon">
-    			<img src="/slot.png" 
-         		alt="Slot Machine" width="20" height="20">
-		    </span> 
-		    Ajouter la Slot
+                <img src="/slot.png" 
+                 alt="Slot Machine" width="20" height="20">
+            </span> 
+            Ajouter la Slot
                 </button>
             </div>
             
@@ -42,10 +42,10 @@
             
             <button id="randomSlotBtn" onclick="showRandomSlotDialog()" class="btn-outline" style="width: 100%;">
                 <span class="shuffle-icon">
-    		<img src="/de.png" 
-         	alt="Dé" class="dice-icon">
-		</span> 
-		Choisir une slot aléatoire
+            <img src="/de.png" 
+             alt="Dé" class="dice-icon">
+        </span> 
+        Choisir une slot aléatoire
             </button>
             
             <button id="launchDraw" onclick="lancerNouveauTournoi()" style="display: none; width: 100%;">
@@ -66,6 +66,10 @@
             
             <button id="showPreviousWinnersBtn" onclick="toggleWinnersPanel()" class="previous-winners-btn">
                 <span class="trophy-icon">🏆</span> Résultats tournois précédents
+            </button>
+            
+            <button id="eliminationHistoryBtn" onclick="showEliminationHistory()" class="elimination-history-btn" style="display: none;">
+                <span class="history-icon">📋</span> Historique des éliminations
             </button>
             
             <button id="goToTournamentsBtn" class="btn-outline" style="width: 100%; text-align: center; margin-top: 1rem;" onclick="window.location.href='/tournois'">
@@ -133,6 +137,26 @@
             </div>
             <div class="winners-modal-footer">
                 <button onclick="toggleWinnersPanel()">Fermer</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="elimination-modal" id="eliminationHistoryModal">
+        <div class="elimination-modal-overlay" onclick="closeEliminationHistory()"></div>
+        <div class="elimination-modal-content">
+            <div class="elimination-modal-header">
+                <div>
+                    <div class="elimination-modal-title">
+                        <span class="history-icon">📋</span> Historique des éliminations
+                    </div>
+                    <div class="elimination-modal-description">Liste chronologique de toutes les éliminations du tournoi</div>
+                </div>
+            </div>
+            <div class="elimination-modal-body">
+                <ul class="elimination-list" id="eliminationList"></ul>
+            </div>
+            <div class="elimination-modal-footer">
+                <button onclick="closeEliminationHistory()">Fermer</button>
             </div>
         </div>
     </div>
