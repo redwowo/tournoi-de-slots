@@ -71,6 +71,16 @@ class AdminPlayersManager {
     localStorage.setItem('adminPlayers', JSON.stringify(this.categories));
     // Mark that user has made modifications
     localStorage.setItem('adminPlayersModified', 'true');
+    // Broadcast change to other tabs/windows
+    this.broadcastUpdate();
+  }
+
+  // Broadcast update to tournament-app instances
+  broadcastUpdate() {
+    const timestamp = Date.now();
+    localStorage.setItem('adminPlayersLastUpdate', timestamp.toString());
+    // Dispatch custom event for same-window listeners
+    window.dispatchEvent(new CustomEvent('adminPlayersUpdated', { detail: { timestamp } }));
   }
 
   // Reset to base data from players.json (clear all modifications)
