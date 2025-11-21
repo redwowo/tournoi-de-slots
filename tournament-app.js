@@ -724,7 +724,11 @@ function updateWinnersDisplay() {
   winnersList.innerHTML = ""
 
   if (TournamentApp.previousWinners.length > 0) {
-    TournamentApp.previousWinners.sort((a, b) => b.date - a.date) // Trier par date décroissante
+    TournamentApp.previousWinners.sort((a, b) => {
+      const dateA = a.date instanceof Date ? a.date.getTime() : 0
+      const dateB = b.date instanceof Date ? b.date.getTime() : 0
+      return dateB - dateA
+    }) // Trier par date décroissante
 
     TournamentApp.previousWinners.forEach((winner) => {
       const li = document.createElement("li")
@@ -743,7 +747,7 @@ function updateWinnersDisplay() {
 
       const date = document.createElement("div")
       date.className = "winner-date"
-      date.textContent = winner.date.toLocaleDateString()
+      date.textContent = winner.date instanceof Date ? winner.date.toLocaleDateString() : "Date inconnue"
 
       info.appendChild(name)
       info.appendChild(date)
@@ -926,7 +930,7 @@ function showEliminationHistory() {
 
       const time = document.createElement("div")
       time.className = "elimination-time"
-      time.textContent = elimination.time.toLocaleString()
+      time.textContent = elimination.time instanceof Date ? elimination.time.toLocaleString() : "Date inconnue"
 
       li.appendChild(header)
       li.appendChild(details)
@@ -2441,8 +2445,11 @@ if (tournamentId) {
     .onSnapshot((doc) => {
       if (doc.exists) {
         const state = doc.data().state;
-        // Ici, tu dois mettre à jour ton UI avec le state reçu
-        updateTournamentUI(state);
+        if (!state) {
+          console.warn("Document Firestore sans état valide", doc.id)
+          return
+        }
+        updateTournamentUI(state)
       }
     });
 }
@@ -2520,24 +2527,69 @@ async function onAction(newState) {
   await updateTournamentState(newState);
 }
 
+function normalizeDateField(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  if (value && typeof value.toDate === "function") {
+    const converted = value.toDate();
+    return converted instanceof Date ? converted : null;
+  }
+  const parsed = new Date(value);
+  return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function normalizeStateDates(state) {
+  if (!state || typeof state !== "object") {
+    return state || {};
+  }
+
+  const normalizedState = { ...state };
+
+  if (Array.isArray(state.previousWinners)) {
+    normalizedState.previousWinners = state.previousWinners.map((winner) => {
+      const normalizedWinner = { ...winner };
+      normalizedWinner.date = normalizeDateField(winner && winner.date);
+      return normalizedWinner;
+    });
+  }
+
+  if (Array.isArray(state.eliminationHistory)) {
+    normalizedState.eliminationHistory = state.eliminationHistory.map((entry) => {
+      const normalizedEntry = { ...entry };
+      normalizedEntry.time = normalizeDateField(entry && entry.time);
+      return normalizedEntry;
+    });
+  }
+
+  return normalizedState;
+}
+
 function updateTournamentUI(state) {
+  if (!state || typeof state !== "object") {
+    console.warn("État de tournoi invalide reçu :", state)
+    return
+  }
+
+  // Normaliser les dates Firestore avant utilisation
+  const normalizedState = normalizeStateDates(state)
+
   // Met à jour l'état du tournoi à partir de l'objet reçu de Firestore
-  TournamentApp.players = state.players || [];
-  TournamentApp.eliminated = state.eliminated || [];
-  TournamentApp.winner = state.winner || "";
-  TournamentApp.tournamentStarted = state.tournamentStarted || false;
-  TournamentApp.tournamentCompleted = state.tournamentCompleted || false;
-  TournamentApp.eliminationHistory = state.eliminationHistory || [];
-  TournamentApp.previousWinners = state.previousWinners || [];
+  TournamentApp.players = normalizedState.players || [];
+  TournamentApp.eliminated = normalizedState.eliminated || [];
+  TournamentApp.winner = normalizedState.winner || "";
+  TournamentApp.tournamentStarted = normalizedState.tournamentStarted || false;
+  TournamentApp.tournamentCompleted = normalizedState.tournamentCompleted || false;
+  TournamentApp.eliminationHistory = normalizedState.eliminationHistory || [];
+  TournamentApp.previousWinners = normalizedState.previousWinners || [];
 
   // Reconstruit le tableau imbriqué à partir de l'objet matches
-  if (state.matches && typeof state.matches === 'object' && !Array.isArray(state.matches)) {
+  if (normalizedState.matches && typeof normalizedState.matches === 'object' && !Array.isArray(normalizedState.matches)) {
     TournamentApp.matches = [];
     for (let i = 0; i < 4; i++) {
-      TournamentApp.matches[i] = state.matches['round' + i] || [];
+      TournamentApp.matches[i] = normalizedState.matches['round' + i] || [];
     }
   } else {
-    TournamentApp.matches = state.matches || [];
+    TournamentApp.matches = normalizedState.matches || [];
   }
 
   // Correction de la structure des matches si besoin
@@ -2721,7 +2773,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     db.collection("tournois").doc(currentTournamentId)
       .onSnapshot((doc) => {
         if (doc.exists) {
-          updateTournamentUI(doc.data().state);
+          const state = doc.data().state
+          if (!state) {
+            console.warn("Document Firestore sans état valide", doc.id)
+            return
+          }
+          updateTournamentUI(state)
         }
       });
   }
@@ -2746,8 +2803,12 @@ async function loadSpecificTournament(tournamentId) {
   try {
     const doc = await db.collection("tournois").doc(tournamentId).get();
     if (doc.exists) {
-      const state = doc.data().state;
-      updateTournamentUI(state);
+      const state = doc.data().state
+      if (!state) {
+        showToast("Erreur", "État du tournoi invalide", "error")
+        return
+      }
+      updateTournamentUI(state)
       disableActionsIfSpectator();
       showToast("Mode spectateur", "Vous regardez ce tournoi en mode spectateur", "info");
     } else {
@@ -2858,8 +2919,12 @@ async function loadTournamentAsCreator(tournamentId) {
   try {
     const doc = await db.collection("tournois").doc(tournamentId).get();
     if (doc.exists) {
-      const state = doc.data().state;
-      updateTournamentUI(state);
+      const state = doc.data().state
+      if (!state) {
+        showToast("Erreur", "État du tournoi invalide", "error")
+        return
+      }
+      updateTournamentUI(state)
       // S'assurer qu'on n'est PAS en mode spectateur
       isSpectatorMode = false;
       localStorage.removeItem('spectatorMode');
