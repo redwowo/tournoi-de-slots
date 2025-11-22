@@ -6,6 +6,18 @@ const crypto = require('crypto');
 
 const app = express();
 
+// Set up JSON parsing middleware for non-multipart routes
+app.use('/api', (req, res, next) => {
+  // Log all API requests for debugging
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  
+  // Only apply express.json() for routes that aren't file uploads
+  if (!req.url.includes('/upload-category-image')) {
+    return express.json()(req, res, next);
+  }
+  next();
+});
+
 // Configure directory for category images
 const uploadsDir = path.join(__dirname, 'category-images');
 
@@ -74,9 +86,15 @@ const upload = multer({
  * - 413: File size exceeds 5MB limit
  * - 500: Server error during upload
  */
-app.post('/api/upload-category-image', (req, res) => {
+app.post('/api/upload-category-image', (req, res, next) => {
+  // Ensure response is always JSON
+  res.setHeader('Content-Type', 'application/json');
+  
+  console.log('[UPLOAD] Received upload request');
+  
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
+      console.error('[UPLOAD] Multer error:', err.code, err.message);
       if (err.code === 'LIMIT_FILE_SIZE') {
         return res.status(413).json({
           success: false,
@@ -88,6 +106,7 @@ app.post('/api/upload-category-image', (req, res) => {
         error: `Upload error: ${err.message}`
       });
     } else if (err) {
+      console.error('[UPLOAD] Error:', err.message);
       return res.status(400).json({
         success: false,
         error: err.message
@@ -95,6 +114,7 @@ app.post('/api/upload-category-image', (req, res) => {
     }
 
     if (!req.file) {
+      console.error('[UPLOAD] No file provided');
       return res.status(400).json({
         success: false,
         error: 'No image file provided'
@@ -103,7 +123,8 @@ app.post('/api/upload-category-image', (req, res) => {
 
     // Return success with public filepath
     const filepath = `/category-images/${req.file.filename}`;
-    res.json({
+    console.log('[UPLOAD] Success:', filepath);
+    return res.json({
       success: true,
       filename: req.file.filename,
       filepath: filepath
@@ -132,7 +153,7 @@ app.post('/api/upload-category-image', (req, res) => {
  * - 404: File not found
  * - 500: Server error during deletion
  */
-app.post('/api/delete-category-image', express.json(), (req, res) => {
+app.post('/api/delete-category-image', (req, res) => {
   const { filepath } = req.body;
 
   if (!filepath) {
