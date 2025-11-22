@@ -5,6 +5,22 @@ let currentEditTournament = null;
 let currentAddPlayerCategory = null;
 let currentEditPlayer = null;
 
+// Category branding state
+let addCategoryState = {
+  color: '#667eea',
+  imagePath: '',
+  uploadedFilename: '',
+  isUploading: false
+};
+
+let editCategoryState = {
+  categoryName: null,
+  color: '#667eea',
+  imagePath: '',
+  uploadedFilename: '',
+  isUploading: false
+};
+
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', async () => {
   // Verify admin is authenticated
@@ -595,20 +611,37 @@ function renderCategories() {
   categories.forEach(category => {
     const playerCount = adminPlayersManager.getPlayersInCategory(category).length;
     const playerText = playerCount === 1 ? 'joueur' : 'joueurs';
-    
+    const metadata = adminPlayersManager.getCategoryMetadata(category);
+    const color = metadata.color || '#667eea';
+    const imagePath = metadata.imagePath || '';
+
+    // Get initials for fallback
+    const initials = category.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+
     html += `
-      <div class="admin-category-card">
-        <div class="admin-category-header">
-          <h3 class="admin-category-title">${escapeHtml(category)}</h3>
-          <span class="admin-category-badge">${playerCount} ${playerText}</span>
+      <div class="admin-category-card-with-branding">
+        <div class="admin-category-color-stripe" style="background-color: ${color};"></div>
+        <div class="admin-category-image-container">
+          ${imagePath ? `<img src="${escapeHtml(imagePath)}" alt="${escapeHtml(category)}" />` : `
+            <div class="admin-category-initials">${initials}</div>
+          `}
         </div>
-        <div class="admin-category-actions">
-          <button class="admin-btn admin-btn-secondary" onclick="showAddPlayerModal('${escapeHtml(category)}')">
-            ➕ Ajouter Joueur
-          </button>
-          <button class="admin-btn admin-btn-danger" onclick="confirmDeleteCategory('${escapeHtml(category)}')">
-            🗑️ Supprimer
-          </button>
+        <div class="admin-category-card-content">
+          <div class="admin-category-card-header-text">
+            <h3 class="admin-category-card-title">${escapeHtml(category)}</h3>
+            <span class="admin-category-card-badge">${playerCount} ${playerText}</span>
+          </div>
+          <div class="admin-category-card-actions">
+            <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="showAddPlayerModal('${escapeHtml(category)}')">
+              ➕ Joueur
+            </button>
+            <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="showEditCategoryModal('${escapeHtml(category)}')">
+              ✏️ Éditer
+            </button>
+            <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="confirmDeleteCategory('${escapeHtml(category)}')">
+              🗑️ Supprimer
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -619,25 +652,69 @@ function renderCategories() {
 }
 
 function showAddCategoryModal() {
+  addCategoryState = {
+    color: '#667eea',
+    imagePath: '',
+    uploadedFilename: '',
+    isUploading: false
+  };
+
   document.getElementById('addCategoryError').textContent = '';
   document.getElementById('categoryNameInput').value = '';
+  document.getElementById('categoryColorInput').value = addCategoryState.color;
+  document.getElementById('categoryColorLabel').textContent = addCategoryState.color;
+  document.getElementById('addCategoryImageClearBtn').style.display = 'none';
+  document.getElementById('addCategoryUploadStatus').textContent = '';
+  document.getElementById('addCategoryImagePreview').classList.remove('has-image');
+  
+  const preview = document.getElementById('addCategoryImagePreview');
+  preview.innerHTML = `
+    <div class="admin-image-placeholder">
+      <span class="admin-placeholder-text">📸</span>
+    </div>
+  `;
+
   document.getElementById('addCategoryModal').classList.add('show');
   setTimeout(() => document.getElementById('categoryNameInput').focus(), 100);
-  
-  const input = document.getElementById('categoryNameInput');
-  input.onkeypress = (e) => {
-    if (e.key === 'Enter') {
+
+  const nameInput = document.getElementById('categoryNameInput');
+  nameInput.onkeypress = (e) => {
+    if (e.key === 'Enter' && !addCategoryState.isUploading) {
       saveNewCategory();
     }
   };
+
+  // Setup color picker change event
+  const colorInput = document.getElementById('categoryColorInput');
+  colorInput.addEventListener('change', (e) => {
+    addCategoryState.color = e.target.value;
+    document.getElementById('categoryColorLabel').textContent = e.target.value;
+  });
+
+  // Setup file input change event
+  const fileInput = document.getElementById('categoryImageInput');
+  fileInput.addEventListener('change', (e) => {
+    handleCategoryImageUpload(e, 'add');
+  });
 }
 
 function closeAddCategoryModal() {
   document.getElementById('addCategoryModal').classList.remove('show');
   document.getElementById('addCategoryError').textContent = '';
+  addCategoryState = {
+    color: '#667eea',
+    imagePath: '',
+    uploadedFilename: '',
+    isUploading: false
+  };
 }
 
 function saveNewCategory() {
+  if (addCategoryState.isUploading) {
+    showAdminToast('Veuillez attendre', 'Le téléchargement est en cours...', 'info');
+    return;
+  }
+
   const categoryName = document.getElementById('categoryNameInput').value.trim();
   const errorDiv = document.getElementById('addCategoryError');
   errorDiv.textContent = '';
@@ -647,7 +724,12 @@ function saveNewCategory() {
     return;
   }
 
-  const result = adminPlayersManager.addCategory(categoryName);
+  const metadata = {
+    color: addCategoryState.color,
+    imagePath: addCategoryState.imagePath
+  };
+
+  const result = adminPlayersManager.addCategory(categoryName, metadata);
   
   if (!result.success) {
     errorDiv.textContent = result.error;
@@ -656,6 +738,184 @@ function saveNewCategory() {
 
   showAdminToast('Succès', `Catégorie "${categoryName}" ajoutée avec succès`, 'success');
   closeAddCategoryModal();
+  renderCategories();
+}
+
+function clearCategoryImage() {
+  addCategoryState.imagePath = '';
+  addCategoryState.uploadedFilename = '';
+  
+  const preview = document.getElementById('addCategoryImagePreview');
+  preview.classList.remove('has-image');
+  preview.innerHTML = `
+    <div class="admin-image-placeholder">
+      <span class="admin-placeholder-text">📸</span>
+    </div>
+  `;
+  
+  document.getElementById('addCategoryImageClearBtn').style.display = 'none';
+  document.getElementById('addCategoryUploadStatus').textContent = '';
+}
+
+function clearEditCategoryImage() {
+  editCategoryState.imagePath = '';
+  editCategoryState.uploadedFilename = '';
+  
+  const preview = document.getElementById('editCategoryImagePreview');
+  preview.classList.remove('has-image');
+  preview.innerHTML = `
+    <div class="admin-image-placeholder">
+      <span class="admin-placeholder-text">📸</span>
+    </div>
+  `;
+  
+  document.getElementById('editCategoryImageClearBtn').style.display = 'none';
+  document.getElementById('editCategoryUploadStatus').textContent = '';
+}
+
+function handleCategoryImageUpload(event, type) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    const statusDiv = document.getElementById(`${type}CategoryUploadStatus`);
+    statusDiv.textContent = '❌ Le fichier est trop volumineux (max 5MB)';
+    statusDiv.className = 'admin-upload-status error';
+    return;
+  }
+
+  const stateKey = type === 'add' ? addCategoryState : editCategoryState;
+  const statusDiv = document.getElementById(`${type}CategoryUploadStatus`);
+  const previewDiv = document.getElementById(`${type}CategoryImagePreview`);
+  const clearBtn = document.getElementById(`${type}CategoryImageClearBtn`);
+
+  stateKey.isUploading = true;
+  statusDiv.textContent = '⏳ Téléchargement en cours...';
+  statusDiv.className = 'admin-upload-status loading';
+  document.getElementById(`${type}CategorySubmitBtn`).disabled = true;
+
+  const formData = new FormData();
+  formData.append('image', file);
+
+  fetch('/api/upload-category-image', {
+    method: 'POST',
+    body: formData
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        stateKey.imagePath = data.filepath;
+        stateKey.uploadedFilename = data.filename;
+
+        previewDiv.classList.add('has-image');
+        previewDiv.innerHTML = `<img src="${data.filepath}" alt="Category image" />`;
+        
+        statusDiv.textContent = '✅ Image téléchargée avec succès';
+        statusDiv.className = 'admin-upload-status success';
+        clearBtn.style.display = 'inline-block';
+      } else {
+        statusDiv.textContent = `❌ Erreur: ${data.error}`;
+        statusDiv.className = 'admin-upload-status error';
+      }
+
+      stateKey.isUploading = false;
+      document.getElementById(`${type}CategorySubmitBtn`).disabled = false;
+    })
+    .catch(error => {
+      statusDiv.textContent = `❌ Erreur de téléchargement: ${error.message}`;
+      statusDiv.className = 'admin-upload-status error';
+      stateKey.isUploading = false;
+      document.getElementById(`${type}CategorySubmitBtn`).disabled = false;
+    });
+}
+
+function showEditCategoryModal(categoryName) {
+  const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
+  
+  editCategoryState = {
+    categoryName: categoryName,
+    color: metadata.color || '#667eea',
+    imagePath: metadata.imagePath || '',
+    uploadedFilename: '',
+    isUploading: false
+  };
+
+  document.getElementById('editCategoryNameDisplay').textContent = categoryName;
+  document.getElementById('editCategoryColorInput').value = editCategoryState.color;
+  document.getElementById('editCategoryColorLabel').textContent = editCategoryState.color;
+  document.getElementById('editCategoryUploadStatus').textContent = '';
+  
+  const preview = document.getElementById('editCategoryImagePreview');
+  const clearBtn = document.getElementById('editCategoryImageClearBtn');
+
+  if (editCategoryState.imagePath) {
+    preview.classList.add('has-image');
+    preview.innerHTML = `<img src="${escapeHtml(editCategoryState.imagePath)}" alt="${escapeHtml(categoryName)}" />`;
+    clearBtn.style.display = 'inline-block';
+  } else {
+    preview.classList.remove('has-image');
+    const initials = categoryName.split(' ').map(word => word[0]).join('').toUpperCase().slice(0, 2);
+    preview.innerHTML = `
+      <div class="admin-image-placeholder">
+        <span class="admin-placeholder-text">📸</span>
+      </div>
+    `;
+    clearBtn.style.display = 'none';
+  }
+
+  document.getElementById('editCategoryModal').classList.add('show');
+
+  const colorInput = document.getElementById('editCategoryColorInput');
+  colorInput.removeEventListener('change', arguments.callee);
+  colorInput.addEventListener('change', (e) => {
+    editCategoryState.color = e.target.value;
+    document.getElementById('editCategoryColorLabel').textContent = e.target.value;
+  });
+
+  const fileInput = document.getElementById('editCategoryImageInput');
+  fileInput.removeEventListener('change', arguments.callee);
+  fileInput.addEventListener('change', (e) => {
+    handleCategoryImageUpload(e, 'edit');
+  });
+}
+
+function closeEditCategoryModal() {
+  document.getElementById('editCategoryModal').classList.remove('show');
+  editCategoryState = {
+    categoryName: null,
+    color: '#667eea',
+    imagePath: '',
+    uploadedFilename: '',
+    isUploading: false
+  };
+}
+
+function saveEditedCategory() {
+  if (!editCategoryState.categoryName) {
+    showAdminToast('Erreur', 'Aucune catégorie sélectionnée', 'error');
+    return;
+  }
+
+  if (editCategoryState.isUploading) {
+    showAdminToast('Veuillez attendre', 'Le téléchargement est en cours...', 'info');
+    return;
+  }
+
+  const updates = {
+    color: editCategoryState.color,
+    imagePath: editCategoryState.imagePath
+  };
+
+  const result = adminPlayersManager.updateCategoryMetadata(editCategoryState.categoryName, updates);
+
+  if (!result.success) {
+    showAdminToast('Erreur', result.error, 'error');
+    return;
+  }
+
+  showAdminToast('Succès', 'Catégorie modifiée avec succès', 'success');
+  closeEditCategoryModal();
   renderCategories();
 }
 

@@ -199,7 +199,7 @@ class AdminPlayersManager {
   }
 
   // Add a new category
-  addCategory(categoryName) {
+  addCategory(categoryName, metadata = {}) {
     const trimmed = categoryName.trim();
 
     if (!trimmed) {
@@ -210,7 +210,13 @@ class AdminPlayersManager {
       return { success: false, error: 'Cette catégorie existe déjà' };
     }
 
-    this.categories[trimmed] = this.createCategoryEntry(trimmed);
+    const overrides = {
+      color: metadata.color || undefined,
+      imagePath: metadata.imagePath || undefined,
+      players: []
+    };
+
+    this.categories[trimmed] = this.createCategoryEntry(trimmed, overrides);
     this.savePlayers();
 
     // Log action
@@ -388,6 +394,48 @@ class AdminPlayersManager {
       color: category.color || defaults.color,
       imagePath: category.imagePath || defaults.imagePath
     };
+  }
+
+  // Update category metadata (color, imagePath)
+  updateCategoryMetadata(categoryName, updates) {
+    if (!this.categories.hasOwnProperty(categoryName)) {
+      return { success: false, error: 'Catégorie non trouvée' };
+    }
+
+    const category = this.categories[categoryName];
+    const oldMetadata = {
+      color: category.color,
+      imagePath: category.imagePath
+    };
+
+    if (updates.color !== undefined) {
+      category.color = updates.color;
+    }
+
+    if (updates.imagePath !== undefined) {
+      category.imagePath = updates.imagePath;
+    }
+
+    this.savePlayers();
+
+    // Log action
+    const changes = [];
+    if (updates.color && updates.color !== oldMetadata.color) {
+      changes.push(`couleur: ${oldMetadata.color} → ${updates.color}`);
+    }
+    if (updates.imagePath && updates.imagePath !== oldMetadata.imagePath) {
+      changes.push('image mise à jour');
+    }
+
+    if (changes.length > 0) {
+      adminManager.logAction({
+        type: 'edit_category',
+        details: `Catégorie "${categoryName}" modifiée (${changes.join(', ')})`,
+        categoryName: categoryName
+      });
+    }
+
+    return { success: true, categoryName: categoryName };
   }
 }
 

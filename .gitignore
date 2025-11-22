@@ -6,3 +6,6 @@ node_modules/
 
 # Test files
 test-*.html
+
+# Uploaded images
+uploads/
