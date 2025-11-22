@@ -1,0 +1,52 @@
+[build]
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/upload-category-image"
+  to = "/.netlify/functions/upload-category-image"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete-category-image"
+  to = "/.netlify/functions/delete-category-image"
+  status = 200
+
+[[redirects]]
+  from = "/tournois"
+  to = "/tournois.html"
+  status = 200
+
+[[redirects]]
+  from = "/tournoi/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/accueil"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/styles.css"
+  to = "/styles.css"
+  status = 200
+
+[[redirects]]
+  from = "/tournament-app.js"
+  to = "/tournament-app.js"
+  status = 200
+
+[[redirects]]
+  from = "/*.png"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*.svg"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

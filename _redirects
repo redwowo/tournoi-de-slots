@@ -1,5 +1,10 @@
-/styles.css        /styles.css        200
+/api/upload-category-image /.netlify/functions/upload-category-image 200
+/api/delete-category-image /.netlify/functions/delete-category-image 200
+/tournois /tournois.html 200
+/tournoi/:id /index.html 200
+/accueil /index.html 200
+/styles.css /styles.css 200
 /tournament-app.js /tournament-app.js 200
-/*.png             /:splat            200
-/*.svg             /:splat            200
-/*                 /index.html        200
+/*.png /:splat 200
+/*.svg /:splat 200
+/* /index.html 200
