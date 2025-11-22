@@ -349,11 +349,133 @@
                         >
                         <div class="admin-form-error" id="addCategoryError"></div>
                     </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Couleur de la Catégorie</label>
+                        <div class="admin-color-picker-container">
+                            <input 
+                                type="color" 
+                                id="categoryColorInput" 
+                                class="admin-color-picker"
+                                value="#667eea"
+                            >
+                            <span class="admin-color-label" id="categoryColorLabel">#667eea</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Image de la Catégorie</label>
+                        <div class="admin-image-upload-container">
+                            <div class="admin-image-preview" id="addCategoryImagePreview">
+                                <div class="admin-image-placeholder">
+                                    <span class="admin-placeholder-text">📸</span>
+                                </div>
+                            </div>
+                            <div class="admin-upload-controls">
+                                <input 
+                                    type="file" 
+                                    id="categoryImageInput" 
+                                    class="admin-file-input"
+                                    accept="image/*"
+                                    style="display: none;"
+                                >
+                                <button 
+                                    type="button" 
+                                    class="admin-btn admin-btn-secondary" 
+                                    onclick="document.getElementById('categoryImageInput').click()"
+                                >
+                                    📤 Télécharger
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="admin-btn admin-btn-secondary" 
+                                    id="addCategoryImageClearBtn"
+                                    onclick="clearCategoryImage()"
+                                    style="display: none;"
+                                >
+                                    ✕ Supprimer
+                                </button>
+                            </div>
+                            <div class="admin-upload-status" id="addCategoryUploadStatus"></div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="admin-modal-footer">
                 <button class="btn-outline" onclick="closeAddCategoryModal()">Annuler</button>
-                <button class="btn-primary" onclick="saveNewCategory()">Ajouter</button>
+                <button class="btn-primary" id="addCategorySubmitBtn" onclick="saveNewCategory()">Ajouter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Category Modal -->
+    <div class="admin-modal" id="editCategoryModal">
+        <div class="admin-modal-content">
+            <div class="admin-modal-header">
+                <h2 class="admin-modal-title">Modifier la Catégorie</h2>
+                <button class="admin-modal-close" onclick="closeEditCategoryModal()">✕</button>
+            </div>
+            <div class="admin-modal-body">
+                <form id="editCategoryForm">
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Nom de la Catégorie</label>
+                        <p id="editCategoryNameDisplay" style="margin: 0; font-weight: 500; color: var(--text-color);"></p>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Couleur de la Catégorie</label>
+                        <div class="admin-color-picker-container">
+                            <input 
+                                type="color" 
+                                id="editCategoryColorInput" 
+                                class="admin-color-picker"
+                                value="#667eea"
+                            >
+                            <span class="admin-color-label" id="editCategoryColorLabel">#667eea</span>
+                        </div>
+                    </div>
+
+                    <div class="admin-form-group">
+                        <label class="admin-form-label">Image de la Catégorie</label>
+                        <div class="admin-image-upload-container">
+                            <div class="admin-image-preview" id="editCategoryImagePreview">
+                                <div class="admin-image-placeholder">
+                                    <span class="admin-placeholder-text">📸</span>
+                                </div>
+                            </div>
+                            <div class="admin-upload-controls">
+                                <input 
+                                    type="file" 
+                                    id="editCategoryImageInput" 
+                                    class="admin-file-input"
+                                    accept="image/*"
+                                    style="display: none;"
+                                >
+                                <button 
+                                    type="button" 
+                                    class="admin-btn admin-btn-secondary" 
+                                    onclick="document.getElementById('editCategoryImageInput').click()"
+                                >
+                                    📤 Télécharger
+                                </button>
+                                <button 
+                                    type="button" 
+                                    class="admin-btn admin-btn-secondary" 
+                                    id="editCategoryImageClearBtn"
+                                    onclick="clearEditCategoryImage()"
+                                    style="display: none;"
+                                >
+                                    ✕ Supprimer
+                                </button>
+                            </div>
+                            <div class="admin-upload-status" id="editCategoryUploadStatus"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="admin-modal-footer">
+                <button class="btn-outline" onclick="closeEditCategoryModal()">Annuler</button>
+                <button class="btn-primary" id="editCategorySubmitBtn" onclick="saveEditedCategory()">Enregistrer</button>
             </div>
         </div>
     </div>

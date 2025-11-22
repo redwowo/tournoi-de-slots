@@ -606,3 +606,22 @@ const toastStyles = `
 const styleSheet = document.createElement('style');
 styleSheet.textContent = toastStyles;
 document.head.appendChild(styleSheet);
+
+// Show admin toast notification
+function showAdminToast(title, message, type = 'info') {
+  const container = document.createElement('div');
+  container.className = `admin-toast admin-toast-${type} show`;
+  container.innerHTML = `
+    <div class="admin-toast-content">
+      <strong>${title}</strong>
+      <p>${message}</p>
+    </div>
+  `;
+  
+  document.body.appendChild(container);
+  
+  setTimeout(() => {
+    container.classList.remove('show');
+    setTimeout(() => container.remove(), 300);
+  }, 3000);
+}

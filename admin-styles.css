@@ -1031,6 +1031,207 @@ tbody tr.selected:hover {
   font-size: 0.85rem;
 }
 
+/* Color Picker Styles */
+.admin-color-picker-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-color-picker {
+  width: 60px;
+  height: 48px;
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--input-bg);
+  transition: all 0.2s ease;
+}
+
+.admin-color-picker:hover {
+  border-color: var(--primary-color);
+}
+
+.admin-color-label {
+  font-family: monospace;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  user-select: all;
+  padding: 8px;
+  background: var(--hover-bg);
+  border-radius: 4px;
+  flex: 1;
+  text-align: center;
+}
+
+/* Image Upload Styles */
+.admin-image-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-image-preview {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--hover-bg);
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.admin-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 100%;
+  color: var(--text-secondary);
+}
+
+.admin-placeholder-text {
+  font-size: 2rem;
+}
+
+.admin-image-preview.has-image {
+  border-color: var(--primary-color);
+  background: transparent;
+}
+
+.admin-upload-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-file-input {
+  display: none;
+}
+
+.admin-upload-status {
+  font-size: 0.85rem;
+  min-height: 20px;
+  animation: slideIn 0.2s ease;
+}
+
+.admin-upload-status.loading {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+.admin-upload-status.success {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.admin-upload-status.error {
+  color: #ef4444;
+  font-weight: 500;
+}
+
+/* Category Card with Color Header */
+.admin-category-card-with-branding {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-category-card-with-branding:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.admin-category-color-stripe {
+  height: 6px;
+  width: 100%;
+}
+
+.admin-category-image-container {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: var(--hover-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 2rem;
+}
+
+.admin-category-image-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-category-initials {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  background: linear-gradient(135deg, var(--hover-bg), var(--active-bg));
+  color: var(--text-secondary);
+}
+
+.admin-category-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-category-card-header-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.admin-category-card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  flex: 1;
+}
+
+.admin-category-card-badge {
+  background: var(--primary-color)20;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.admin-category-card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
 html.light {
   --bg-color: #f5f5f5;
   --text-color: #1a1a1a;
