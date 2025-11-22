@@ -3,62 +3,159 @@ class AdminPlayersManager {
   constructor() {
     this.categories = {};
     this.nextPlayerId = 1;
+    this.defaultCategoryColor = '#4b5563';
+    this.defaultImagePath = '';
+    this.categoryDefaults = {
+      'Hacksaw Gaming': { color: '#101820', imagePath: '/hacksawlogo.png' },
+      'Nolimit City': { color: '#ffd100', imagePath: '/nolimitcitylogo.png' },
+      'Pragmatic Play': { color: '#ff6f00', imagePath: '/pragmaticplaylogo.png' }
+    };
+
     this.loadPlayers();
+  }
+
+  getDefaultColor(categoryName) {
+    return (this.categoryDefaults[categoryName]?.color) || this.defaultCategoryColor;
+  }
+
+  getDefaultImagePath(categoryName) {
+    return (this.categoryDefaults[categoryName]?.imagePath) || this.defaultImagePath;
+  }
+
+  createCategoryEntry(categoryName, overrides = {}) {
+    const players = Array.isArray(overrides.players) ? overrides.players : [];
+    return {
+      color: overrides.color || this.getDefaultColor(categoryName),
+      imagePath: overrides.imagePath || this.getDefaultImagePath(categoryName),
+      players: players
+    };
+  }
+
+  sanitizePlayers(players) {
+    if (!Array.isArray(players)) {
+      return [];
+    }
+
+    return players
+      .filter(player => player && typeof player.name === 'string')
+      .map(player => {
+        const parsedId = Number(player.id);
+        const trimmedName = player.name.trim();
+        return {
+          id: Number.isFinite(parsedId) ? parsedId : 0,
+          name: trimmedName
+        };
+      })
+      .filter(player => player.name.length > 0);
+  }
+
+  normalizeCategories(rawCategories) {
+    const normalized = {};
+    let requiresResave = false;
+
+    if (!rawCategories || typeof rawCategories !== 'object') {
+      return { normalized, requiresResave };
+    }
+
+    Object.entries(rawCategories).forEach(([name, value]) => {
+      if (Array.isArray(value)) {
+        normalized[name] = {
+          color: this.getDefaultColor(name),
+          imagePath: this.getDefaultImagePath(name),
+          players: this.sanitizePlayers(value)
+        };
+        requiresResave = true;
+        return;
+      }
+
+      if (value && typeof value === 'object') {
+        const players = this.sanitizePlayers(value.players || []);
+        const color = value.color || this.getDefaultColor(name);
+        const imagePath = value.imagePath || this.getDefaultImagePath(name);
+
+        if (!value.color || !value.imagePath || !Array.isArray(value.players)) {
+          requiresResave = true;
+        }
+
+        normalized[name] = { color, imagePath, players };
+        return;
+      }
+
+      normalized[name] = {
+        color: this.getDefaultColor(name),
+        imagePath: this.getDefaultImagePath(name),
+        players: []
+      };
+      requiresResave = true;
+    });
+
+    return { normalized, requiresResave };
+  }
+
+  applyNormalizedData(rawData, options = {}) {
+    const { normalized, requiresResave } = this.normalizeCategories(rawData);
+    this.categories = normalized;
+    this.updateNextPlayerId();
+
+    if (options.resave && requiresResave) {
+      localStorage.setItem('adminPlayers', JSON.stringify(this.categories));
+      if (options.markModified) {
+        localStorage.setItem('adminPlayersModified', 'true');
+      }
+    }
+  }
+
+  loadFromLocalStorageFallback() {
+    const stored = localStorage.getItem('adminPlayers');
+    if (stored) {
+      try {
+        this.applyNormalizedData(JSON.parse(stored), { resave: true, markModified: true });
+        return;
+      } catch (error) {
+        console.error('Erreur lors de la lecture des données locales:', error);
+      }
+    }
+
+    this.categories = {};
+    this.nextPlayerId = 1;
   }
 
   // Load players from localStorage or file
   async loadPlayers() {
     try {
-      // Always load from players.json first as the base data
       const response = await fetch('/players.json');
       if (response.ok) {
         const baseData = await response.json();
-        
-        // Check if localStorage has user modifications
+
         const stored = localStorage.getItem('adminPlayers');
         const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
-        
+
         if (stored && hasModifications) {
-          // User has made modifications, use localStorage data
-          this.categories = JSON.parse(stored);
+          const parsedStored = JSON.parse(stored);
+          this.applyNormalizedData(parsedStored, { resave: true });
         } else {
-          // No modifications or old data, use players.json
-          this.categories = baseData;
-          // Clear any old localStorage data
+          this.applyNormalizedData(baseData);
           localStorage.removeItem('adminPlayers');
           localStorage.removeItem('adminPlayersModified');
         }
-        
-        this.updateNextPlayerId();
       } else {
-        // Fallback to localStorage if players.json can't be loaded
-        const stored = localStorage.getItem('adminPlayers');
-        if (stored) {
-          this.categories = JSON.parse(stored);
-          this.updateNextPlayerId();
-        } else {
-          this.categories = {};
-        }
+        this.loadFromLocalStorageFallback();
       }
     } catch (error) {
       console.error('Error loading players:', error);
-      // Fallback to localStorage on error
-      const stored = localStorage.getItem('adminPlayers');
-      if (stored) {
-        this.categories = JSON.parse(stored);
-        this.updateNextPlayerId();
-      } else {
-        this.categories = {};
-      }
+      this.loadFromLocalStorageFallback();
     }
   }
 
   // Update next player ID based on existing players
   updateNextPlayerId() {
     let maxId = 0;
-    for (const categoryPlayers of Object.values(this.categories)) {
-      for (const player of categoryPlayers) {
-        if (player.id > maxId) {
+    for (const category of Object.values(this.categories)) {
+      if (!category || !Array.isArray(category.players)) {
+        continue;
+      }
+      for (const player of category.players) {
+        if (typeof player.id === 'number' && player.id > maxId) {
           maxId = player.id;
         }
       }
@@ -113,7 +210,7 @@ class AdminPlayersManager {
       return { success: false, error: 'Cette catégorie existe déjà' };
     }
 
-    this.categories[trimmed] = [];
+    this.categories[trimmed] = this.createCategoryEntry(trimmed);
     this.savePlayers();
 
     // Log action
@@ -132,7 +229,7 @@ class AdminPlayersManager {
       return { success: false, error: 'Catégorie non trouvée' };
     }
 
-    const playerCount = this.categories[categoryName].length;
+    const playerCount = this.categories[categoryName].players.length;
     delete this.categories[categoryName];
     this.savePlayers();
 
@@ -152,7 +249,7 @@ class AdminPlayersManager {
     if (!this.categories.hasOwnProperty(categoryName)) {
       return [];
     }
-    return [...this.categories[categoryName]];
+    return [...this.categories[categoryName].players];
   }
 
   // Add a player to a category
@@ -167,8 +264,10 @@ class AdminPlayersManager {
       return { success: false, error: 'Le nom du joueur ne peut pas être vide' };
     }
 
+    const category = this.categories[categoryName];
+
     // Check if player name already exists in this category
-    if (this.categories[categoryName].some(p => p.name.toLowerCase() === trimmed.toLowerCase())) {
+    if (category.players.some(p => p.name.toLowerCase() === trimmed.toLowerCase())) {
       return { success: false, error: 'Ce joueur existe déjà dans cette catégorie' };
     }
 
@@ -177,7 +276,7 @@ class AdminPlayersManager {
       name: trimmed
     };
 
-    this.categories[categoryName].push(newPlayer);
+    category.players.push(newPlayer);
     this.savePlayers();
 
     // Log action
@@ -204,13 +303,14 @@ class AdminPlayersManager {
       return { success: false, error: 'Le nom du joueur ne peut pas être vide' };
     }
 
-    const player = this.categories[categoryName].find(p => p.id === playerId);
+    const category = this.categories[categoryName];
+    const player = category.players.find(p => p.id === playerId);
     if (!player) {
       return { success: false, error: 'Joueur non trouvé' };
     }
 
     // Check if new name already exists (excluding current player)
-    if (this.categories[categoryName].some(p => p.id !== playerId && p.name.toLowerCase() === trimmed.toLowerCase())) {
+    if (category.players.some(p => p.id !== playerId && p.name.toLowerCase() === trimmed.toLowerCase())) {
       return { success: false, error: 'Ce nom de joueur existe déjà dans cette catégorie' };
     }
 
@@ -236,13 +336,14 @@ class AdminPlayersManager {
       return { success: false, error: 'Catégorie non trouvée' };
     }
 
-    const playerIndex = this.categories[categoryName].findIndex(p => p.id === playerId);
+    const category = this.categories[categoryName];
+    const playerIndex = category.players.findIndex(p => p.id === playerId);
     if (playerIndex === -1) {
       return { success: false, error: 'Joueur non trouvé' };
     }
 
-    const player = this.categories[categoryName][playerIndex];
-    this.categories[categoryName].splice(playerIndex, 1);
+    const player = category.players[playerIndex];
+    category.players.splice(playerIndex, 1);
     this.savePlayers();
 
     // Log action
@@ -261,8 +362,8 @@ class AdminPlayersManager {
   getPlayerStats() {
     const categories = this.getCategories();
     let totalPlayers = 0;
-    for (const players of Object.values(this.categories)) {
-      totalPlayers += players.length;
+    for (const category of Object.values(this.categories)) {
+      totalPlayers += Array.isArray(category.players) ? category.players.length : 0;
     }
 
     return {
@@ -270,7 +371,26 @@ class AdminPlayersManager {
       totalPlayers: totalPlayers
     };
   }
+
+  // Get metadata for a category
+  getCategoryMetadata(categoryName) {
+    const defaults = {
+      color: this.getDefaultColor(categoryName),
+      imagePath: this.getDefaultImagePath(categoryName)
+    };
+
+    if (!this.categories.hasOwnProperty(categoryName)) {
+      return defaults;
+    }
+
+    const category = this.categories[categoryName];
+    return {
+      color: category.color || defaults.color,
+      imagePath: category.imagePath || defaults.imagePath
+    };
+  }
 }
 
 // Global instance
 const adminPlayersManager = new AdminPlayersManager();
+

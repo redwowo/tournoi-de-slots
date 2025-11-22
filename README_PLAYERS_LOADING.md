@@ -56,6 +56,30 @@ Use the test files to verify behavior:
 
 ## Expected Data
 
+### Category Schema
+Each entry in `players.json` (and in `localStorage`) now stores both metadata and the player list:
+
+```
+{
+  "Hacksaw Gaming": {
+    "color": "#101820",
+    "imagePath": "/hacksawlogo.png",
+    "players": [{ "id": 1, "name": "Booze Bash" }, ...]
+  }
+}
+```
+
+- `color`: Hex code used for future UI theming (defaults to a neutral gray `#4b5563` for unknown providers)
+- `imagePath`: Path to the provider logo (blank by default)
+- `players`: Array of `{ id, name }`
+
+The three built-in providers ship with branded colors:
+| Category | Color | Logo |
+|----------|-------|------|
+| Hacksaw Gaming | `#101820` | `/hacksawlogo.png` |
+| Nolimit City | `#ffd100` | `/nolimitcitylogo.png` |
+| Pragmatic Play | `#ff6f00` | `/pragmaticplaylogo.png` |
+
 ### Default Categories (from players.json)
 | Category | Count | First Item | Last Item |
 |----------|-------|------------|-----------|
@@ -66,11 +90,11 @@ Use the test files to verify behavior:
 **Total**: 319 machines
 
 ### Migration of Old Data
-Old localStorage data (without modification flag) is automatically:
+Legacy localStorage entries that only stored arrays are automatically:
 - ✅ Detected
-- ✅ Ignored
-- ✅ Cleared
-- ✅ Replaced with players.json data
+- ✅ Wrapped with `{ color, imagePath, players }`
+- ✅ Re-saved (with the `adminPlayersModified` flag) so every page reads the new schema
+- ✅ Replaced with `players.json` data if no modifications exist
 
 No manual intervention required!
 
@@ -101,10 +125,15 @@ Returns players in specified category.
 
 **Returns**: Array<{id: number, name: string}>
 
+### `getCategoryMetadata(categoryName)`
+Provides the `color` and `imagePath` for a category, falling back to sensible defaults when metadata is missing.
+
+**Returns**: { color: string, imagePath: string }
+
 ## localStorage Keys
 
 ### `adminPlayers`
-JSON string of current categories and players.
+JSON string of current categories, metadata, and players.
 
 ### `adminPlayersModified`
 String `"true"` if user has made modifications, otherwise removed.
