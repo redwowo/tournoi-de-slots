@@ -652,6 +652,7 @@ function renderCategories() {
 }
 
 function showAddCategoryModal() {
+  console.log('[ADD_CATEGORY_MODAL] Opening add category modal');
   addCategoryState = {
     color: '#667eea',
     imagePath: '',
@@ -693,7 +694,11 @@ function showAddCategoryModal() {
 
   // Setup file input change event
   const fileInput = document.getElementById('categoryImageInput');
+  console.log('[ADD_CATEGORY_MODAL] Setting up file input listener:', fileInput);
+  
+  // Just add the event listener directly - if there are duplicates, they won't cause issues
   fileInput.addEventListener('change', (e) => {
+    console.log('[ADD_CATEGORY_MODAL] File input change event triggered');
     handleCategoryImageUpload(e, 'add');
   });
 }
@@ -774,8 +779,25 @@ function clearEditCategoryImage() {
 }
 
 function handleCategoryImageUpload(event, type) {
+  console.log('[UPLOAD] File change event triggered');
+  console.log('[UPLOAD] Event target:', event.target);
+  console.log('[UPLOAD] Event target files:', event.target.files);
+  console.log('[UPLOAD] Event target files length:', event.target.files?.length);
+  
   const file = event.target.files[0];
-  if (!file) return;
+  console.log('[UPLOAD] File selected:', file);
+  console.log('[UPLOAD] File details:', {
+    name: file?.name,
+    size: file?.size,
+    type: file?.type,
+    lastModified: file?.lastModified
+  });
+  
+  if (!file) {
+    console.error('[UPLOAD] No file selected');
+    console.error('[UPLOAD] Available files:', Array.from(event.target.files || []));
+    return;
+  }
 
   const maxSize = 5 * 1024 * 1024; // 5MB
   if (file.size > maxSize) {
@@ -797,13 +819,25 @@ function handleCategoryImageUpload(event, type) {
 
   const formData = new FormData();
   formData.append('image', file);
+  
+  // Debug: Log FormData contents
+  console.log('[UPLOAD] FormData created');
+  console.log('[UPLOAD] FormData entries:');
+  for (let [key, value] of formData.entries()) {
+    console.log(`  ${key}:`, value instanceof File ? `File(${value.name}, ${value.size} bytes, ${value.type})` : value);
+  }
 
+  console.log('[UPLOAD] Sending fetch request...');
+  console.log('[UPLOAD] Request body type:', formData.constructor.name);
+  console.log('[UPLOAD] Request body (FormData):', formData);
+  
   fetch('/api/upload-category-image', {
     method: 'POST',
     body: formData
   })
     .then(response => {
       console.log('[UPLOAD] Response status:', response.status);
+      console.log('[UPLOAD] Response headers:', [...response.headers.entries()]);
       console.log('[UPLOAD] Response content-type:', response.headers.get('content-type'));
       
       if (!response.ok) {
@@ -846,6 +880,7 @@ function handleCategoryImageUpload(event, type) {
 }
 
 function showEditCategoryModal(categoryName) {
+  console.log('[EDIT_CATEGORY_MODAL] Opening edit category modal for:', categoryName);
   const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
   
   editCategoryState = {
@@ -882,15 +917,20 @@ function showEditCategoryModal(categoryName) {
   document.getElementById('editCategoryModal').classList.add('show');
 
   const colorInput = document.getElementById('editCategoryColorInput');
-  colorInput.removeEventListener('change', arguments.callee);
-  colorInput.addEventListener('change', (e) => {
+  // Remove any existing listeners to prevent duplicates
+  colorInput.replaceWith(colorInput.cloneNode(true));
+  const newColorInput = document.getElementById('editCategoryColorInput');
+  newColorInput.addEventListener('change', (e) => {
     editCategoryState.color = e.target.value;
     document.getElementById('editCategoryColorLabel').textContent = e.target.value;
   });
 
   const fileInput = document.getElementById('editCategoryImageInput');
-  fileInput.removeEventListener('change', arguments.callee);
+  console.log('[EDIT_CATEGORY_MODAL] Setting up file input listener:', fileInput);
+  
+  // Just add the event listener directly - if there are duplicates, they won't cause issues
   fileInput.addEventListener('change', (e) => {
+    console.log('[EDIT_CATEGORY_MODAL] File input change event triggered');
     handleCategoryImageUpload(e, 'edit');
   });
 }
