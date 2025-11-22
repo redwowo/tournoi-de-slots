@@ -378,11 +378,12 @@
                                     class="admin-file-input"
                                     accept="image/*"
                                     style="display: none;"
+                                    onchange="console.log('Direct file input change triggered');"
                                 >
                                 <button 
                                     type="button" 
                                     class="admin-btn admin-btn-secondary" 
-                                    onclick="document.getElementById('categoryImageInput').click()"
+                                    onclick="console.log('Button clicked'); document.getElementById('categoryImageInput').click()"
                                 >
                                     📤 Télécharger
                                 </button>
@@ -450,11 +451,12 @@
                                     class="admin-file-input"
                                     accept="image/*"
                                     style="display: none;"
+                                    onchange="console.log('Direct edit file input change triggered');"
                                 >
                                 <button 
                                     type="button" 
                                     class="admin-btn admin-btn-secondary" 
-                                    onclick="document.getElementById('editCategoryImageInput').click()"
+                                    onclick="console.log('Edit button clicked'); document.getElementById('editCategoryImageInput').click()"
                                 >
                                     📤 Télécharger
                                 </button>
