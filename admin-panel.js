@@ -802,8 +802,22 @@ function handleCategoryImageUpload(event, type) {
     method: 'POST',
     body: formData
   })
-    .then(response => response.json())
+    .then(response => {
+      console.log('[UPLOAD] Response status:', response.status);
+      console.log('[UPLOAD] Response content-type:', response.headers.get('content-type'));
+      
+      if (!response.ok) {
+        return response.text().then(text => {
+          console.error('[UPLOAD] Error response:', text);
+          throw new Error(`Server error (${response.status}): ${text.substring(0, 100)}`);
+        });
+      }
+      
+      return response.json();
+    })
     .then(data => {
+      console.log('[UPLOAD] Success data:', data);
+      
       if (data.success) {
         stateKey.imagePath = data.filepath;
         stateKey.uploadedFilename = data.filename;
@@ -823,6 +837,7 @@ function handleCategoryImageUpload(event, type) {
       document.getElementById(`${type}CategorySubmitBtn`).disabled = false;
     })
     .catch(error => {
+      console.error('[UPLOAD] Catch error:', error);
       statusDiv.textContent = `❌ Erreur de téléchargement: ${error.message}`;
       statusDiv.className = 'admin-upload-status error';
       stateKey.isUploading = false;

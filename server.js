@@ -87,10 +87,13 @@ const upload = multer({
  * - 500: Server error during upload
  */
 app.post('/api/upload-category-image', (req, res, next) => {
-  // Ensure response is always JSON
+  // CRITICAL: Set Content-Type first to guarantee JSON response
   res.setHeader('Content-Type', 'application/json');
   
   console.log('[UPLOAD] Received upload request');
+  console.log('[UPLOAD] Request headers:', req.headers);
+  console.log('[UPLOAD] Request method:', req.method);
+  console.log('[UPLOAD] Request URL:', req.url);
   
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -114,7 +117,8 @@ app.post('/api/upload-category-image', (req, res, next) => {
     }
 
     if (!req.file) {
-      console.error('[UPLOAD] No file provided');
+      console.error('[UPLOAD] No file provided in request');
+      console.log('[UPLOAD] Request body keys:', Object.keys(req.body || {}));
       return res.status(400).json({
         success: false,
         error: 'No image file provided'
@@ -124,6 +128,11 @@ app.post('/api/upload-category-image', (req, res, next) => {
     // Return success with public filepath
     const filepath = `/category-images/${req.file.filename}`;
     console.log('[UPLOAD] Success:', filepath);
+    console.log('[UPLOAD] File details:', {
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    });
     return res.json({
       success: true,
       filename: req.file.filename,
