@@ -175,9 +175,9 @@ cat players.json | jq 'keys[]'
 # Output: Hacksaw Gaming, Nolimit City, Pragmatic Play
 
 # Count players per category
-cat players.json | jq '.["Hacksaw Gaming"] | length'    # 116
-cat players.json | jq '.["Nolimit City"] | length'      # 95
-cat players.json | jq '.["Pragmatic Play"] | length'    # 108
+cat players.json | jq '.["Hacksaw Gaming"].players | length'    # 116
+cat players.json | jq '.["Nolimit City"].players | length'      # 95
+cat players.json | jq '.["Pragmatic Play"].players | length'    # 108
 
 # Verify syntax
 node --check admin-players-manager.js

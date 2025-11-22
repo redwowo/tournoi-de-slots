@@ -64,6 +64,63 @@ function getMachineURL(machineName, category) {
 // Variable pour stocker les données complètes des machines par catégorie (maintenant dynamique)
 let machinesData = {};
 
+const categoryMetadataDefaults = {
+  'Hacksaw Gaming': { color: '#101820', imagePath: '/hacksawlogo.png' },
+  'Nolimit City': { color: '#ffd100', imagePath: '/nolimitcitylogo.png' },
+  'Pragmatic Play': { color: '#ff6f00', imagePath: '/pragmaticplaylogo.png' }
+};
+
+function getDefaultMachineColor(categoryName) {
+  return (categoryMetadataDefaults[categoryName]?.color) || '#4b5563';
+}
+
+function getDefaultMachineImagePath(categoryName) {
+  return (categoryMetadataDefaults[categoryName]?.imagePath) || '';
+}
+
+function normalizeCategoryEntry(categoryName, value) {
+  if (Array.isArray(value)) {
+    return {
+      color: getDefaultMachineColor(categoryName),
+      imagePath: getDefaultMachineImagePath(categoryName),
+      players: value
+    };
+  }
+
+  if (value && typeof value === 'object') {
+    const players = Array.isArray(value.players) ? value.players : [];
+    return {
+      color: value.color || getDefaultMachineColor(categoryName),
+      imagePath: value.imagePath || getDefaultMachineImagePath(categoryName),
+      players: players
+    };
+  }
+
+  return {
+    color: getDefaultMachineColor(categoryName),
+    imagePath: getDefaultMachineImagePath(categoryName),
+    players: []
+  };
+}
+
+function normalizeMachinesDataset(rawData) {
+  const normalized = {};
+  if (!rawData || typeof rawData !== 'object') {
+    return normalized;
+  }
+
+  Object.entries(rawData).forEach(([name, value]) => {
+    normalized[name] = normalizeCategoryEntry(name, value);
+  });
+
+  return normalized;
+}
+
+function getCategoryPlayers(categoryName) {
+  const category = machinesData[categoryName];
+  return category && Array.isArray(category.players) ? category.players : [];
+}
+
 // Fonction pour charger les machines depuis players.json ou localStorage admin
 async function loadMachinesFromPlayersJson() {
   try {
@@ -87,21 +144,19 @@ async function loadMachinesFromPlayersJson() {
       console.log('Chargement des machines depuis players.json');
     }
     
-    // Réinitialiser machinesData
-    machinesData = {};
-    
-    // Stocker les données complètes pour toutes les catégories (dynamique)
-    for (const category in data) {
-      machinesData[category] = data[category] || [];
-    }
+    // Réinitialiser machinesData avec la nouvelle structure (metadata + joueurs)
+    machinesData = normalizeMachinesDataset(data);
     
     // Extraire les noms pour les trois catégories par défaut (backward compatibility)
-    TournamentApp.slotMachines = machinesData["Hacksaw Gaming"] ? machinesData["Hacksaw Gaming"].map(m => m.name) : [];
-    TournamentApp.nolimitCityMachines = machinesData["Nolimit City"] ? machinesData["Nolimit City"].map(m => m.name) : [];
-    TournamentApp.pragmaticPlayMachines = machinesData["Pragmatic Play"] ? machinesData["Pragmatic Play"].map(m => m.name) : [];
+    const hacksawPlayers = getCategoryPlayers("Hacksaw Gaming");
+    const nolimitPlayers = getCategoryPlayers("Nolimit City");
+    const pragmaticPlayers = getCategoryPlayers("Pragmatic Play");
+    TournamentApp.slotMachines = hacksawPlayers.map(m => m.name);
+    TournamentApp.nolimitCityMachines = nolimitPlayers.map(m => m.name);
+    TournamentApp.pragmaticPlayMachines = pragmaticPlayers.map(m => m.name);
     
     console.log('Machines chargées:', Object.keys(machinesData).reduce((acc, cat) => {
-      acc[cat] = machinesData[cat].length;
+      acc[cat] = machinesData[cat]?.players ? machinesData[cat].players.length : 0;
       return acc;
     }, {}));
   } catch (error) {
@@ -155,7 +210,7 @@ function updateRandomSlotDialogOptions() {
   
   // Ajouter dynamiquement les options pour toutes les catégories disponibles
   for (const categoryName in machinesData) {
-    if (machinesData[categoryName] && machinesData[categoryName].length > 0) {
+    if (machinesData[categoryName] && Array.isArray(machinesData[categoryName].players) && machinesData[categoryName].players.length > 0) {
       const mapping = categoryMapping[categoryName];
       const categoryKey = mapping ? mapping.key : categoryName.toLowerCase().replace(/\s+/g, '-');
       const hasLogo = mapping && mapping.logo;
@@ -408,7 +463,7 @@ function addPlayer() {
     let category = "";
     
     for (const categoryName in machinesData) {
-      const categoryMachines = machinesData[categoryName];
+      const categoryMachines = getCategoryPlayers(categoryName);
       if (categoryMachines.some(machine => machine.name === name)) {
         category = categoryName;
         break;
@@ -624,7 +679,7 @@ function showSuggestions(input) {
   const allMatches = [];
   
   for (const categoryName in machinesData) {
-    const categoryMachines = machinesData[categoryName];
+    const categoryMachines = getCategoryPlayers(categoryName);
     const matches = categoryMachines
       .filter(machine => 
         machine.name.toLowerCase().includes(inputValue) && 
@@ -1025,7 +1080,10 @@ function updateSelectedProvidersDisplay() {
 // MODIFICATION: Fonction pour mettre à jour le nombre maximum de machines disponibles
 function updateMaxAvailableSlots() {
   // Mettre à jour le compteur global de machines disponibles
-  const totalMachines = Object.values(machinesData).reduce((sum, machines) => sum + machines.length, 0);
+  const totalMachines = Object.values(machinesData).reduce((sum, category) => {
+    const count = Array.isArray(category.players) ? category.players.length : 0;
+    return sum + count;
+  }, 0);
   const countElement = document.getElementById('count');
   if (countElement) {
     countElement.textContent = `Slot ajoutés : ${TournamentApp.players.length}/16 (${totalMachines} machines disponibles)`;
@@ -1036,7 +1094,7 @@ function updateMaxAvailableSlots() {
   if (TournamentApp.selectedSlotTypes.includes("all")) {
     // Collecter toutes les machines de toutes les catégories dynamiquement
     for (const category in machinesData) {
-      const categoryMachines = machinesData[category].map(m => m.name);
+      const categoryMachines = getCategoryPlayers(category).map(m => m.name);
       availableSlots = availableSlots.concat(categoryMachines);
     }
     availableSlots = availableSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
@@ -1048,7 +1106,7 @@ function updateMaxAvailableSlots() {
       if (categoryOption) {
         const categoryName = categoryOption.getAttribute('data-category');
         if (machinesData[categoryName]) {
-          const categorySlots = machinesData[categoryName]
+          const categorySlots = getCategoryPlayers(categoryName)
             .map(m => m.name)
             .filter(slot => !TournamentApp.players.some(player => player.name === slot));
           availableSlots = availableSlots.concat(categorySlots);
@@ -1725,7 +1783,7 @@ function selectRandomSlot() {
   if (TournamentApp.selectedSlotTypes.includes("all")) {
     // Collecter toutes les machines de toutes les catégories dynamiquement
     for (const category in machinesData) {
-      const categoryMachines = machinesData[category]
+      const categoryMachines = getCategoryPlayers(category)
         .map(m => ({ name: m.name, category }))
         .filter(slot => !TournamentApp.players.some(player => player.name === slot.name));
       availableSlots = availableSlots.concat(categoryMachines);
@@ -1738,7 +1796,7 @@ function selectRandomSlot() {
       if (categoryOption) {
         const categoryName = categoryOption.getAttribute('data-category');
         if (machinesData[categoryName]) {
-          const categorySlots = machinesData[categoryName]
+          const categorySlots = getCategoryPlayers(categoryName)
             .map(m => ({ name: m.name, category: categoryName }))
             .filter(slot => !TournamentApp.players.some(player => player.name === slot.name));
           availableSlots = availableSlots.concat(categorySlots);

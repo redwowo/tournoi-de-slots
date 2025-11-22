@@ -1,327 +1,1296 @@
 {
-  "Hacksaw Gaming": [
-    { "id": 1, "name": "Booze Bash" },
-    { "id": 2, "name": "Ultimate Slot of America" },
-    { "id": 3, "name": "Spinman" },
-    { "id": 4, "name": "Pray for Three" },
-    { "id": 5, "name": "Danny Dollar" },
-    { "id": 6, "name": "Rad Maxx" },
-    { "id": 7, "name": "Reign of Rome" },
-    { "id": 8, "name": "Fighter Pit" },
-    { "id": 9, "name": "Wishbringer" },
-    { "id": 10, "name": "Life and Death" },
-    { "id": 11, "name": "Dorks of the Deep" },
-    { "id": 12, "name": "Strength of Hercules" },
-    { "id": 13, "name": "Hounds of Hell" },
-    { "id": 14, "name": "FRKN Bananas" },
-    { "id": 15, "name": "Marlin Masters" },
-    { "id": 16, "name": "Phoenix DuelReels" },
-    { "id": 17, "name": "Le Viking" },
-    { "id": 18, "name": "Klowns" },
-    { "id": 19, "name": "Fire my Laser" },
-    { "id": 20, "name": "Donut Division" },
-    { "id": 21, "name": "Shaolin Master" },
-    { "id": 22, "name": "Snow Slingers" },
-    { "id": 23, "name": "Duel at Dawn" },
-    { "id": 24, "name": "Wings of Horus" },
-    { "id": 25, "name": "Rise of Ymir" },
-    { "id": 26, "name": "Get the CHEESE" },
-    { "id": 27, "name": "Cloud Princess" },
-    { "id": 28, "name": "Le Pharaoh" },
-    { "id": 29, "name": "Evil Eyes" },
-    { "id": 30, "name": "Octo Attack" },
-    { "id": 31, "name": "Donny Dough" },
-    { "id": 32, "name": "Dragon's Domain" },
-    { "id": 33, "name": "SixSixSix" },
-    { "id": 34, "name": "Tai the Toad" },
-    { "id": 35, "name": "Twisted Lab" },
-    { "id": 36, "name": "Ze Zeus" },
-    { "id": 37, "name": "Cursed Crypt" },
-    { "id": 38, "name": "Slayers Inc" },
-    { "id": 39, "name": "Jelly Slice" },
-    { "id": 40, "name": "Keep'em" },
-    { "id": 41, "name": "Divine Drop" },
-    { "id": 42, "name": "Orb of Destiny" },
-    { "id": 43, "name": "Cash Crew" },
-    { "id": 44, "name": "Rusty & Curly" },
-    { "id": 45, "name": "Bouncy Bombs" },
-    { "id": 46, "name": "Dawn of Kings" },
-    { "id": 47, "name": "Fist of Destruction" },
-    { "id": 48, "name": "Beam Boys" },
-    { "id": 49, "name": "Feel the Beat" },
-    { "id": 50, "name": "2 Wild 2 Die" },
-    { "id": 51, "name": "Dark Summoning" },
-    { "id": 52, "name": "Xmas Drop" },
-    { "id": 53, "name": "Immortal Desire" },
-    { "id": 54, "name": "Eye of the Panda" },
-    { "id": 55, "name": "Benny the Beer" },
-    { "id": 56, "name": "Chaos Crew 2" },
-    { "id": 57, "name": "Densho" },
-    { "id": 58, "name": "Le Bandit" },
-    { "id": 59, "name": "Ronin Stackways" },
-    { "id": 60, "name": "Drop'em" },
-    { "id": 61, "name": "Vending Machine" },
-    { "id": 62, "name": "Beast Below" },
-    { "id": 63, "name": "Mighty Masks" },
-    { "id": 64, "name": "Temple of Torment" },
-    { "id": 65, "name": "Mayan Stackways" },
-    { "id": 66, "name": "Cursed Seas" },
-    { "id": 67, "name": "Fear the Dark" },
-    { "id": 68, "name": "Stormforged" },
-    { "id": 69, "name": "Keep 'em Cool" },
-    { "id": 70, "name": "Magic Piggy" },
-    { "id": 71, "name": "Bloodthirst" },
-    { "id": 72, "name": "Frank's Farm" },
-    { "id": 73, "name": "Rip City" },
-    { "id": 74, "name": "Rotten" },
-    { "id": 75, "name": "Gronk's Gems" },
-    { "id": 76, "name": "Book of Time" },
-    { "id": 77, "name": "Pug Life" },
-    { "id": 78, "name": "Undead Fortune" },
-    { "id": 79, "name": "Break Bones" },
-    { "id": 80, "name": "Alpha Eagle" },
-    { "id": 81, "name": "Forest Fortune" },
-    { "id": 82, "name": "Time Spinners" },
-    { "id": 83, "name": "Fruit Duel" },
-    { "id": 84, "name": "Dork Unit" },
-    { "id": 85, "name": "Born Wild" },
-    { "id": 86, "name": "Outlaws Inc." },
-    { "id": 87, "name": "Buffalo Stack'n'Sync" },
-    { "id": 88, "name": "Itero" },
-    { "id": 89, "name": "Hand Of Anubis" },
-    { "id": 90, "name": "Gladiator Legends" },
-    { "id": 91, "name": "Warrior Ways" },
-    { "id": 92, "name": "Double Rainbow" },
-    { "id": 93, "name": "The Bowery Boys" },
-    { "id": 94, "name": "Harvest Wilds" },
-    { "id": 95, "name": "King Carrot" },
-    { "id": 96, "name": "Joker Bombs" },
-    { "id": 97, "name": "Tasty Treats" },
-    { "id": 98, "name": "Cash Quest" },
-    { "id": 99, "name": "Wanted Dead Or a Wild" },
-    { "id": 100, "name": "Rocket Reels" },
-    { "id": 101, "name": "Toshi Video Club" },
-    { "id": 102, "name": "Xpander" },
-    { "id": 103, "name": "Hop'N'Pop" },
-    { "id": 104, "name": "Stack'Em" },
-    { "id": 105, "name": "Frutz" },
-    { "id": 106, "name": "Aztec Twist" },
-    { "id": 107, "name": "Cubes 2" },
-    { "id": 108, "name": "Let It Snow" },
-    { "id": 109, "name": "Mystery Motel" },
-    { "id": 110, "name": "Chaos Crew" },
-    { "id": 111, "name": "The Respinners" },
-    { "id": 112, "name": "Cash Compass" },
-    { "id": 113, "name": "Cubes" },
-    { "id": 114, "name": "Miami Multiplier" },
-    { "id": 115, "name": "OmNom" },
-    { "id": 116, "name": "Stick'Em" }
-  ],
-  "Nolimit City": [
-    { "id": 1, "name": "Tractor Beam" },
-    { "id": 2, "name": "Fire in the Hole 3" },
-    { "id": 3, "name": "Kill Em All" },
-    { "id": 4, "name": "Highway to Hell" },
-    { "id": 5, "name": "Blood Diamond" },
-    { "id": 6, "name": "Mental II" },
-    { "id": 7, "name": "Home of the Brave" },
-    { "id": 8, "name": "Dead, Dead Or Deader" },
-    { "id": 9, "name": "Duck Hunters" },
-    { "id": 10, "name": "Tombstone Slaughter: El Gordo's Revenge" },
-    { "id": 11, "name": "xWays Hoarder 2" },
-    { "id": 12, "name": "Outsourced: Payday" },
-    { "id": 13, "name": "Tanked" },
-    { "id": 14, "name": "Munchies" },
-    { "id": 15, "name": "Outsourced: Slash Game" },
-    { "id": 16, "name": "Blood & Shadow 2" },
-    { "id": 17, "name": "Brute Force" },
-    { "id": 18, "name": "San Quentin 2: Death Row" },
-    { "id": 19, "name": "Skate or Die" },
-    { "id": 20, "name": "Stockholm Syndrome" },
-    { "id": 21, "name": "Outsourced" },
-    { "id": 22, "name": "Apocalypse Super xNudge®" },
-    { "id": 23, "name": "Punk Rocker 2" },
-    { "id": 24, "name": "Beheaded" },
-    { "id": 25, "name": "Deadwood R.I.P" },
-    { "id": 26, "name": "Loner" },
-    { "id": 27, "name": "Kenneth Must Die" },
-    { "id": 28, "name": "Tombstone: No Mercy" },
-    { "id": 29, "name": "BRICK SNAKE 2000" },
-    { "id": 30, "name": "Possessed" },
-    { "id": 31, "name": "Fire in the Hole 2" },
-    { "id": 32, "name": "D-Day" },
-    { "id": 33, "name": "Land Of The Free" },
-    { "id": 34, "name": "Devil's Crossroad" },
-    { "id": 35, "name": "Jingle Balls" },
-    { "id": 36, "name": "Nine To Five" },
-    { "id": 37, "name": "Roadkill" },
-    { "id": 38, "name": "Ugliest Catch" },
-    { "id": 39, "name": "Space Donkey" },
-    { "id": 40, "name": "The Crypt" },
-    { "id": 41, "name": "DJ Psycho" },
-    { "id": 42, "name": "True Kult" },
-    { "id": 43, "name": "Bounty Hunters" },
-    { "id": 44, "name": "The Cage" },
-    { "id": 45, "name": "Gluttony" },
-    { "id": 46, "name": "Whacked!" },
-    { "id": 47, "name": "Disturbed" },
-    { "id": 48, "name": "Kiss My Chainsaw" },
-    { "id": 49, "name": "Blood & Shadow" },
-    { "id": 50, "name": "Benji Killed In Vegas" },
-    { "id": 51, "name": "Walk of Shame" },
-    { "id": 52, "name": "Dead Canary" },
-    { "id": 53, "name": "Pearl Harbor" },
-    { "id": 54, "name": "Rock Bottom" },
-    { "id": 55, "name": "Serial" },
-    { "id": 56, "name": "Little Bighorn" },
-    { "id": 57, "name": "The Border" },
-    { "id": 58, "name": "Road Rage" },
-    { "id": 59, "name": "The Rave" },
-    { "id": 60, "name": "Folsom Prison" },
-    { "id": 61, "name": "Karen Maneater" },
-    { "id": 62, "name": "Remember Gulag" },
-    { "id": 63, "name": "Misery Mining" },
-    { "id": 64, "name": "Punk Toilet" },
-    { "id": 65, "name": "Tombstone R.I.P" },
-    { "id": 66, "name": "True Grit Redemption" },
-    { "id": 67, "name": "Legion X" },
-    { "id": 68, "name": "Evil Goblins xBomb®" },
-    { "id": 69, "name": "Das xBoot" },
-    { "id": 70, "name": "Mental" },
-    { "id": 71, "name": "xWays Hoarder xSplit" },
-    { "id": 72, "name": "Infectious 5 xWays®" },
-    { "id": 73, "name": "El Paso Gunfight xNudge®" },
-    { "id": 74, "name": "Bushido Ways xNudge®" },
-    { "id": 75, "name": "Fire In The Hole" },
-    { "id": 76, "name": "East Coast VS West Coast" },
-    { "id": 77, "name": "San Quentin xWays®" },
-    { "id": 78, "name": "Tomb of Akhenaten" },
-    { "id": 79, "name": "Warrior Graveyard xNudge" },
-    { "id": 80, "name": "Monkey's Gold xPays" },
-    { "id": 81, "name": "Buffalo Hunter" },
-    { "id": 82, "name": "Book of Shadows" },
-    { "id": 83, "name": "Immortal Fruits" },
-    { "id": 84, "name": "Golden Genie And The Walking Wilds" },
-    { "id": 85, "name": "Milky Ways" },
-    { "id": 86, "name": "Bonus Bunnies" },
-    { "id": 87, "name": "Deadwood xNudge®" },
-    { "id": 88, "name": "Harlequin Carnival" },
-    { "id": 89, "name": "Gaelic Gold" },
-    { "id": 90, "name": "Barbarian Fury" },
-    { "id": 91, "name": "Punk Rocker" },
-    { "id": 92, "name": "Poison Eve" },
-    { "id": 93, "name": "Dragon Tribe" },
-    { "id": 94, "name": "Tomb of Néfertiti" },
-    { "id": 95, "name": "Manhattan Goes Wild" }
-  ],
-  "Pragmatic Play": [
-    { "id": 1, "name": "5 Lions Megaways 2" },
-    { "id": 2, "name": "5 Lions Reborn" },
-    { "id": 3, "name": "6 Jokers" },
-    { "id": 4, "name": "7 Clovers of Fortune" },
-    { "id": 5, "name": "Ancient Island Megaways" },
-    { "id": 6, "name": "Angel vs Sinner" },
-    { "id": 7, "name": "Aztec Gems Megaways" },
-    { "id": 8, "name": "Aztec Smash" },
-    { "id": 9, "name": "Aztec Treasure Hunt" },
-    { "id": 10, "name": "Badge Blitz" },
-    { "id": 11, "name": "Bandit Megaways" },
-    { "id": 12, "name": "Big Bass Bonanza 1000" },
-    { "id": 13, "name": "Big Bass Bonanza 3 Reeler" },
-    { "id": 14, "name": "Big Bass Boxing Bonus Round" },
-    { "id": 15, "name": "Big Bass Halloween 2" },
-    { "id": 16, "name": "Big Bass Return to the Races" },
-    { "id": 17, "name": "Big Bass Vegas Double Down Deluxe" },
-    { "id": 18, "name": "Big Bass Xmas Extreme" },
-    { "id": 19, "name": "Bigger Bass Splash" },
-    { "id": 20, "name": "Blitz Super Wheel" },
-    { "id": 21, "name": "Book of Monsters" },
-    { "id": 22, "name": "Bow of Artemis" },
-    { "id": 23, "name": "Brick House Bonanza" },
-    { "id": 24, "name": "Candy Corner" },
-    { "id": 25, "name": "Cash Surge" },
-    { "id": 26, "name": "Chests of Cai Shen" },
-    { "id": 27, "name": "Congo Cash XL" },
-    { "id": 28, "name": "Crank It Up" },
-    { "id": 29, "name": "Dragon Gold 88" },
-    { "id": 30, "name": "Dragon King Hot Pots" },
-    { "id": 31, "name": "Dynamite Diggin Doug" },
-    { "id": 32, "name": "Emotiwins" },
-    { "id": 33, "name": "Escape the Pyramid Fire & Ice" },
-    { "id": 34, "name": "Eternal Empress Freeze Time" },
-    { "id": 35, "name": "Eye of Spartacus" },
-    { "id": 36, "name": "Fangtastic Freespins" },
-    { "id": 37, "name": "Fiesta Fortune" },
-    { "id": 38, "name": "Floating Dragon Year of the Snake" },
-    { "id": 39, "name": "Fonzos Feline Fortunes" },
-    { "id": 40, "name": "Forging Wilds" },
-    { "id": 41, "name": "Fortune Hitn Roll" },
-    { "id": 42, "name": "Gates of Hades" },
-    { "id": 43, "name": "Gates of Olympus Super Scatter" },
-    { "id": 44, "name": "Gates of Olympus Xmas 1000" },
-    { "id": 45, "name": "Gem Elevator" },
-    { "id": 46, "name": "Greedy Fortune Pig" },
-    { "id": 47, "name": "Hand of Midas 2" },
-    { "id": 48, "name": "Himalayan Wild" },
-    { "id": 49, "name": "Hot to Burn 7 Deadly Free Spins" },
-    { "id": 50, "name": "Irish Crown" },
-    { "id": 51, "name": "Jackpot Hunter" },
-    { "id": 52, "name": "Jelly Candy" },
-    { "id": 53, "name": "John Hunter and Galileos Secrets" },
-    { "id": 54, "name": "Jokers Jewels Cash" },
-    { "id": 55, "name": "Jokers Jewels Hot" },
-    { "id": 56, "name": "Jokers Jewels Wild" },
-    { "id": 57, "name": "Jumbo Safari" },
-    { "id": 58, "name": "Lucky Dog" },
-    { "id": 59, "name": "Lucky Monkey" },
-    { "id": 60, "name": "Lucky Mouse" },
-    { "id": 61, "name": "Lucky Ox" },
-    { "id": 62, "name": "Lucky Phoenix" },
-    { "id": 63, "name": "Lucky Tiger" },
-    { "id": 64, "name": "Lucky Tiger 1000" },
-    { "id": 65, "name": "Luckys Wild Pub" },
-    { "id": 66, "name": "Mahjong Wins Super Scatter" },
-    { "id": 67, "name": "Majestic Express Gold Run" },
-    { "id": 68, "name": "Might of Freya Megaways" },
-    { "id": 69, "name": "Mining Rush" },
-    { "id": 70, "name": "Moleionaire" },
-    { "id": 71, "name": "Money Stacks" },
-    { "id": 72, "name": "Money Stacks Megaways" },
-    { "id": 73, "name": "Mummys Jewels" },
-    { "id": 74, "name": "Mustang Gold Megaways" },
-    { "id": 75, "name": "Mystery Mice" },
-    { "id": 76, "name": "Oodles of Noodles" },
-    { "id": 77, "name": "Penguins Christmas Party Time" },
-    { "id": 78, "name": "Peppes Pepperoni Pizza Plaza" },
-    { "id": 79, "name": "Plushie Wins" },
-    { "id": 80, "name": "Raging Waterfall Megaways" },
-    { "id": 81, "name": "Ratinho Sortudo" },
-    { "id": 82, "name": "Release the Kraken Megaways" },
-    { "id": 83, "name": "Resurrecting Riches" },
-    { "id": 84, "name": "Ride The Lightning" },
-    { "id": 85, "name": "Running Sushi" },
-    { "id": 86, "name": "Samurai Code" },
-    { "id": 87, "name": "Santas Xmas Rush" },
-    { "id": 88, "name": "Savannah Legend" },
-    { "id": 89, "name": "Sleeping Dragon" },
-    { "id": 90, "name": "Sumo Supreme Megaways" },
-    { "id": 91, "name": "Sweet Kingdom" },
-    { "id": 92, "name": "Temple Guardians" },
-    { "id": 93, "name": "The Dog House Muttley Crew" },
-    { "id": 94, "name": "The Dog House Royal Hunt" },
-    { "id": 95, "name": "Tiny Toads" },
-    { "id": 96, "name": "Touro Sortudo" },
-    { "id": 97, "name": "Triple Pot Gold" },
-    { "id": 98, "name": "Vampy Party" },
-    { "id": 99, "name": "Volcano Goddess" },
-    { "id": 100, "name": "Wealthy Frog" },
-    { "id": 101, "name": "Wild West Gold Blazing Bounty" },
-    { "id": 102, "name": "Wild Wild Joker" },
-    { "id": 103, "name": "Wild Wild Pearls" },
-    { "id": 104, "name": "Wild Wildebeest Wins" },
-    { "id": 105, "name": "Wisdom of Athena 1000" },
-    { "id": 106, "name": "Witch Heart Megaways" },
-    { "id": 107, "name": "Wolf Gold Ultimate" },
-    { "id": 108, "name": "Yeti Quest" }
-  ]
+  "Hacksaw Gaming": {
+    "color": "#101820",
+    "imagePath": "/hacksawlogo.png",
+    "players": [
+      {
+        "id": 1,
+        "name": "Booze Bash"
+      },
+      {
+        "id": 2,
+        "name": "Ultimate Slot of America"
+      },
+      {
+        "id": 3,
+        "name": "Spinman"
+      },
+      {
+        "id": 4,
+        "name": "Pray for Three"
+      },
+      {
+        "id": 5,
+        "name": "Danny Dollar"
+      },
+      {
+        "id": 6,
+        "name": "Rad Maxx"
+      },
+      {
+        "id": 7,
+        "name": "Reign of Rome"
+      },
+      {
+        "id": 8,
+        "name": "Fighter Pit"
+      },
+      {
+        "id": 9,
+        "name": "Wishbringer"
+      },
+      {
+        "id": 10,
+        "name": "Life and Death"
+      },
+      {
+        "id": 11,
+        "name": "Dorks of the Deep"
+      },
+      {
+        "id": 12,
+        "name": "Strength of Hercules"
+      },
+      {
+        "id": 13,
+        "name": "Hounds of Hell"
+      },
+      {
+        "id": 14,
+        "name": "FRKN Bananas"
+      },
+      {
+        "id": 15,
+        "name": "Marlin Masters"
+      },
+      {
+        "id": 16,
+        "name": "Phoenix DuelReels"
+      },
+      {
+        "id": 17,
+        "name": "Le Viking"
+      },
+      {
+        "id": 18,
+        "name": "Klowns"
+      },
+      {
+        "id": 19,
+        "name": "Fire my Laser"
+      },
+      {
+        "id": 20,
+        "name": "Donut Division"
+      },
+      {
+        "id": 21,
+        "name": "Shaolin Master"
+      },
+      {
+        "id": 22,
+        "name": "Snow Slingers"
+      },
+      {
+        "id": 23,
+        "name": "Duel at Dawn"
+      },
+      {
+        "id": 24,
+        "name": "Wings of Horus"
+      },
+      {
+        "id": 25,
+        "name": "Rise of Ymir"
+      },
+      {
+        "id": 26,
+        "name": "Get the CHEESE"
+      },
+      {
+        "id": 27,
+        "name": "Cloud Princess"
+      },
+      {
+        "id": 28,
+        "name": "Le Pharaoh"
+      },
+      {
+        "id": 29,
+        "name": "Evil Eyes"
+      },
+      {
+        "id": 30,
+        "name": "Octo Attack"
+      },
+      {
+        "id": 31,
+        "name": "Donny Dough"
+      },
+      {
+        "id": 32,
+        "name": "Dragon's Domain"
+      },
+      {
+        "id": 33,
+        "name": "SixSixSix"
+      },
+      {
+        "id": 34,
+        "name": "Tai the Toad"
+      },
+      {
+        "id": 35,
+        "name": "Twisted Lab"
+      },
+      {
+        "id": 36,
+        "name": "Ze Zeus"
+      },
+      {
+        "id": 37,
+        "name": "Cursed Crypt"
+      },
+      {
+        "id": 38,
+        "name": "Slayers Inc"
+      },
+      {
+        "id": 39,
+        "name": "Jelly Slice"
+      },
+      {
+        "id": 40,
+        "name": "Keep'em"
+      },
+      {
+        "id": 41,
+        "name": "Divine Drop"
+      },
+      {
+        "id": 42,
+        "name": "Orb of Destiny"
+      },
+      {
+        "id": 43,
+        "name": "Cash Crew"
+      },
+      {
+        "id": 44,
+        "name": "Rusty & Curly"
+      },
+      {
+        "id": 45,
+        "name": "Bouncy Bombs"
+      },
+      {
+        "id": 46,
+        "name": "Dawn of Kings"
+      },
+      {
+        "id": 47,
+        "name": "Fist of Destruction"
+      },
+      {
+        "id": 48,
+        "name": "Beam Boys"
+      },
+      {
+        "id": 49,
+        "name": "Feel the Beat"
+      },
+      {
+        "id": 50,
+        "name": "2 Wild 2 Die"
+      },
+      {
+        "id": 51,
+        "name": "Dark Summoning"
+      },
+      {
+        "id": 52,
+        "name": "Xmas Drop"
+      },
+      {
+        "id": 53,
+        "name": "Immortal Desire"
+      },
+      {
+        "id": 54,
+        "name": "Eye of the Panda"
+      },
+      {
+        "id": 55,
+        "name": "Benny the Beer"
+      },
+      {
+        "id": 56,
+        "name": "Chaos Crew 2"
+      },
+      {
+        "id": 57,
+        "name": "Densho"
+      },
+      {
+        "id": 58,
+        "name": "Le Bandit"
+      },
+      {
+        "id": 59,
+        "name": "Ronin Stackways"
+      },
+      {
+        "id": 60,
+        "name": "Drop'em"
+      },
+      {
+        "id": 61,
+        "name": "Vending Machine"
+      },
+      {
+        "id": 62,
+        "name": "Beast Below"
+      },
+      {
+        "id": 63,
+        "name": "Mighty Masks"
+      },
+      {
+        "id": 64,
+        "name": "Temple of Torment"
+      },
+      {
+        "id": 65,
+        "name": "Mayan Stackways"
+      },
+      {
+        "id": 66,
+        "name": "Cursed Seas"
+      },
+      {
+        "id": 67,
+        "name": "Fear the Dark"
+      },
+      {
+        "id": 68,
+        "name": "Stormforged"
+      },
+      {
+        "id": 69,
+        "name": "Keep 'em Cool"
+      },
+      {
+        "id": 70,
+        "name": "Magic Piggy"
+      },
+      {
+        "id": 71,
+        "name": "Bloodthirst"
+      },
+      {
+        "id": 72,
+        "name": "Frank's Farm"
+      },
+      {
+        "id": 73,
+        "name": "Rip City"
+      },
+      {
+        "id": 74,
+        "name": "Rotten"
+      },
+      {
+        "id": 75,
+        "name": "Gronk's Gems"
+      },
+      {
+        "id": 76,
+        "name": "Book of Time"
+      },
+      {
+        "id": 77,
+        "name": "Pug Life"
+      },
+      {
+        "id": 78,
+        "name": "Undead Fortune"
+      },
+      {
+        "id": 79,
+        "name": "Break Bones"
+      },
+      {
+        "id": 80,
+        "name": "Alpha Eagle"
+      },
+      {
+        "id": 81,
+        "name": "Forest Fortune"
+      },
+      {
+        "id": 82,
+        "name": "Time Spinners"
+      },
+      {
+        "id": 83,
+        "name": "Fruit Duel"
+      },
+      {
+        "id": 84,
+        "name": "Dork Unit"
+      },
+      {
+        "id": 85,
+        "name": "Born Wild"
+      },
+      {
+        "id": 86,
+        "name": "Outlaws Inc."
+      },
+      {
+        "id": 87,
+        "name": "Buffalo Stack'n'Sync"
+      },
+      {
+        "id": 88,
+        "name": "Itero"
+      },
+      {
+        "id": 89,
+        "name": "Hand Of Anubis"
+      },
+      {
+        "id": 90,
+        "name": "Gladiator Legends"
+      },
+      {
+        "id": 91,
+        "name": "Warrior Ways"
+      },
+      {
+        "id": 92,
+        "name": "Double Rainbow"
+      },
+      {
+        "id": 93,
+        "name": "The Bowery Boys"
+      },
+      {
+        "id": 94,
+        "name": "Harvest Wilds"
+      },
+      {
+        "id": 95,
+        "name": "King Carrot"
+      },
+      {
+        "id": 96,
+        "name": "Joker Bombs"
+      },
+      {
+        "id": 97,
+        "name": "Tasty Treats"
+      },
+      {
+        "id": 98,
+        "name": "Cash Quest"
+      },
+      {
+        "id": 99,
+        "name": "Wanted Dead Or a Wild"
+      },
+      {
+        "id": 100,
+        "name": "Rocket Reels"
+      },
+      {
+        "id": 101,
+        "name": "Toshi Video Club"
+      },
+      {
+        "id": 102,
+        "name": "Xpander"
+      },
+      {
+        "id": 103,
+        "name": "Hop'N'Pop"
+      },
+      {
+        "id": 104,
+        "name": "Stack'Em"
+      },
+      {
+        "id": 105,
+        "name": "Frutz"
+      },
+      {
+        "id": 106,
+        "name": "Aztec Twist"
+      },
+      {
+        "id": 107,
+        "name": "Cubes 2"
+      },
+      {
+        "id": 108,
+        "name": "Let It Snow"
+      },
+      {
+        "id": 109,
+        "name": "Mystery Motel"
+      },
+      {
+        "id": 110,
+        "name": "Chaos Crew"
+      },
+      {
+        "id": 111,
+        "name": "The Respinners"
+      },
+      {
+        "id": 112,
+        "name": "Cash Compass"
+      },
+      {
+        "id": 113,
+        "name": "Cubes"
+      },
+      {
+        "id": 114,
+        "name": "Miami Multiplier"
+      },
+      {
+        "id": 115,
+        "name": "OmNom"
+      },
+      {
+        "id": 116,
+        "name": "Stick'Em"
+      }
+    ]
+  },
+  "Nolimit City": {
+    "color": "#ffd100",
+    "imagePath": "/nolimitcitylogo.png",
+    "players": [
+      {
+        "id": 1,
+        "name": "Tractor Beam"
+      },
+      {
+        "id": 2,
+        "name": "Fire in the Hole 3"
+      },
+      {
+        "id": 3,
+        "name": "Kill Em All"
+      },
+      {
+        "id": 4,
+        "name": "Highway to Hell"
+      },
+      {
+        "id": 5,
+        "name": "Blood Diamond"
+      },
+      {
+        "id": 6,
+        "name": "Mental II"
+      },
+      {
+        "id": 7,
+        "name": "Home of the Brave"
+      },
+      {
+        "id": 8,
+        "name": "Dead, Dead Or Deader"
+      },
+      {
+        "id": 9,
+        "name": "Duck Hunters"
+      },
+      {
+        "id": 10,
+        "name": "Tombstone Slaughter: El Gordo's Revenge"
+      },
+      {
+        "id": 11,
+        "name": "xWays Hoarder 2"
+      },
+      {
+        "id": 12,
+        "name": "Outsourced: Payday"
+      },
+      {
+        "id": 13,
+        "name": "Tanked"
+      },
+      {
+        "id": 14,
+        "name": "Munchies"
+      },
+      {
+        "id": 15,
+        "name": "Outsourced: Slash Game"
+      },
+      {
+        "id": 16,
+        "name": "Blood & Shadow 2"
+      },
+      {
+        "id": 17,
+        "name": "Brute Force"
+      },
+      {
+        "id": 18,
+        "name": "San Quentin 2: Death Row"
+      },
+      {
+        "id": 19,
+        "name": "Skate or Die"
+      },
+      {
+        "id": 20,
+        "name": "Stockholm Syndrome"
+      },
+      {
+        "id": 21,
+        "name": "Outsourced"
+      },
+      {
+        "id": 22,
+        "name": "Apocalypse Super xNudge®"
+      },
+      {
+        "id": 23,
+        "name": "Punk Rocker 2"
+      },
+      {
+        "id": 24,
+        "name": "Beheaded"
+      },
+      {
+        "id": 25,
+        "name": "Deadwood R.I.P"
+      },
+      {
+        "id": 26,
+        "name": "Loner"
+      },
+      {
+        "id": 27,
+        "name": "Kenneth Must Die"
+      },
+      {
+        "id": 28,
+        "name": "Tombstone: No Mercy"
+      },
+      {
+        "id": 29,
+        "name": "BRICK SNAKE 2000"
+      },
+      {
+        "id": 30,
+        "name": "Possessed"
+      },
+      {
+        "id": 31,
+        "name": "Fire in the Hole 2"
+      },
+      {
+        "id": 32,
+        "name": "D-Day"
+      },
+      {
+        "id": 33,
+        "name": "Land Of The Free"
+      },
+      {
+        "id": 34,
+        "name": "Devil's Crossroad"
+      },
+      {
+        "id": 35,
+        "name": "Jingle Balls"
+      },
+      {
+        "id": 36,
+        "name": "Nine To Five"
+      },
+      {
+        "id": 37,
+        "name": "Roadkill"
+      },
+      {
+        "id": 38,
+        "name": "Ugliest Catch"
+      },
+      {
+        "id": 39,
+        "name": "Space Donkey"
+      },
+      {
+        "id": 40,
+        "name": "The Crypt"
+      },
+      {
+        "id": 41,
+        "name": "DJ Psycho"
+      },
+      {
+        "id": 42,
+        "name": "True Kult"
+      },
+      {
+        "id": 43,
+        "name": "Bounty Hunters"
+      },
+      {
+        "id": 44,
+        "name": "The Cage"
+      },
+      {
+        "id": 45,
+        "name": "Gluttony"
+      },
+      {
+        "id": 46,
+        "name": "Whacked!"
+      },
+      {
+        "id": 47,
+        "name": "Disturbed"
+      },
+      {
+        "id": 48,
+        "name": "Kiss My Chainsaw"
+      },
+      {
+        "id": 49,
+        "name": "Blood & Shadow"
+      },
+      {
+        "id": 50,
+        "name": "Benji Killed In Vegas"
+      },
+      {
+        "id": 51,
+        "name": "Walk of Shame"
+      },
+      {
+        "id": 52,
+        "name": "Dead Canary"
+      },
+      {
+        "id": 53,
+        "name": "Pearl Harbor"
+      },
+      {
+        "id": 54,
+        "name": "Rock Bottom"
+      },
+      {
+        "id": 55,
+        "name": "Serial"
+      },
+      {
+        "id": 56,
+        "name": "Little Bighorn"
+      },
+      {
+        "id": 57,
+        "name": "The Border"
+      },
+      {
+        "id": 58,
+        "name": "Road Rage"
+      },
+      {
+        "id": 59,
+        "name": "The Rave"
+      },
+      {
+        "id": 60,
+        "name": "Folsom Prison"
+      },
+      {
+        "id": 61,
+        "name": "Karen Maneater"
+      },
+      {
+        "id": 62,
+        "name": "Remember Gulag"
+      },
+      {
+        "id": 63,
+        "name": "Misery Mining"
+      },
+      {
+        "id": 64,
+        "name": "Punk Toilet"
+      },
+      {
+        "id": 65,
+        "name": "Tombstone R.I.P"
+      },
+      {
+        "id": 66,
+        "name": "True Grit Redemption"
+      },
+      {
+        "id": 67,
+        "name": "Legion X"
+      },
+      {
+        "id": 68,
+        "name": "Evil Goblins xBomb®"
+      },
+      {
+        "id": 69,
+        "name": "Das xBoot"
+      },
+      {
+        "id": 70,
+        "name": "Mental"
+      },
+      {
+        "id": 71,
+        "name": "xWays Hoarder xSplit"
+      },
+      {
+        "id": 72,
+        "name": "Infectious 5 xWays®"
+      },
+      {
+        "id": 73,
+        "name": "El Paso Gunfight xNudge®"
+      },
+      {
+        "id": 74,
+        "name": "Bushido Ways xNudge®"
+      },
+      {
+        "id": 75,
+        "name": "Fire In The Hole"
+      },
+      {
+        "id": 76,
+        "name": "East Coast VS West Coast"
+      },
+      {
+        "id": 77,
+        "name": "San Quentin xWays®"
+      },
+      {
+        "id": 78,
+        "name": "Tomb of Akhenaten"
+      },
+      {
+        "id": 79,
+        "name": "Warrior Graveyard xNudge"
+      },
+      {
+        "id": 80,
+        "name": "Monkey's Gold xPays"
+      },
+      {
+        "id": 81,
+        "name": "Buffalo Hunter"
+      },
+      {
+        "id": 82,
+        "name": "Book of Shadows"
+      },
+      {
+        "id": 83,
+        "name": "Immortal Fruits"
+      },
+      {
+        "id": 84,
+        "name": "Golden Genie And The Walking Wilds"
+      },
+      {
+        "id": 85,
+        "name": "Milky Ways"
+      },
+      {
+        "id": 86,
+        "name": "Bonus Bunnies"
+      },
+      {
+        "id": 87,
+        "name": "Deadwood xNudge®"
+      },
+      {
+        "id": 88,
+        "name": "Harlequin Carnival"
+      },
+      {
+        "id": 89,
+        "name": "Gaelic Gold"
+      },
+      {
+        "id": 90,
+        "name": "Barbarian Fury"
+      },
+      {
+        "id": 91,
+        "name": "Punk Rocker"
+      },
+      {
+        "id": 92,
+        "name": "Poison Eve"
+      },
+      {
+        "id": 93,
+        "name": "Dragon Tribe"
+      },
+      {
+        "id": 94,
+        "name": "Tomb of Néfertiti"
+      },
+      {
+        "id": 95,
+        "name": "Manhattan Goes Wild"
+      }
+    ]
+  },
+  "Pragmatic Play": {
+    "color": "#ff6f00",
+    "imagePath": "/pragmaticplaylogo.png",
+    "players": [
+      {
+        "id": 1,
+        "name": "5 Lions Megaways 2"
+      },
+      {
+        "id": 2,
+        "name": "5 Lions Reborn"
+      },
+      {
+        "id": 3,
+        "name": "6 Jokers"
+      },
+      {
+        "id": 4,
+        "name": "7 Clovers of Fortune"
+      },
+      {
+        "id": 5,
+        "name": "Ancient Island Megaways"
+      },
+      {
+        "id": 6,
+        "name": "Angel vs Sinner"
+      },
+      {
+        "id": 7,
+        "name": "Aztec Gems Megaways"
+      },
+      {
+        "id": 8,
+        "name": "Aztec Smash"
+      },
+      {
+        "id": 9,
+        "name": "Aztec Treasure Hunt"
+      },
+      {
+        "id": 10,
+        "name": "Badge Blitz"
+      },
+      {
+        "id": 11,
+        "name": "Bandit Megaways"
+      },
+      {
+        "id": 12,
+        "name": "Big Bass Bonanza 1000"
+      },
+      {
+        "id": 13,
+        "name": "Big Bass Bonanza 3 Reeler"
+      },
+      {
+        "id": 14,
+        "name": "Big Bass Boxing Bonus Round"
+      },
+      {
+        "id": 15,
+        "name": "Big Bass Halloween 2"
+      },
+      {
+        "id": 16,
+        "name": "Big Bass Return to the Races"
+      },
+      {
+        "id": 17,
+        "name": "Big Bass Vegas Double Down Deluxe"
+      },
+      {
+        "id": 18,
+        "name": "Big Bass Xmas Extreme"
+      },
+      {
+        "id": 19,
+        "name": "Bigger Bass Splash"
+      },
+      {
+        "id": 20,
+        "name": "Blitz Super Wheel"
+      },
+      {
+        "id": 21,
+        "name": "Book of Monsters"
+      },
+      {
+        "id": 22,
+        "name": "Bow of Artemis"
+      },
+      {
+        "id": 23,
+        "name": "Brick House Bonanza"
+      },
+      {
+        "id": 24,
+        "name": "Candy Corner"
+      },
+      {
+        "id": 25,
+        "name": "Cash Surge"
+      },
+      {
+        "id": 26,
+        "name": "Chests of Cai Shen"
+      },
+      {
+        "id": 27,
+        "name": "Congo Cash XL"
+      },
+      {
+        "id": 28,
+        "name": "Crank It Up"
+      },
+      {
+        "id": 29,
+        "name": "Dragon Gold 88"
+      },
+      {
+        "id": 30,
+        "name": "Dragon King Hot Pots"
+      },
+      {
+        "id": 31,
+        "name": "Dynamite Diggin Doug"
+      },
+      {
+        "id": 32,
+        "name": "Emotiwins"
+      },
+      {
+        "id": 33,
+        "name": "Escape the Pyramid Fire & Ice"
+      },
+      {
+        "id": 34,
+        "name": "Eternal Empress Freeze Time"
+      },
+      {
+        "id": 35,
+        "name": "Eye of Spartacus"
+      },
+      {
+        "id": 36,
+        "name": "Fangtastic Freespins"
+      },
+      {
+        "id": 37,
+        "name": "Fiesta Fortune"
+      },
+      {
+        "id": 38,
+        "name": "Floating Dragon Year of the Snake"
+      },
+      {
+        "id": 39,
+        "name": "Fonzos Feline Fortunes"
+      },
+      {
+        "id": 40,
+        "name": "Forging Wilds"
+      },
+      {
+        "id": 41,
+        "name": "Fortune Hitn Roll"
+      },
+      {
+        "id": 42,
+        "name": "Gates of Hades"
+      },
+      {
+        "id": 43,
+        "name": "Gates of Olympus Super Scatter"
+      },
+      {
+        "id": 44,
+        "name": "Gates of Olympus Xmas 1000"
+      },
+      {
+        "id": 45,
+        "name": "Gem Elevator"
+      },
+      {
+        "id": 46,
+        "name": "Greedy Fortune Pig"
+      },
+      {
+        "id": 47,
+        "name": "Hand of Midas 2"
+      },
+      {
+        "id": 48,
+        "name": "Himalayan Wild"
+      },
+      {
+        "id": 49,
+        "name": "Hot to Burn 7 Deadly Free Spins"
+      },
+      {
+        "id": 50,
+        "name": "Irish Crown"
+      },
+      {
+        "id": 51,
+        "name": "Jackpot Hunter"
+      },
+      {
+        "id": 52,
+        "name": "Jelly Candy"
+      },
+      {
+        "id": 53,
+        "name": "John Hunter and Galileos Secrets"
+      },
+      {
+        "id": 54,
+        "name": "Jokers Jewels Cash"
+      },
+      {
+        "id": 55,
+        "name": "Jokers Jewels Hot"
+      },
+      {
+        "id": 56,
+        "name": "Jokers Jewels Wild"
+      },
+      {
+        "id": 57,
+        "name": "Jumbo Safari"
+      },
+      {
+        "id": 58,
+        "name": "Lucky Dog"
+      },
+      {
+        "id": 59,
+        "name": "Lucky Monkey"
+      },
+      {
+        "id": 60,
+        "name": "Lucky Mouse"
+      },
+      {
+        "id": 61,
+        "name": "Lucky Ox"
+      },
+      {
+        "id": 62,
+        "name": "Lucky Phoenix"
+      },
+      {
+        "id": 63,
+        "name": "Lucky Tiger"
+      },
+      {
+        "id": 64,
+        "name": "Lucky Tiger 1000"
+      },
+      {
+        "id": 65,
+        "name": "Luckys Wild Pub"
+      },
+      {
+        "id": 66,
+        "name": "Mahjong Wins Super Scatter"
+      },
+      {
+        "id": 67,
+        "name": "Majestic Express Gold Run"
+      },
+      {
+        "id": 68,
+        "name": "Might of Freya Megaways"
+      },
+      {
+        "id": 69,
+        "name": "Mining Rush"
+      },
+      {
+        "id": 70,
+        "name": "Moleionaire"
+      },
+      {
+        "id": 71,
+        "name": "Money Stacks"
+      },
+      {
+        "id": 72,
+        "name": "Money Stacks Megaways"
+      },
+      {
+        "id": 73,
+        "name": "Mummys Jewels"
+      },
+      {
+        "id": 74,
+        "name": "Mustang Gold Megaways"
+      },
+      {
+        "id": 75,
+        "name": "Mystery Mice"
+      },
+      {
+        "id": 76,
+        "name": "Oodles of Noodles"
+      },
+      {
+        "id": 77,
+        "name": "Penguins Christmas Party Time"
+      },
+      {
+        "id": 78,
+        "name": "Peppes Pepperoni Pizza Plaza"
+      },
+      {
+        "id": 79,
+        "name": "Plushie Wins"
+      },
+      {
+        "id": 80,
+        "name": "Raging Waterfall Megaways"
+      },
+      {
+        "id": 81,
+        "name": "Ratinho Sortudo"
+      },
+      {
+        "id": 82,
+        "name": "Release the Kraken Megaways"
+      },
+      {
+        "id": 83,
+        "name": "Resurrecting Riches"
+      },
+      {
+        "id": 84,
+        "name": "Ride The Lightning"
+      },
+      {
+        "id": 85,
+        "name": "Running Sushi"
+      },
+      {
+        "id": 86,
+        "name": "Samurai Code"
+      },
+      {
+        "id": 87,
+        "name": "Santas Xmas Rush"
+      },
+      {
+        "id": 88,
+        "name": "Savannah Legend"
+      },
+      {
+        "id": 89,
+        "name": "Sleeping Dragon"
+      },
+      {
+        "id": 90,
+        "name": "Sumo Supreme Megaways"
+      },
+      {
+        "id": 91,
+        "name": "Sweet Kingdom"
+      },
+      {
+        "id": 92,
+        "name": "Temple Guardians"
+      },
+      {
+        "id": 93,
+        "name": "The Dog House Muttley Crew"
+      },
+      {
+        "id": 94,
+        "name": "The Dog House Royal Hunt"
+      },
+      {
+        "id": 95,
+        "name": "Tiny Toads"
+      },
+      {
+        "id": 96,
+        "name": "Touro Sortudo"
+      },
+      {
+        "id": 97,
+        "name": "Triple Pot Gold"
+      },
+      {
+        "id": 98,
+        "name": "Vampy Party"
+      },
+      {
+        "id": 99,
+        "name": "Volcano Goddess"
+      },
+      {
+        "id": 100,
+        "name": "Wealthy Frog"
+      },
+      {
+        "id": 101,
+        "name": "Wild West Gold Blazing Bounty"
+      },
+      {
+        "id": 102,
+        "name": "Wild Wild Joker"
+      },
+      {
+        "id": 103,
+        "name": "Wild Wild Pearls"
+      },
+      {
+        "id": 104,
+        "name": "Wild Wildebeest Wins"
+      },
+      {
+        "id": 105,
+        "name": "Wisdom of Athena 1000"
+      },
+      {
+        "id": 106,
+        "name": "Witch Heart Megaways"
+      },
+      {
+        "id": 107,
+        "name": "Wolf Gold Ultimate"
+      },
+      {
+        "id": 108,
+        "name": "Yeti Quest"
+      }
+    ]
+  }
 }
