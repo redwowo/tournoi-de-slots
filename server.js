@@ -5,17 +5,20 @@ const multer = require('multer');
 const crypto = require('crypto');
 
 const app = express();
+const apiRouter = express.Router();
+const jsonParser = express.json();
 
-// Set up JSON parsing middleware for non-multipart routes
-app.use('/api', (req, res, next) => {
-  // Log all API requests for debugging
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  
-  // Only apply express.json() for routes that aren't file uploads
-  if (!req.url.includes('/upload-category-image')) {
-    return express.json()(req, res, next);
-  }
+// Log every API request and only parse JSON when needed
+apiRouter.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
   next();
+});
+
+apiRouter.use((req, res, next) => {
+  if (req.path.startsWith('/upload-category-image')) {
+    return next();
+  }
+  return jsonParser(req, res, next);
 });
 
 // Configure directory for category images
@@ -86,14 +89,14 @@ const upload = multer({
  * - 413: File size exceeds 5MB limit
  * - 500: Server error during upload
  */
-app.post('/api/upload-category-image', (req, res, next) => {
+apiRouter.post('/upload-category-image', (req, res, next) => {
   // CRITICAL: Set Content-Type first to guarantee JSON response
   res.setHeader('Content-Type', 'application/json');
   
   console.log('[UPLOAD] Received upload request');
   console.log('[UPLOAD] Request headers:', req.headers);
   console.log('[UPLOAD] Request method:', req.method);
-  console.log('[UPLOAD] Request URL:', req.url);
+  console.log('[UPLOAD] Request URL:', req.originalUrl);
   
   upload.single('image')(req, res, (err) => {
     if (err instanceof multer.MulterError) {
@@ -162,7 +165,7 @@ app.post('/api/upload-category-image', (req, res, next) => {
  * - 404: File not found
  * - 500: Server error during deletion
  */
-app.post('/api/delete-category-image', (req, res) => {
+apiRouter.post('/delete-category-image', (req, res) => {
   const { filepath } = req.body;
 
   if (!filepath) {
@@ -213,6 +216,8 @@ app.post('/api/delete-category-image', (req, res) => {
     });
   });
 });
+
+app.use('/api', apiRouter);
 
 // Redirige /tournois vers tournois.html (AVANT express.static)
 app.get('/tournois', (req, res) => {
