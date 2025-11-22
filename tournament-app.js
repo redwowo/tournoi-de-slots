@@ -61,12 +61,8 @@ function getMachineURL(machineName, category) {
 
 // ===== FONCTIONS DE CHARGEMENT DES MACHINES =====
 
-// Variable pour stocker les données complètes des machines par catégorie
-let machinesData = {
-  "Hacksaw Gaming": [],
-  "Nolimit City": [],
-  "Pragmatic Play": []
-};
+// Variable pour stocker les données complètes des machines par catégorie (maintenant dynamique)
+let machinesData = {};
 
 // Fonction pour charger les machines depuis players.json ou localStorage admin
 async function loadMachinesFromPlayersJson() {
@@ -91,26 +87,29 @@ async function loadMachinesFromPlayersJson() {
       console.log('Chargement des machines depuis players.json');
     }
     
-    // Stocker les données complètes et extraire les noms
-    machinesData["Hacksaw Gaming"] = data["Hacksaw Gaming"] || [];
-    machinesData["Nolimit City"] = data["Nolimit City"] || [];
-    machinesData["Pragmatic Play"] = data["Pragmatic Play"] || [];
+    // Réinitialiser machinesData
+    machinesData = {};
     
-    // Extraire les noms des machines par catégorie
-    TournamentApp.slotMachines = machinesData["Hacksaw Gaming"].map(machine => machine.name);
-    TournamentApp.nolimitCityMachines = machinesData["Nolimit City"].map(machine => machine.name);
-    TournamentApp.pragmaticPlayMachines = machinesData["Pragmatic Play"].map(machine => machine.name);
+    // Stocker les données complètes pour toutes les catégories (dynamique)
+    for (const category in data) {
+      machinesData[category] = data[category] || [];
+    }
     
-    console.log('Machines chargées:', {
-      'Hacksaw Gaming': TournamentApp.slotMachines.length,
-      'Nolimit City': TournamentApp.nolimitCityMachines.length,
-      'Pragmatic Play': TournamentApp.pragmaticPlayMachines.length
-    });
+    // Extraire les noms pour les trois catégories par défaut (backward compatibility)
+    TournamentApp.slotMachines = machinesData["Hacksaw Gaming"] ? machinesData["Hacksaw Gaming"].map(m => m.name) : [];
+    TournamentApp.nolimitCityMachines = machinesData["Nolimit City"] ? machinesData["Nolimit City"].map(m => m.name) : [];
+    TournamentApp.pragmaticPlayMachines = machinesData["Pragmatic Play"] ? machinesData["Pragmatic Play"].map(m => m.name) : [];
+    
+    console.log('Machines chargées:', Object.keys(machinesData).reduce((acc, cat) => {
+      acc[cat] = machinesData[cat].length;
+      return acc;
+    }, {}));
   } catch (error) {
     console.error('Erreur lors du chargement des machines:', error);
     showToast('Erreur', 'Impossible de charger les machines', 'error');
     
     // En cas d'erreur, utiliser des tableaux vides pour éviter les erreurs
+    machinesData = {};
     TournamentApp.slotMachines = [];
     TournamentApp.nolimitCityMachines = [];
     TournamentApp.pragmaticPlayMachines = [];
@@ -135,43 +134,52 @@ async function reloadMachinesFromAdminChanges() {
   }
 }
 
-// Fonction pour mettre à jour le nombre maximum de machines disponibles
-function updateMaxAvailableSlots() {
-  const totalMachines = TournamentApp.slotMachines.length + 
-                       TournamentApp.nolimitCityMachines.length + 
-                       TournamentApp.pragmaticPlayMachines.length;
-  
-  const countElement = document.getElementById('count');
-  if (countElement) {
-    countElement.textContent = `Slot ajoutés : ${TournamentApp.players.length}/16 (${totalMachines} machines disponibles)`;
-  }
-}
-
 // Fonction pour mettre à jour les options du dialogue de sélection aléatoire
 function updateRandomSlotDialogOptions() {
   const slotTypeSelection = document.getElementById('slotTypeSelection');
   if (!slotTypeSelection) return;
 
-  // Récupérer les catégories actuellement disponibles
-  const categories = {
-    'hacksaw': TournamentApp.slotMachines.length > 0 ? 'Hacksaw Gaming' : null,
-    'nolimit': TournamentApp.nolimitCityMachines.length > 0 ? 'Nolimit City' : null,
-    'pragmatic': TournamentApp.pragmaticPlayMachines.length > 0 ? 'Pragmatic Play' : null
+  // Garder l'option "Toutes les machines"
+  const allOption = slotTypeSelection.querySelector('[data-value="all"]');
+  
+  // Supprimer toutes les options de catégorie existantes (sauf "all")
+  const categoryOptions = slotTypeSelection.querySelectorAll('.slot-type-option:not([data-value="all"])');
+  categoryOptions.forEach(opt => opt.remove());
+  
+  // Mapping des noms de catégories vers leurs clés/identifiants
+  const categoryMapping = {
+    'Hacksaw Gaming': { key: 'hacksaw', logo: '/hacksawlogo.png' },
+    'Nolimit City': { key: 'nolimit', logo: '/nolimitcitylogo.png' },
+    'Pragmatic Play': { key: 'pragmatic', logo: '/pragmaticplaylogo.png' }
   };
-
-  // Mettre à jour la visibilité de chaque catégorie
-  const hacksawOption = slotTypeSelection.querySelector('[data-value="hacksaw"]');
-  const nolimitOption = slotTypeSelection.querySelector('[data-value="nolimit"]');
-  const pragmaticOption = slotTypeSelection.querySelector('[data-value="pragmatic"]');
-
-  if (hacksawOption) {
-    hacksawOption.style.display = categories.hacksaw ? 'flex' : 'none';
-  }
-  if (nolimitOption) {
-    nolimitOption.style.display = categories.nolimit ? 'flex' : 'none';
-  }
-  if (pragmaticOption) {
-    pragmaticOption.style.display = categories.pragmatic ? 'flex' : 'none';
+  
+  // Ajouter dynamiquement les options pour toutes les catégories disponibles
+  for (const categoryName in machinesData) {
+    if (machinesData[categoryName] && machinesData[categoryName].length > 0) {
+      const mapping = categoryMapping[categoryName];
+      const categoryKey = mapping ? mapping.key : categoryName.toLowerCase().replace(/\s+/g, '-');
+      const hasLogo = mapping && mapping.logo;
+      
+      const option = document.createElement('div');
+      option.className = 'slot-type-option';
+      option.setAttribute('data-value', categoryKey);
+      option.setAttribute('data-category', categoryName);
+      option.onclick = function() { toggleSlotType(this, categoryKey); };
+      
+      option.innerHTML = `
+        <div class="slot-type-checkbox">
+          <input type="checkbox" id="checkbox-${categoryKey}">
+          <span class="checkmark">✓</span>
+        </div>
+        <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
+          <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
+            ${hasLogo ? `<img src="${mapping.logo}" alt="${categoryName}" class="provider-logo">` : categoryName}
+          </span>
+        </div>
+      `;
+      
+      slotTypeSelection.appendChild(option);
+    }
   }
 }
 
@@ -396,19 +404,15 @@ function addPlayer() {
 
   // Ajouter le joueur si la limite n'est pas atteinte
   if (TournamentApp.players.length < 16) {
-    // Vérifier si la machine est dans l'une des listes
-    const isHacksawGaming = TournamentApp.slotMachines.includes(name)
-    const isNolimitCity = TournamentApp.nolimitCityMachines.includes(name)
-    const isPragmaticPlay = TournamentApp.pragmaticPlayMachines.includes(name)
-
-    // Déterminer la catégorie
-    let category = ""
-    if (isHacksawGaming) {
-      category = "Hacksaw Gaming"
-    } else if (isNolimitCity) {
-      category = "Nolimit City"
-    } else if (isPragmaticPlay) {
-      category = "Pragmatic Play"
+    // Déterminer la catégorie dynamiquement en cherchant dans toutes les catégories
+    let category = "";
+    
+    for (const categoryName in machinesData) {
+      const categoryMachines = machinesData[categoryName];
+      if (categoryMachines.some(machine => machine.name === name)) {
+        category = categoryName;
+        break;
+      }
     }
 
     // Ajouter le joueur avec sa catégorie
@@ -602,7 +606,7 @@ function updateWinnersDisplay() {
   }
 }
 
-// Fonction pour afficher les suggestions de machines
+// Fonction pour afficher les suggestions de machines (dynamique pour toutes catégories)
 function showSuggestions(input) {
   const inputValue = input.value.trim().toLowerCase()
   const suggestionsContainer = document.getElementById("suggestionsList")
@@ -616,53 +620,62 @@ function showSuggestions(input) {
     return
   }
 
-  // Rechercher des correspondances dans les trois listes
-  const hacksawMatches = TournamentApp.slotMachines.filter(
-    (machine) =>
-      machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
-  )
-
-  const nolimitMatches = TournamentApp.nolimitCityMachines.filter(
-    (machine) =>
-      machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
-  )
-
-  const pragmaticMatches = TournamentApp.pragmaticPlayMachines.filter(
-    (machine) =>
-      machine.toLowerCase().includes(inputValue) && !TournamentApp.players.some((player) => player.name === machine),
-  )
-
-  // Combiner les résultats et limiter à 10 suggestions
-  const allMatches = [...hacksawMatches, ...nolimitMatches, ...pragmaticMatches].slice(0, 10)
+  // Rechercher des correspondances dans toutes les catégories dynamiquement
+  const allMatches = [];
+  
+  for (const categoryName in machinesData) {
+    const categoryMachines = machinesData[categoryName];
+    const matches = categoryMachines
+      .filter(machine => 
+        machine.name.toLowerCase().includes(inputValue) && 
+        !TournamentApp.players.some(player => player.name === machine.name)
+      )
+      .map(machine => ({
+        name: machine.name,
+        category: categoryName
+      }));
+    
+    allMatches.push(...matches);
+  }
+  
+  // Limiter à 10 suggestions
+  const limitedMatches = allMatches.slice(0, 10);
 
   // Si aucune correspondance, afficher un message
-  if (allMatches.length === 0) {
+  if (limitedMatches.length === 0) {
     const noSuggestions = document.createElement("div")
     noSuggestions.className = "no-suggestions"
     noSuggestions.textContent = "Aucune machine correspondante trouvée"
     suggestionsContainer.appendChild(noSuggestions)
   } else {
     // Créer un élément pour chaque suggestion
-    allMatches.forEach((machine) => {
+    limitedMatches.forEach((match) => {
       const item = document.createElement("div")
       item.className = "suggestion-item"
 
       const nameSpan = document.createElement("span")
       nameSpan.className = "suggestion-name"
-      nameSpan.textContent = machine
+      nameSpan.textContent = match.name
 
       const categorySpan = document.createElement("span")
       categorySpan.className = "suggestion-category"
-
-      if (TournamentApp.slotMachines.includes(machine)) {
-        categorySpan.textContent = "Hacksaw"
-        categorySpan.classList.add("hacksaw")
-      } else if (TournamentApp.nolimitCityMachines.includes(machine)) {
-        categorySpan.textContent = "Nolimit"
-        categorySpan.classList.add("nolimit")
-      } else if (TournamentApp.pragmaticPlayMachines.includes(machine)) {
-        categorySpan.textContent = "Pragmatic"
-        categorySpan.classList.add("pragmatic")
+      
+      // Utiliser des noms abrégés pour les catégories connues
+      const categoryShortNames = {
+        'Hacksaw Gaming': 'Hacksaw',
+        'Nolimit City': 'Nolimit',
+        'Pragmatic Play': 'Pragmatic'
+      };
+      
+      categorySpan.textContent = categoryShortNames[match.category] || match.category;
+      
+      // Ajouter une classe CSS pour les catégories connues
+      if (match.category === 'Hacksaw Gaming') {
+        categorySpan.classList.add("hacksaw");
+      } else if (match.category === 'Nolimit City') {
+        categorySpan.classList.add("nolimit");
+      } else if (match.category === 'Pragmatic Play') {
+        categorySpan.classList.add("pragmatic");
       }
 
       item.appendChild(nameSpan)
@@ -670,7 +683,7 @@ function showSuggestions(input) {
 
       // Ajouter un événement de clic pour sélectionner cette suggestion
       item.addEventListener("click", () => {
-        input.value = machine
+        input.value = match.name
         suggestionsContainer.style.display = "none"
         // Optionnel : ajouter automatiquement la machine après sélection
         // addPlayer();
@@ -1011,53 +1024,58 @@ function updateSelectedProvidersDisplay() {
 
 // MODIFICATION: Fonction pour mettre à jour le nombre maximum de machines disponibles
 function updateMaxAvailableSlots() {
+  // Mettre à jour le compteur global de machines disponibles
+  const totalMachines = Object.values(machinesData).reduce((sum, machines) => sum + machines.length, 0);
+  const countElement = document.getElementById('count');
+  if (countElement) {
+    countElement.textContent = `Slot ajoutés : ${TournamentApp.players.length}/16 (${totalMachines} machines disponibles)`;
+  }
+
   let availableSlots = []
 
   if (TournamentApp.selectedSlotTypes.includes("all")) {
-    const allSlots = [
-      ...TournamentApp.slotMachines,
-      ...TournamentApp.nolimitCityMachines,
-      ...TournamentApp.pragmaticPlayMachines,
-    ]
-    availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
+    // Collecter toutes les machines de toutes les catégories dynamiquement
+    for (const category in machinesData) {
+      const categoryMachines = machinesData[category].map(m => m.name);
+      availableSlots = availableSlots.concat(categoryMachines);
+    }
+    availableSlots = availableSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot))
   } else {
-    // Combiner les machines des providers sélectionnés
-    if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
-      const hacksawSlots = TournamentApp.slotMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      )
-      availableSlots = availableSlots.concat(hacksawSlots)
-    }
-
-    if (TournamentApp.selectedSlotTypes.includes("nolimit")) {
-      const nolimitSlots = TournamentApp.nolimitCityMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      )
-      availableSlots = availableSlots.concat(nolimitSlots)
-    }
-
-    if (TournamentApp.selectedSlotTypes.includes("pragmatic")) {
-      const pragmaticSlots = TournamentApp.pragmaticPlayMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      )
-      availableSlots = availableSlots.concat(pragmaticSlots)
-    }
+    // Combiner les machines des providers sélectionnés dynamiquement
+    TournamentApp.selectedSlotTypes.forEach(typeKey => {
+      // Trouver la catégorie correspondante
+      const categoryOption = document.querySelector(`.slot-type-option[data-value="${typeKey}"]`);
+      if (categoryOption) {
+        const categoryName = categoryOption.getAttribute('data-category');
+        if (machinesData[categoryName]) {
+          const categorySlots = machinesData[categoryName]
+            .map(m => m.name)
+            .filter(slot => !TournamentApp.players.some(player => player.name === slot));
+          availableSlots = availableSlots.concat(categorySlots);
+        }
+      }
+    });
   }
 
   // Mettre à jour l'affichage du nombre total de machines disponibles
-  document.getElementById("maxAvailable").textContent = availableSlots.length
+  const maxAvailableElement = document.getElementById("maxAvailable");
+  if (maxAvailableElement) {
+    maxAvailableElement.textContent = availableSlots.length;
+  }
 
   // Limiter le nombre maximum dans l'input
   const slotCountInput = document.getElementById("slotCount")
-  const maxSelectable = Math.min(16, 16 - TournamentApp.players.length)
-  slotCountInput.max = Math.min(availableSlots.length, maxSelectable)
+  if (slotCountInput) {
+    const maxSelectable = Math.min(16, 16 - TournamentApp.players.length)
+    slotCountInput.max = Math.min(availableSlots.length, maxSelectable)
 
-  if (Number.parseInt(slotCountInput.value) > Number.parseInt(slotCountInput.max)) {
-    slotCountInput.value = slotCountInput.max
-  }
+    if (Number.parseInt(slotCountInput.value) > Number.parseInt(slotCountInput.max)) {
+      slotCountInput.value = slotCountInput.max
+    }
 
-  if (Number.parseInt(slotCountInput.value) > 16) {
-    slotCountInput.value = 16
+    if (Number.parseInt(slotCountInput.value) > 16) {
+      slotCountInput.value = 16
+    }
   }
 }
 
@@ -1699,37 +1717,34 @@ function undoMatch() {
   showToast("Match annulé", `Le résultat du match entre ${p1Name} et ${p2Name} a été annulé.`, "success")
 }
 
-// MODIFICATION: Fonction selectRandomSlot pour gérer la sélection multiple
+// MODIFICATION: Fonction selectRandomSlot pour gérer la sélection multiple (dynamique)
 function selectRandomSlot() {
   const slotCount = Number.parseInt(document.getElementById("slotCount").value) || 1;
   let availableSlots = [];
 
   if (TournamentApp.selectedSlotTypes.includes("all")) {
-    const allSlots = [
-      ...TournamentApp.slotMachines,
-      ...TournamentApp.nolimitCityMachines,
-      ...TournamentApp.pragmaticPlayMachines,
-    ];
-    availableSlots = allSlots.filter((slot) => !TournamentApp.players.some((player) => player.name === slot));
+    // Collecter toutes les machines de toutes les catégories dynamiquement
+    for (const category in machinesData) {
+      const categoryMachines = machinesData[category]
+        .map(m => ({ name: m.name, category }))
+        .filter(slot => !TournamentApp.players.some(player => player.name === slot.name));
+      availableSlots = availableSlots.concat(categoryMachines);
+    }
   } else {
-    if (TournamentApp.selectedSlotTypes.includes("hacksaw")) {
-      const hacksawSlots = TournamentApp.slotMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      );
-      availableSlots = availableSlots.concat(hacksawSlots);
-    }
-    if (TournamentApp.selectedSlotTypes.includes("nolimit")) {
-      const nolimitSlots = TournamentApp.nolimitCityMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      );
-      availableSlots = availableSlots.concat(nolimitSlots);
-    }
-    if (TournamentApp.selectedSlotTypes.includes("pragmatic")) {
-      const pragmaticSlots = TournamentApp.pragmaticPlayMachines.filter(
-        (slot) => !TournamentApp.players.some((player) => player.name === slot),
-      );
-      availableSlots = availableSlots.concat(pragmaticSlots);
-    }
+    // Combiner les machines des providers sélectionnés dynamiquement
+    TournamentApp.selectedSlotTypes.forEach(typeKey => {
+      // Trouver la catégorie correspondante
+      const categoryOption = document.querySelector(`.slot-type-option[data-value="${typeKey}"]`);
+      if (categoryOption) {
+        const categoryName = categoryOption.getAttribute('data-category');
+        if (machinesData[categoryName]) {
+          const categorySlots = machinesData[categoryName]
+            .map(m => ({ name: m.name, category: categoryName }))
+            .filter(slot => !TournamentApp.players.some(player => player.name === slot.name));
+          availableSlots = availableSlots.concat(categorySlots);
+        }
+      }
+    });
   }
 
   if (availableSlots.length === 0) {
@@ -1774,18 +1789,8 @@ function selectRandomSlot() {
     return;
   }
 
-  // Sinon, on crée la liste aléatoire complète
-  const selectedSlots = availableSlots.slice(0, actualCount).map((slot) => {
-    let category = "";
-    if (TournamentApp.slotMachines.includes(slot)) {
-      category = "Hacksaw Gaming";
-    } else if (TournamentApp.nolimitCityMachines.includes(slot)) {
-      category = "Nolimit City";
-    } else if (TournamentApp.pragmaticPlayMachines.includes(slot)) {
-      category = "Pragmatic Play";
-    }
-    return { name: slot, category };
-  });
+  // Sinon, on crée la liste aléatoire complète (déjà avec catégorie)
+  const selectedSlots = availableSlots.slice(0, actualCount);
   TournamentApp.selectedSlotsArray = selectedSlots;
   afficherMachineCourante();
 }
