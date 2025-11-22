@@ -1278,6 +1278,30 @@ h1 {
   background-color: var(--bgaming-category-bg);
 }
 
+/* New branded category badge for player list */
+.category-badge-branded {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  color: white;
+  margin-left: 0.5rem;
+}
+
+.category-badge-logo {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.category-badge-initials {
+  font-size: 0.6rem;
+  font-weight: 600;
+}
+
 /* NOUVELLE VERSION: Styles améliorés pour le modal de sélection aléatoire */
 .random-slot-dialog {
   display: none;
@@ -1466,6 +1490,40 @@ h1 {
 .slot-type-badge.bgaming {
   background-color: var(--bgaming-category-bg);
   color: white;
+}
+
+/* Category branding elements for dialog options */
+.category-option-branding {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.category-option-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.category-option-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.category-option-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 0.95rem;
 }
 
 /* Affichage des providers sélectionnés */
@@ -1667,6 +1725,30 @@ h1 {
 .random-slot-category.bgaming {
   background-color: var(--bgaming-category-bg);
   color: white;
+}
+
+/* New branded random slot category display */
+.random-slot-category-branded {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  color: white;
+}
+
+.random-slot-category-logo {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+.random-slot-category-initials {
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 /* Footer avec boutons */
@@ -1881,6 +1963,30 @@ input[type="number"] {
 
 .suggestion-category.bgaming {
   background-color: var(--bgaming-category-bg);
+}
+
+/* New branded suggestion category pill */
+.suggestion-category-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  color: white;
+  margin-left: 0.5rem;
+  font-weight: 500;
+}
+
+.suggestion-category-logo {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.suggestion-category-initials {
+  font-size: 0.7rem;
+  font-weight: 600;
 }
 
 .no-suggestions {
@@ -2314,6 +2420,56 @@ input[type="number"] {
   padding: 0.25rem;
   background-color: var(--hover-bg);
   border-radius: 0.25rem;
+}
+
+/* Responsive styles for branded category elements */
+@media (max-width: 768px) {
+  .category-option-branding {
+    gap: 0.5rem;
+  }
+  
+  .category-option-logo,
+  .category-option-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .category-option-name {
+    font-size: 0.85rem;
+  }
+  
+  .suggestion-category-pill {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    gap: 0.25rem;
+  }
+  
+  .suggestion-category-logo {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .random-slot-category-branded {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    gap: 0.4rem;
+  }
+  
+  .random-slot-category-logo {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .category-badge-branded {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.4rem;
+    gap: 0.25rem;
+  }
+  
+  .category-badge-logo {
+    width: 12px;
+    height: 12px;
+  }
 }
 
 /* Responsive pour la modal d'ancien tournoi */

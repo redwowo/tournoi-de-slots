@@ -182,11 +182,24 @@ async function reloadMachinesFromAdminChanges() {
   updateRandomSlotDialogOptions();
   updateMaxAvailableSlots();
   
+  // Mettre à jour l'affichage des joueurs pour refléter les changements de couleurs/logos
+  updatePlayersDisplay();
+  
   // Mettre à jour les suggestions si le champ de saisie est visible
   const playerNameInput = document.getElementById('playerName');
   if (playerNameInput && playerNameInput.value) {
     showSuggestions(playerNameInput);
   }
+}
+
+// Helper function to get initials from category name
+function getCategoryInitials(categoryName) {
+  return categoryName
+    .split(' ')
+    .map(word => word[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 // Fonction pour mettre à jour les options du dialogue de sélection aléatoire
@@ -201,19 +214,13 @@ function updateRandomSlotDialogOptions() {
   const categoryOptions = slotTypeSelection.querySelectorAll('.slot-type-option:not([data-value="all"])');
   categoryOptions.forEach(opt => opt.remove());
   
-  // Mapping des noms de catégories vers leurs clés/identifiants
-  const categoryMapping = {
-    'Hacksaw Gaming': { key: 'hacksaw', logo: '/hacksawlogo.png' },
-    'Nolimit City': { key: 'nolimit', logo: '/nolimitcitylogo.png' },
-    'Pragmatic Play': { key: 'pragmatic', logo: '/pragmaticplaylogo.png' }
-  };
-  
   // Ajouter dynamiquement les options pour toutes les catégories disponibles
   for (const categoryName in machinesData) {
     if (machinesData[categoryName] && Array.isArray(machinesData[categoryName].players) && machinesData[categoryName].players.length > 0) {
-      const mapping = categoryMapping[categoryName];
-      const categoryKey = mapping ? mapping.key : categoryName.toLowerCase().replace(/\s+/g, '-');
-      const hasLogo = mapping && mapping.logo;
+      const categoryData = machinesData[categoryName];
+      const categoryKey = categoryName.toLowerCase().replace(/\s+/g, '-');
+      const categoryColor = categoryData.color || '#4b5563';
+      const categoryImage = categoryData.imagePath || '';
       
       const option = document.createElement('div');
       option.className = 'slot-type-option';
@@ -221,15 +228,28 @@ function updateRandomSlotDialogOptions() {
       option.setAttribute('data-category', categoryName);
       option.onclick = function() { toggleSlotType(this, categoryKey); };
       
+      // Apply category color as border
+      option.style.borderLeft = `4px solid ${categoryColor}`;
+      
+      // Create image/initials element
+      let imageHtml = '';
+      if (categoryImage) {
+        imageHtml = `<img src="${categoryImage}" alt="${categoryName}" class="category-option-logo">`;
+      } else {
+        const initials = getCategoryInitials(categoryName);
+        imageHtml = `<div class="category-option-avatar" style="background-color: ${categoryColor};">${initials}</div>`;
+      }
+      
       option.innerHTML = `
         <div class="slot-type-checkbox">
           <input type="checkbox" id="checkbox-${categoryKey}">
           <span class="checkmark">✓</span>
         </div>
-        <div class="slot-type-label" style="width:100%;display:flex;justify-content:center;align-items:center;">
-          <span class="slot-type-name" style="width:100%;display:flex;justify-content:center;align-items:center;">
-            ${hasLogo ? `<img src="${mapping.logo}" alt="${categoryName}" class="provider-logo">` : categoryName}
-          </span>
+        <div class="slot-type-label">
+          <div class="category-option-branding">
+            ${imageHtml}
+            <span class="category-option-name">${categoryName}</span>
+          </div>
         </div>
       `;
       
@@ -579,19 +599,40 @@ function updatePlayersDisplay() {
 
     // Ajouter le badge de catégorie seulement si la machine a une catégorie
     if (player.category) {
+      // Get category metadata
+      const categoryData = machinesData[player.category] || {};
+      const categoryColor = categoryData.color || '#4b5563';
+      const categoryImage = categoryData.imagePath || '';
+      
       const categoryBadge = document.createElement("span")
-      categoryBadge.className = "category-badge"
-
-      // Ajouter une classe spécifique selon la catégorie
-      if (player.category === "Hacksaw Gaming") {
-        categoryBadge.classList.add("hacksaw")
-      } else if (player.category === "Nolimit City") {
-        categoryBadge.classList.add("nolimit")
-      } else if (player.category === "Pragmatic Play") {
-        categoryBadge.classList.add("pragmatic")
+      categoryBadge.className = "category-badge-branded"
+      categoryBadge.style.backgroundColor = categoryColor;
+      
+      // Add logo or initials
+      if (categoryImage) {
+        const img = document.createElement("img");
+        img.src = categoryImage;
+        img.alt = player.category;
+        img.className = "category-badge-logo";
+        categoryBadge.appendChild(img);
+      } else {
+        const initialsSpan = document.createElement("span");
+        initialsSpan.className = "category-badge-initials";
+        initialsSpan.textContent = getCategoryInitials(player.category);
+        categoryBadge.appendChild(initialsSpan);
       }
-
-      categoryBadge.textContent = player.category
+      
+      // Add category short name
+      const categoryShortNames = {
+        'Hacksaw Gaming': 'Hacksaw',
+        'Nolimit City': 'Nolimit',
+        'Pragmatic Play': 'Pragmatic'
+      };
+      const shortName = categoryShortNames[player.category] || player.category;
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = shortName;
+      categoryBadge.appendChild(labelSpan);
+      
       playerInfo.appendChild(categoryBadge)
     }
 
@@ -712,8 +753,15 @@ function showSuggestions(input) {
       nameSpan.className = "suggestion-name"
       nameSpan.textContent = match.name
 
-      const categorySpan = document.createElement("span")
-      categorySpan.className = "suggestion-category"
+      // Get category metadata
+      const categoryData = machinesData[match.category] || {};
+      const categoryColor = categoryData.color || '#4b5563';
+      const categoryImage = categoryData.imagePath || '';
+      
+      // Create category pill with branding
+      const categoryPill = document.createElement("span")
+      categoryPill.className = "suggestion-category-pill"
+      categoryPill.style.backgroundColor = categoryColor;
       
       // Utiliser des noms abrégés pour les catégories connues
       const categoryShortNames = {
@@ -722,19 +770,28 @@ function showSuggestions(input) {
         'Pragmatic Play': 'Pragmatic'
       };
       
-      categorySpan.textContent = categoryShortNames[match.category] || match.category;
+      const categoryLabel = categoryShortNames[match.category] || match.category;
       
-      // Ajouter une classe CSS pour les catégories connues
-      if (match.category === 'Hacksaw Gaming') {
-        categorySpan.classList.add("hacksaw");
-      } else if (match.category === 'Nolimit City') {
-        categorySpan.classList.add("nolimit");
-      } else if (match.category === 'Pragmatic Play') {
-        categorySpan.classList.add("pragmatic");
+      // Add logo or initials
+      if (categoryImage) {
+        const img = document.createElement("img");
+        img.src = categoryImage;
+        img.alt = match.category;
+        img.className = "suggestion-category-logo";
+        categoryPill.appendChild(img);
+      } else {
+        const initialsSpan = document.createElement("span");
+        initialsSpan.className = "suggestion-category-initials";
+        initialsSpan.textContent = getCategoryInitials(match.category);
+        categoryPill.appendChild(initialsSpan);
       }
+      
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = categoryLabel;
+      categoryPill.appendChild(labelSpan);
 
       item.appendChild(nameSpan)
-      item.appendChild(categorySpan)
+      item.appendChild(categoryPill)
 
       // Ajouter un événement de clic pour sélectionner cette suggestion
       item.addEventListener("click", () => {
@@ -2252,17 +2309,39 @@ function afficherMachineCourante() {
   TournamentApp.randomSlotSelected = slot.name;
   TournamentApp.randomSlotCategory = slot.category;
   document.getElementById("randomSlotName").textContent = TournamentApp.randomSlotSelected;
+  
   const categoryElement = document.getElementById("randomSlotCategory");
   if (TournamentApp.randomSlotCategory) {
-    categoryElement.textContent = TournamentApp.randomSlotCategory;
-    categoryElement.className = "random-slot-category";
-    if (TournamentApp.randomSlotCategory === "Hacksaw Gaming") {
-      categoryElement.classList.add("hacksaw");
-    } else if (TournamentApp.randomSlotCategory === "Nolimit City") {
-      categoryElement.classList.add("nolimit");
-    } else if (TournamentApp.randomSlotCategory === "Pragmatic Play") {
-      categoryElement.classList.add("pragmatic");
+    // Get category metadata
+    const categoryData = machinesData[TournamentApp.randomSlotCategory] || {};
+    const categoryColor = categoryData.color || '#4b5563';
+    const categoryImage = categoryData.imagePath || '';
+    
+    // Clear previous content and classes
+    categoryElement.className = "random-slot-category-branded";
+    categoryElement.innerHTML = '';
+    
+    // Apply dynamic background color
+    categoryElement.style.backgroundColor = categoryColor;
+    
+    // Add logo or initials
+    if (categoryImage) {
+      const img = document.createElement("img");
+      img.src = categoryImage;
+      img.alt = TournamentApp.randomSlotCategory;
+      img.className = "random-slot-category-logo";
+      categoryElement.appendChild(img);
+    } else {
+      const initialsSpan = document.createElement("span");
+      initialsSpan.className = "random-slot-category-initials";
+      initialsSpan.textContent = getCategoryInitials(TournamentApp.randomSlotCategory);
+      categoryElement.appendChild(initialsSpan);
     }
+    
+    // Add category name
+    const nameSpan = document.createElement("span");
+    nameSpan.textContent = TournamentApp.randomSlotCategory;
+    categoryElement.appendChild(nameSpan);
   } else {
     categoryElement.textContent = "";
   }
