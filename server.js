@@ -226,7 +226,7 @@ app.get('/tournois', (req, res) => {
 
 // Route pour les tournois spécifiques (ex: /tournoi/s4emrt9h)
 app.get('/tournoi/:id', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'tournoi.html'));
 });
 
 // Sert tous les fichiers statiques du dossier courant (APRÈS les routes spécifiques)
