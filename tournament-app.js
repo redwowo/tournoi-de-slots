@@ -2116,8 +2116,8 @@ function addRandomSlot() {
   });
 }
 
-// Initialisation unifiée au chargement de la page
-document.addEventListener('DOMContentLoaded', async () => {
+// Fonction d'initialisation du tournoi (appelée par mode-selection.js)
+window.initializeTournamentApp = async () => {
   // 0. Charger les machines depuis players.json avant tout
   await loadMachinesFromPlayersJson();
 
@@ -2255,6 +2255,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       reloadMachinesFromAdminChanges();
     }
   });
+};
+
+// Initialisation unifiée au chargement de la page
+document.addEventListener('DOMContentLoaded', async () => {
+  // Ne s'exécute que si le mode sélection n'est pas actif
+  if (!window.modeSelection) {
+    await window.initializeTournamentApp();
+  }
 });
 
 // Accepter la machine affichée et l'ajouter au tournoi
