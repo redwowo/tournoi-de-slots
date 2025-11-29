@@ -2116,18 +2116,15 @@ function addRandomSlot() {
   });
 }
 
-// Fonction d'initialisation du tournoi (appelée par mode-selection.js)
+// Fonction d'initialisation du tournoi (appelée par tournament-navigation.js)
 window.initializeTournamentApp = async () => {
   // 0. Charger les machines depuis players.json avant tout
   await loadMachinesFromPlayersJson();
 
-  // 1. Initialiser le thème (doit être fait en premier pour éviter le flash)
-  initTheme();
-
-  // 2. Détecter le mode spectateur AVANT tout chargement de données
+  // 1. Détecter le mode spectateur AVANT tout chargement de données
   initializeSpectatorMode();
   
-  // 3. Vérifier les paramètres URL pour déterminer le mode
+  // 2. Vérifier les paramètres URL pour déterminer le mode
   const tournamentId = getTournamentFromUrl();
 
   if (tournamentId) {
@@ -2259,10 +2256,8 @@ window.initializeTournamentApp = async () => {
 
 // Initialisation unifiée au chargement de la page
 document.addEventListener('DOMContentLoaded', async () => {
-  // Ne s'exécute que si le mode sélection n'est pas actif
-  if (!window.modeSelection) {
-    await window.initializeTournamentApp();
-  }
+  // S'exécute automatiquement sur la page de tournoi
+  await window.initializeTournamentApp();
 });
 
 // Accepter la machine affichée et l'ajouter au tournoi

@@ -22,6 +22,16 @@
   status = 200
 
 [[redirects]]
+  from = "/tournoi"
+  to = "/tournoi.html"
+  status = 200
+
+[[redirects]]
+  from = "/bonus-hunt"
+  to = "/bonus-hunt.html"
+  status = 200
+
+[[redirects]]
   from = "/accueil"
   to = "/index.html"
   status = 200
