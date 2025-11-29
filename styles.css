@@ -2529,3 +2529,287 @@ h1 img {
 #victoryMessage {
   /* supprimé */
 }
+
+/* Styles pour le menu de sélection du mode */
+.mode-selection-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-color) 0%, var(--card-bg) 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.mode-selection-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 2rem;
+  position: relative;
+}
+
+.logo-home {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+.logo-home:hover {
+  transform: scale(1.1);
+}
+
+.mode-selection-content {
+  text-align: center;
+}
+
+.mode-selection-title {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--heading-color);
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.mode-selection-title img {
+  animation: bounce 2s infinite;
+}
+
+.mode-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.mode-card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  padding: 3rem 2rem;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-color), var(--primary_hover));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.mode-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary-color);
+}
+
+.mode-card:hover::before {
+  transform: scaleX(1);
+}
+
+.mode-card-icon {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.mode-card:hover .mode-card-icon {
+  transform: scale(1.1);
+}
+
+.mode-card-title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--heading-color);
+  margin-bottom: 1rem;
+}
+
+.mode-card-description {
+  font-size: 1rem;
+  color: var(--muted-text);
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  height: 0;
+  overflow: hidden;
+}
+
+.mode-card:hover .mode-card-description {
+  opacity: 1;
+  transform: translateY(0);
+  height: auto;
+  margin-top: 0.5rem;
+}
+
+/* Styles pour le contenu du mode Tournoi */
+.tournament-content {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Styles pour le contenu du mode Bonus-Hunt */
+.bonus-hunt-content {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--bg-color) 0%, var(--card-bg) 100%);
+}
+
+.coming-soon-container {
+  text-align: center;
+  padding: 3rem;
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  max-width: 500px;
+  width: 100%;
+}
+
+.coming-soon-icon {
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  animation: pulse 2s infinite;
+}
+
+.coming-soon-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: var(--heading-color);
+  margin-bottom: 1rem;
+}
+
+.coming-soon-description {
+  font-size: 1.2rem;
+  color: var(--muted-text);
+  margin-bottom: 2rem;
+}
+
+.coming-soon-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--text-color);
+  font-size: 1rem;
+}
+
+.feature-item svg {
+  color: var(--success-color);
+  flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mode-selection-container {
+    padding: 1rem;
+  }
+  
+  .mode-selection-title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .mode-cards {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .mode-card {
+    padding: 2rem 1.5rem;
+  }
+  
+  .mode-card-title {
+    font-size: 1.5rem;
+  }
+  
+  .logo-home {
+    top: 1rem;
+    left: 1rem;
+  }
+  
+  .coming-soon-container {
+    margin: 1rem;
+    padding: 2rem;
+  }
+  
+  .coming-soon-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mode-selection-title {
+    font-size: 1.5rem;
+  }
+  
+  .mode-selection-title img {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .mode-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .mode-card-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+  
+  .mode-card-title {
+    font-size: 1.3rem;
+  }
+}
