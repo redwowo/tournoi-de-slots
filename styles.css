@@ -2584,18 +2584,7 @@ h1 img {
   position: relative;
 }
 
-.logo-home {
-  position: absolute;
-  top: 2rem;
-  left: 2rem;
-  cursor: pointer;
-  transition: transform 0.3s ease;
-  z-index: 10;
-}
-
-.logo-home:hover {
-  transform: scale(1.1);
-}
+/* Removed logo-home styles */
 
 /* Navigation Header Styles */
 .navigation-header {
@@ -2628,23 +2617,7 @@ h1 img {
   gap: 1rem;
 }
 
-.navigation-header .logo-home {
-  position: static;
-  top: auto;
-  left: auto;
-  display: inline-block;
-  text-decoration: none;
-  border-radius: 50%;
-  padding: 0.5rem;
-  background-color: var(--card-bg);
-  border: 2px solid var(--border-color);
-  transition: all 0.3s ease;
-}
-
-.navigation-header .logo-home:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px var(--shadow-color);
-}
+/* Removed navigation-header logo-home styles */
 
 .back-button {
   display: inline-flex;
