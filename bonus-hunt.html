@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonus Hunt Tracker - Bientôt disponible</title>
+    <link rel="icon" type="image/png" href="/fly.png">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/admin-styles.css">
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">🌓</button>
+
+    <!-- Navigation header -->
+    <div class="navigation-header">
+        <div class="nav-left">
+            <!-- Logo cliquable pour revenir au menu -->
+            <a href="/" class="logo-home" title="Retour au menu principal">
+                <img src="/sept.png" alt="Slot Machine" width="40" height="40">
+            </a>
+            <!-- Bouton retour -->
+            <a href="/" class="back-button" title="Retour au menu principal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"></path>
+                </svg>
+            </a>
+        </div>
+        <div class="nav-center">
+            <h1 class="page-title">
+                <img src="/sept.png" alt="Slot Machine" width="32" height="32">
+                Bonus Hunt Tracker
+                <img src="/sept.png" alt="Slot Machine" width="32" height="32">
+            </h1>
+        </div>
+        <div class="nav-right"></div>
+    </div>
+
+    <!-- Contenu du mode Bonus-Hunt -->
+    <div class="bonus-hunt-content">
+        <div class="coming-soon-container">
+            <div class="coming-soon-icon">
+                <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2H20a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7.83a2 2 0 0 1-1.42-.59L2 17"></path>
+                    <path d="M7 12h10"></path>
+                    <path d="M12 7v10"></path>
+                </svg>
+            </div>
+            <h1 class="coming-soon-title">Bonus Hunt Tracker</h1>
+            <p class="coming-soon-description">Fonctionnalité bientôt disponible</p>
+            <div class="coming-soon-features">
+                <div class="feature-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Suivi des bonus en temps réel</span>
+                </div>
+                <div class="feature-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Statistiques détaillées</span>
+                </div>
+                <div class="feature-item">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 11l3 3L22 4"></path>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    <span>Historique des sessions</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="legal-notice-icon" id="legalNoticeIcon" style="position: fixed; bottom: 20px; left: 20px; z-index: 51; cursor: pointer;">
+        <img src="/about-us.png" alt="Mentions légales" style="width: 40px; height: 40px;">
+    </div>
+    <div class="legal-notice-slide" id="legalNoticeSlide">
+        Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
+    </div>
+
+    <script src="/bonus-hunt-navigation.js"></script>
+</body>
+</html>
