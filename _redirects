@@ -1,7 +1,7 @@
 /api/upload-category-image /.netlify/functions/upload-category-image 200
 /api/delete-category-image /.netlify/functions/delete-category-image 200
 /tournois /tournois.html 200
-/tournoi/:id /index.html 200
+/tournoi/:id /tournoi.html 200
 /tournoi /tournoi.html 200
 /bonus-hunt /bonus-hunt.html 200
 /accueil /index.html 200

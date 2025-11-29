@@ -18,7 +18,7 @@
 
 [[redirects]]
   from = "/tournoi/*"
-  to = "/index.html"
+  to = "/tournoi.html"
   status = 200
 
 [[redirects]]
