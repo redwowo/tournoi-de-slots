@@ -2235,14 +2235,14 @@ window.initializeTournamentApp = async () => {
   if (h1) {
     h1.style.cursor = "pointer";
     h1.addEventListener("click", () => {
-      window.location.href = "/";
+      window.location.href = isSpectatorMode ? "/tournoi" : "/";
     });
     const imgs = h1.querySelectorAll("img");
     imgs.forEach(img => {
       img.style.cursor = "pointer";
       img.addEventListener("click", (e) => {
         e.stopPropagation();
-        window.location.href = "/";
+        window.location.href = isSpectatorMode ? "/tournoi" : "/";
       });
     });
   }
@@ -2262,14 +2262,26 @@ window.initializeTournamentApp = async () => {
     disableActionsIfSpectator();
   }
 
-  // 10. Raccourci clavier pour sortir du mode spectateur (Échap)
+  // 10. Configurer le bouton de retour en fonction du mode spectateur
+  const backButton = document.querySelector('.back-button-standalone');
+  if (backButton) {
+    if (isSpectatorMode) {
+      backButton.setAttribute('href', '/tournoi');
+      backButton.setAttribute('title', 'Retour à la liste des tournois');
+    } else {
+      backButton.setAttribute('href', '/');
+      backButton.setAttribute('title', 'Retour au menu principal');
+    }
+  }
+
+  // 11. Raccourci clavier pour sortir du mode spectateur (Échap)
   document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && isSpectatorMode) {
       exitSpectatorMode();
     }
   });
 
-  // 11. Écouter les changements de données de joueurs/machines depuis l'admin
+  // 12. Écouter les changements de données de joueurs/machines depuis l'admin
   window.addEventListener('adminPlayersUpdated', async (event) => {
     console.log('Admin players data updated, reloading machines...');
     await reloadMachinesFromAdminChanges();
