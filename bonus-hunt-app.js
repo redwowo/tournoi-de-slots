@@ -15,115 +15,11 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeBonusHuntApp() {
     console.log('Bonus Hunt App initialized');
     
-    // Set up event listeners for data-action attributes
-    setupActionListeners();
-    
     // Set up form handlers
     setupFormHandlers();
-    
-    // Initialize UI components
-    initializeUIComponents();
-    
-    // Load existing data if any
-    loadExistingData();
-    
-    // Set up machine form handler
-    setupMachineFormHandler();
-}
-
-function setupActionListeners() {
-    // Handle all elements with data-action attributes
-    document.addEventListener('click', function(event) {
-        const actionElement = event.target.closest('[data-action]');
-        if (actionElement) {
-            const action = actionElement.getAttribute('data-action');
-            handleAction(action, actionElement, event);
-        }
-    });
-}
-
-function handleAction(action, element, event) {
-    event.preventDefault();
-    
-    switch (action) {
-        case 'navigate-home':
-            // Navigation is handled by the href attribute
-            break;
-            
-        case 'create-session':
-            showCreateSessionDialog();
-            break;
-            
-        case 'export-data':
-            exportSessionData();
-            break;
-            
-        case 'show-help':
-            showHelpDialog();
-            break;
-            
-        case 'toggle-spectator':
-            toggleSpectatorMode();
-            break;
-            
-        case 'toggle-theme':
-            // Theme is handled by navigation script
-            break;
-            
-        case 'change-session':
-            handleSessionChange(element.value);
-            break;
-            
-        case 'clear-bonus-list':
-            clearBonusList();
-            break;
-            
-        case 'start-opening':
-            startOpeningPhase();
-            break;
-            
-        case 'record-win':
-            recordBonusResult('won');
-            break;
-            
-        case 'record-loss':
-            recordBonusResult('lost');
-            break;
-            
-        case 'refresh-history':
-            refreshSessionHistory();
-            break;
-            
-        case 'search':
-            handleSearch(element.value);
-            break;
-            
-        case 'close-spectator-modal':
-            closeSpectatorModal();
-            break;
-            
-        case 'toggle-legal':
-            toggleLegalNotice();
-            break;
-            
-        default:
-            console.log('Unknown action:', action);
-    }
 }
 
 function setupFormHandlers() {
-    // Session form
-    const sessionForm = document.getElementById('sessionForm');
-    if (sessionForm) {
-        sessionForm.addEventListener('submit', handleSessionFormSubmit);
-    }
-    
-    // Balance form
-    const balanceForm = document.getElementById('balanceForm');
-    if (balanceForm) {
-        balanceForm.addEventListener('submit', handleBalanceFormSubmit);
-    }
-    
     // Bonus form
     const bonusForm = document.getElementById('bonusForm');
     if (bonusForm) {
@@ -133,111 +29,7 @@ function setupFormHandlers() {
     // Gain form
     const gainForm = document.getElementById('gainForm');
     if (gainForm) {
-        gainForm.addEventListener('submit', handleGainFormSubmit);
-    }
-}
-
-function handleSessionFormSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const sessionData = {
-        name: formData.get('sessionName') || document.getElementById('sessionName').value,
-        balance: parseFloat(formData.get('sessionBalance') || document.getElementById('sessionBalance').value),
-        createdAt: new Date().toISOString()
-    };
-    
-    createNewSession(sessionData);
-}
-
-function handleBalanceFormSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const balanceData = {
-        current: parseFloat(formData.get('currentBalance') || document.getElementById('currentBalance').value),
-        target: parseFloat(formData.get('targetBalance') || document.getElementById('targetBalance').value)
-    };
-    
-    updateBalanceSettings(balanceData);
-}
-
-function handleBonusFormSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const bonusData = {
-        game: formData.get('bonusGame') || document.getElementById('bonusGame').value,
-        amount: parseFloat(formData.get('bonusAmount') || document.getElementById('bonusAmount').value),
-        status: 'pending',
-        createdAt: new Date().toISOString()
-    };
-    
-    addBonusToList(bonusData);
-}
-
-function handleGainFormSubmit(event) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const gainData = {
-        amount: parseFloat(formData.get('gainAmount') || document.getElementById('gainAmount').value),
-        multiplier: parseFloat(formData.get('gainMultiplier') || document.getElementById('gainMultiplier').value)
-    };
-    
-    recordGain(gainData);
-}
-
-function initializeUIComponents() {
-    // Initialize KPI displays
-    updateKPIDisplays();
-    
-    // Initialize charts placeholder
-    initializeCharts();
-    
-    // Set up filter listeners
-    setupFilterListeners();
-}
-
-function updateKPIDisplays() {
-    // These will be updated with actual data when the app is fully implemented
-    const kpiValues = {
-        initialBalance: '0,00€',
-        breakEven: '0,00€',
-        bonusCount: '0',
-        profitLoss: '0,00€'
-    };
-    
-    Object.keys(kpiValues).forEach(kpi => {
-        const element = document.getElementById(kpi + 'Value');
-        if (element) {
-            element.textContent = kpiValues[kpi];
-        }
-    });
-}
-
-function initializeCharts() {
-    // Placeholder for Chart.js initialization
-    const chartCanvas = document.getElementById('progressionChart');
-    if (chartCanvas && typeof Chart !== 'undefined') {
-        // Chart will be initialized when data is available
-        console.log('Chart.js loaded and ready');
-    }
-}
-
-function setupFilterListeners() {
-    const categoryFilter = document.getElementById('categoryFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const searchInput = document.getElementById('searchInput');
-    
-    if (categoryFilter) {
-        categoryFilter.addEventListener('change', applyFilters);
-    }
-    
-    if (statusFilter) {
-        statusFilter.addEventListener('change', applyFilters);
-    }
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function(event) {
-            handleSearch(event.target.value);
-        });
+        gainForm.addEventListener('submit', handleOpeningGainSubmit);
     }
 }
 
@@ -254,109 +46,13 @@ function formatCurrency(value) {
     return `${currencyFormatter.format(number)}€`;
 }
 
-// Placeholder functions for future implementation
-function showCreateSessionDialog() {
-    showToast('Création de session - À implémenter', 'info');
-}
-
-function exportSessionData() {
-    showToast('Export des données - À implémenter', 'info');
-}
-
-function showHelpDialog() {
-    showToast('Aide - À implémenter', 'info');
-}
-
-function toggleSpectatorMode() {
-    const spectatorModal = document.getElementById('spectatorModal');
-    if (spectatorModal) {
-        spectatorModal.style.display = 'flex';
-    }
-}
-
-function closeSpectatorModal() {
-    const spectatorModal = document.getElementById('spectatorModal');
-    if (spectatorModal) {
-        spectatorModal.style.display = 'none';
-    }
-}
-
-function handleSessionChange(sessionId) {
-    console.log('Session changed to:', sessionId);
-    // Implementation will go here
-}
-
-function clearBonusList() {
-    if (confirm('Êtes-vous sûr de vouloir vider la liste des bonus ?')) {
-        showToast('Liste des bonus vidée', 'success');
-        // Implementation will go here
-    }
-}
-
-function startOpeningPhase() {
-    showToast('Phase d\'ouverture démarrée', 'success');
-    // Implementation will go here
-}
-
-function recordBonusResult(result) {
-    showToast(`Bonus marqué comme: ${result === 'won' ? 'Gagné' : 'Perdu'}`, 'success');
-    // Implementation will go here
-}
-
-function recordGain(gainData) {
-    showToast('Gain enregistré', 'success');
-    // Implementation will go here
-}
-
-function refreshSessionHistory() {
-    showToast('Historique actualisé', 'success');
-    // Implementation will go here
-}
-
-function handleSearch(searchTerm) {
-    console.log('Searching for:', searchTerm);
-    // Implementation will go here
-}
-
-function applyFilters() {
-    console.log('Applying filters');
-    // Implementation will go here
-}
-
-function toggleLegalNotice() {
-    const legalSlide = document.getElementById('legalNoticeSlide');
-    if (legalSlide) {
-        legalSlide.classList.toggle('visible');
-    }
-}
-
-function createNewSession(sessionData) {
-    console.log('Creating new session:', sessionData);
-    showToast('Session créée avec succès', 'success');
-    // Implementation will go here
-}
-
-function updateBalanceSettings(balanceData) {
-    console.log('Updating balance settings:', balanceData);
-    showToast('Paramètres de balance mis à jour', 'success');
-    // Implementation will go here
-}
-
-function addBonusToList(bonusData) {
-    console.log('Adding bonus:', bonusData);
-    showToast('Bonus ajouté à la liste', 'success');
-    // Implementation will go here
-}
-
-function loadExistingData() {
-    console.log('Loading existing data');
-    // Implementation will go here
-}
-
 // Toast notification function
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toastContainer');
-    if (!toastContainer) return;
+    if (!toastContainer) {
+        console.log(`[${type}] ${message}`);
+        return;
+    }
     
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -374,68 +70,47 @@ function showToast(message, type = 'info') {
 
 // Opening phase tracking
 let openingPhaseState = {
-    currentMachineIndex: 0,
-    machines: [],
+    currentBonusIndex: 0,
+    bonuses: [],
     results: []
 };
 
-// Breakeven calculation state
-let breakEvenState = {
-    savedBonusIndices: new Set(),
-    startBalance: 0,
-    endBalance: null,
-    totalSavedStakes: 0
-};
-
-// Machine form handler for the multi-step wizard
-function setupMachineFormHandler() {
-    const machineForm = document.getElementById('machineForm');
-    if (machineForm) {
-        machineForm.addEventListener('submit', handleMachineFormSubmit);
-    }
-    
-    // Also setup gain form if we're in opening phase
-    const gainForm = document.getElementById('gainForm');
-    if (gainForm) {
-        gainForm.addEventListener('submit', handleOpeningGainSubmit);
-    }
-}
-
-function handleMachineFormSubmit(event) {
+// Bonus form handler
+function handleBonusFormSubmit(event) {
     event.preventDefault();
-    const machineName = document.getElementById('machineName').value;
-    const machineStake = parseFloat(document.getElementById('machineStake').value);
+    const bonusName = document.getElementById('bonusName').value;
+    const bonusStake = parseFloat(document.getElementById('bonusStake').value);
     
-    if (!machineName.trim() || !machineStake || machineStake <= 0) {
+    if (!bonusName.trim() || !bonusStake || bonusStake <= 0) {
         showToast('Veuillez remplir correctement tous les champs', 'warning');
         return;
     }
     
-    const machine = {
+    const bonus = {
         id: Date.now(),
-        name: machineName,
-        stake: machineStake,
+        name: bonusName,
+        stake: bonusStake,
         result: null,
         createdAt: new Date().toISOString()
     };
     
     // Add to app state
-    if (app.sessionData && Array.isArray(app.sessionData.machines)) {
-        app.sessionData.machines.push(machine);
+    if (app.sessionData && Array.isArray(app.sessionData.bonuses)) {
+        app.sessionData.bonuses.push(bonus);
     }
     
-    addMachineToList(machine);
-    updateMachineStats();
+    addBonusToList(bonus);
+    updateBonusStats();
     
     // Reset form
-    document.getElementById('machineName').value = '';
-    document.getElementById('machineStake').value = '';
+    document.getElementById('bonusName').value = '';
+    document.getElementById('bonusStake').value = '';
     
-    showToast('Machine ajoutée avec succès', 'success');
+    showToast('Bonus ajouté avec succès', 'success');
 }
 
-function addMachineToList(machine) {
-    const container = document.getElementById('machineListContainer');
+function addBonusToList(bonus) {
+    const container = document.getElementById('bonusListContainer');
     
     if (!container) return;
     
@@ -445,10 +120,10 @@ function addMachineToList(machine) {
         emptyState.remove();
     }
     
-    const machineItem = document.createElement('div');
-    machineItem.className = 'machine-item';
-    machineItem.setAttribute('data-machine-id', machine.id);
-    machineItem.style.cssText = `
+    const bonusItem = document.createElement('div');
+    bonusItem.className = 'bonus-item';
+    bonusItem.setAttribute('data-bonus-id', bonus.id);
+    bonusItem.style.cssText = `
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -459,11 +134,11 @@ function addMachineToList(machine) {
         gap: 1rem;
     `;
     
-    const machineInfo = document.createElement('div');
-    machineInfo.style.cssText = 'flex: 1;';
-    machineInfo.innerHTML = `
-        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(machine.name)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${machine.stake.toFixed(2)}€</div>
+    const bonusInfo = document.createElement('div');
+    bonusInfo.style.cssText = 'flex: 1;';
+    bonusInfo.innerHTML = `
+        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(bonus.name)}</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${bonus.stake.toFixed(2)}€</div>
     `;
     
     const removeBtn = document.createElement('button');
@@ -472,12 +147,12 @@ function addMachineToList(machine) {
     removeBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
     removeBtn.innerHTML = '<i data-lucide="trash-2"></i> Supprimer';
     removeBtn.onclick = function() {
-        removeMachine(machine.id);
+        removeBonus(bonus.id);
     };
     
-    machineItem.appendChild(machineInfo);
-    machineItem.appendChild(removeBtn);
-    container.appendChild(machineItem);
+    bonusItem.appendChild(bonusInfo);
+    bonusItem.appendChild(removeBtn);
+    container.appendChild(bonusItem);
     
     // Recreate icons
     if (typeof lucide !== 'undefined') {
@@ -485,25 +160,25 @@ function addMachineToList(machine) {
     }
 }
 
-function removeMachine(machineId) {
-    if (app.sessionData && Array.isArray(app.sessionData.machines)) {
-        app.sessionData.machines = app.sessionData.machines.filter(m => m.id !== machineId);
+function removeBonus(bonusId) {
+    if (app.sessionData && Array.isArray(app.sessionData.bonuses)) {
+        app.sessionData.bonuses = app.sessionData.bonuses.filter(b => b.id !== bonusId);
     }
     
-    const machineItem = document.querySelector(`[data-machine-id="${machineId}"]`);
-    if (machineItem) {
-        machineItem.remove();
+    const bonusItem = document.querySelector(`[data-bonus-id="${bonusId}"]`);
+    if (bonusItem) {
+        bonusItem.remove();
     }
     
-    updateMachineStats();
+    updateBonusStats();
     
-    // Show empty state if no machines left
-    const container = document.getElementById('machineListContainer');
+    // Show empty state if no bonuses left
+    const container = document.getElementById('bonusListContainer');
     if (container && container.children.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i data-lucide="inbox"></i>
-                <p>Aucune machine ajoutée. Commencez par ajouter une machine !</p>
+                <p>Aucun bonus ajouté. Commencez par ajouter un bonus !</p>
             </div>
         `;
         if (typeof lucide !== 'undefined') {
@@ -511,19 +186,19 @@ function removeMachine(machineId) {
         }
     }
     
-    showToast('Machine supprimée', 'success');
+    showToast('Bonus supprimé', 'success');
 }
 
-function updateMachineStats() {
-    const machines = app.sessionData && Array.isArray(app.sessionData.machines) ? app.sessionData.machines : [];
-    const machineCount = machines.length;
-    const totalStake = machines.reduce((sum, m) => sum + (parseFloat(m.stake) || 0), 0);
+function updateBonusStats() {
+    const bonuses = app.sessionData && Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
+    const bonusCount = bonuses.length;
+    const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
     
-    const countEl = document.getElementById('machineCount');
+    const countEl = document.getElementById('bonusCount');
     const stakeEl = document.getElementById('totalStake');
     
     if (countEl) {
-        countEl.textContent = machineCount;
+        countEl.textContent = bonusCount;
     }
     if (stakeEl) {
         stakeEl.textContent = formatCurrency(totalStake);
@@ -533,11 +208,11 @@ function updateMachineStats() {
 }
 
 function updateCompactBreakevenDisplay() {
-    const container = document.getElementById('machineListContainer');
+    const container = document.getElementById('bonusListContainer');
     if (!container || !app.sessionData) return;
     
-    const machines = Array.isArray(app.sessionData.machines) ? app.sessionData.machines : [];
-    const totalStake = machines.reduce((sum, m) => sum + (parseFloat(m.stake) || 0), 0);
+    const bonuses = Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
+    const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
     const huntPrice = app.sessionData.huntPrice || 0;
     
     let multiplier = null;
@@ -575,54 +250,6 @@ function updateCompactBreakevenDisplay() {
     }
 }
 
-function getBreakevenDifficultyInfo(multiplier) {
-    if (typeof multiplier !== 'number' || !isFinite(multiplier)) {
-        return {
-            label: 'En attente des données',
-            color: 'var(--muted-text)',
-            background: 'var(--bg-color)'
-        };
-    }
-    
-    if (multiplier <= 0) {
-        return {
-            label: '✓ Breakeven atteint',
-            color: '#10b981',
-            background: '#d1fae5'
-        };
-    }
-    
-    if (multiplier <= 30) {
-        return {
-            label: '✓ Facile (≤30x)',
-            color: '#10b981',
-            background: '#d1fae5'
-        };
-    }
-    
-    if (multiplier <= 60) {
-        return {
-            label: '◐ Moyen (40-60x)',
-            color: '#fbbf24',
-            background: '#fef3c7'
-        };
-    }
-    
-    if (multiplier < 100) {
-        return {
-            label: '⚠ Difficile (60-100x)',
-            color: '#f97316',
-            background: '#ffedd5'
-        };
-    }
-    
-    return {
-        label: '✗ Très Difficile (≥100x)',
-        color: '#ef4444',
-        background: '#fee2e2'
-    };
-}
-
 function escapeHtml(text) {
     const map = {
         '&': '&amp;',
@@ -637,16 +264,16 @@ function escapeHtml(text) {
 function handleOpeningGainSubmit(event) {
     event.preventDefault();
     const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
-    const currentMachine = openingPhaseState.machines[openingPhaseState.currentMachineIndex];
+    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
     
-    if (!currentMachine) return;
+    if (!currentBonus) return;
     
     const result = {
-        machineId: currentMachine.id,
-        machineName: currentMachine.name,
-        stake: currentMachine.stake,
+        bonusId: currentBonus.id,
+        bonusName: currentBonus.name,
+        stake: currentBonus.stake,
         gain: gainAmount,
-        multiplier: gainAmount > 0 ? (gainAmount / currentMachine.stake).toFixed(2) : '0',
+        multiplier: gainAmount > 0 ? (gainAmount / currentBonus.stake).toFixed(2) : '0',
         createdAt: new Date().toISOString()
     };
     
@@ -655,11 +282,11 @@ function handleOpeningGainSubmit(event) {
     // Add to opening list display
     addResultToOpeningList(result);
     
-    // Move to next machine
-    openingPhaseState.currentMachineIndex++;
+    // Move to next bonus
+    openingPhaseState.currentBonusIndex++;
     
-    if (openingPhaseState.currentMachineIndex < openingPhaseState.machines.length) {
-        displayCurrentMachine();
+    if (openingPhaseState.currentBonusIndex < openingPhaseState.bonuses.length) {
+        displayCurrentBonus();
     } else {
         showSessionSummary();
     }
@@ -669,13 +296,13 @@ function handleOpeningGainSubmit(event) {
     document.getElementById('gainMultiplier').value = '';
 }
 
-function displayCurrentMachine() {
-    const currentMachine = openingPhaseState.machines[openingPhaseState.currentMachineIndex];
+function displayCurrentBonus() {
+    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
     
-    if (!currentMachine) return;
+    if (!currentBonus) return;
     
-    document.getElementById('openingMachineName').textContent = currentMachine.name;
-    document.getElementById('openingBetAmount').textContent = currentMachine.stake.toFixed(2) + '€';
+    document.getElementById('openingBonusName').textContent = currentBonus.name;
+    document.getElementById('openingBetAmount').textContent = currentBonus.stake.toFixed(2) + '€';
     document.getElementById('gainAmount').value = '';
     document.getElementById('gainMultiplier').value = '';
 }
@@ -691,7 +318,6 @@ function addResultToOpeningList(result) {
     }
     
     const resultIndex = openingPhaseState.results.indexOf(result);
-    const isSaved = breakEvenState.savedBonusIndices.has(resultIndex);
     
     const resultItem = document.createElement('div');
     resultItem.className = 'result-item';
@@ -707,7 +333,6 @@ function addResultToOpeningList(result) {
         gap: 1rem;
         margin-bottom: 0.5rem;
         transition: all 0.3s ease;
-        ${isSaved ? 'border-color: var(--success-color); background: rgba(16, 185, 129, 0.1);' : ''}
     `;
     
     const resultInfo = document.createElement('div');
@@ -715,31 +340,12 @@ function addResultToOpeningList(result) {
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
     resultInfo.innerHTML = `
-        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.machineName)}</div>
+        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
         <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: ${result.gain.toFixed(2)}€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×${result.multiplier}</div>
     `;
     
-    const saveBtn = document.createElement('button');
-    saveBtn.type = 'button';
-    saveBtn.style.cssText = `
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        border: 1px solid var(--border-color);
-        background: ${isSaved ? 'var(--success-color)' : 'var(--bg-color)'};
-        color: ${isSaved ? 'white' : 'var(--text-color)'};
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.3s ease;
-        flex-shrink: 0;
-    `;
-    saveBtn.textContent = isSaved ? '✓ Saved' : 'Save';
-    saveBtn.onclick = function() {
-        toggleBonusSaved(resultIndex);
-    };
-    
     resultItem.appendChild(resultInfo);
-    resultItem.appendChild(saveBtn);
     container.appendChild(resultItem);
 }
 
@@ -759,18 +365,12 @@ function showSessionSummary() {
     // Show summary message
     const summaryMsg = `
         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-top: 2rem;">
-            <h3>Toutes les Machines Ouvertes</h3>
+            <h3>Tous les Bonus Ouverts</h3>
             <p>Mise totale: ${totalStake.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
             </p>
-            <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--muted-text);">
-                Sélectionnez les bonuses à conserver puis calculez le breakeven
-            </p>
-            <button class="btn btn-success" style="margin-top: 1rem; width: auto;" onclick="app.goToBreakeven()">
-                <i data-lucide="target"></i> Calculer le Breakeven
-            </button>
         </div>
     `;
     
@@ -778,200 +378,15 @@ function showSessionSummary() {
     if (container) {
         container.innerHTML = summaryMsg + container.innerHTML;
     }
-}
-
-// Breakeven calculation functions
-function initializeBreakeven() {
-    // Set the start balance
-    const startBalance = app.sessionData ? app.sessionData.balance : 0;
-    breakEvenState.startBalance = startBalance;
     
-    document.getElementById('breakEvenStartBalance').value = startBalance.toFixed(2);
-    
-    // Update the saved bonuses list
-    updateBreakevenBonusList();
-    
-    // Calculate if we have an end balance
-    calculateBreakeven();
-}
-
-function toggleBonusSaved(resultIndex) {
-    if (breakEvenState.savedBonusIndices.has(resultIndex)) {
-        breakEvenState.savedBonusIndices.delete(resultIndex);
-    } else {
-        breakEvenState.savedBonusIndices.add(resultIndex);
-    }
-    
-    // Update the visual state in opening list
-    updateOpeningListSavedState();
-    
-    // Update breakeven bonus list
-    updateBreakevenBonusList();
-    
-    // Recalculate
-    calculateBreakeven();
-}
-
-function updateOpeningListSavedState() {
-    const items = document.querySelectorAll('[data-result-index]');
-    items.forEach((item) => {
-        const resultIndex = parseInt(item.getAttribute('data-result-index'));
-        const isSaved = breakEvenState.savedBonusIndices.has(resultIndex);
-        const btn = item.querySelector('button');
-        
-        if (isSaved) {
-            item.style.borderColor = 'var(--success-color)';
-            item.style.background = 'rgba(16, 185, 129, 0.1)';
-            if (btn) {
-                btn.style.background = 'var(--success-color)';
-                btn.style.color = 'white';
-                btn.textContent = '✓ Saved';
-            }
-        } else {
-            item.style.borderColor = 'var(--border-color)';
-            item.style.background = 'var(--bg-color)';
-            if (btn) {
-                btn.style.background = 'var(--bg-color)';
-                btn.style.color = 'var(--text-color)';
-                btn.textContent = 'Save';
-            }
-        }
-    });
-}
-
-function updateBreakevenBonusList() {
-    const container = document.getElementById('breakEvenBonusList');
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    let totalSavedStakes = 0;
-    
-    if (breakEvenState.savedBonusIndices.size === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <i data-lucide="inbox"></i>
-                <p>Aucune bonus sauvegardée. Retournez à l'étape Ouverture et sélectionnez les bonuses à conserver.</p>
-            </div>
-        `;
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
-    } else {
-        breakEvenState.savedBonusIndices.forEach((resultIndex) => {
-            if (resultIndex < openingPhaseState.results.length) {
-                const result = openingPhaseState.results[resultIndex];
-                totalSavedStakes += result.stake;
-                
-                const bonusItem = document.createElement('div');
-                bonusItem.style.cssText = `
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 1rem;
-                    background: rgba(16, 185, 129, 0.1);
-                    border: 1px solid var(--success-color);
-                    border-radius: 8px;
-                    gap: 1rem;
-                    margin-bottom: 0.5rem;
-                `;
-                
-                const bonusInfo = document.createElement('div');
-                bonusInfo.style.cssText = 'flex: 1;';
-                bonusInfo.innerHTML = `
-                    <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.machineName)}</div>
-                    <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€</div>
-                `;
-                
-                bonusItem.appendChild(bonusInfo);
-                container.appendChild(bonusItem);
-            }
-        });
-    }
-    
-    breakEvenState.totalSavedStakes = totalSavedStakes;
-}
-
-function calculateBreakeven() {
-    const startBalance = parseFloat(document.getElementById('breakEvenStartBalance').value) || 0;
-    const endBalance = parseFloat(document.getElementById('breakEvenEndBalance').value);
-    const huntCost = startBalance - endBalance;
-    const savedStakes = breakEvenState.totalSavedStakes;
-    
-    const huntCostEl = document.getElementById('breakEvenHuntCost');
-    const savedValueEl = document.getElementById('breakEvenSavedValue');
-    const resultEl = document.getElementById('breakEvenResult');
-    const errorEl = document.getElementById('breakEvenError');
-    const multiplierEl = document.getElementById('breakEvenMultiplier');
-    const difficultyEl = document.getElementById('breakEvenDifficulty');
-    
-    // Hide error and result initially
-    errorEl.style.display = 'none';
-    resultEl.style.display = 'none';
-    
-    // Update displayed values
-    if (huntCostEl) {
-        huntCostEl.textContent = formatCurrency(huntCost);
-    }
-    if (savedValueEl) {
-        savedValueEl.textContent = formatCurrency(savedStakes);
-    }
-    
-    // Validate inputs
-    if (isNaN(endBalance) || endBalance === null || endBalance === '') {
-        if (errorEl) {
-            errorEl.style.display = 'none';
-        }
-        return;
-    }
-    
-    if (huntCost < 0) {
-        if (errorEl) {
-            errorEl.style.display = 'block';
-            document.getElementById('breakEvenErrorMessage').textContent = 'Le solde de fin ne peut pas être supérieur au solde de départ';
-        }
-        return;
-    }
-    
-    if (savedStakes <= 0) {
-        if (errorEl) {
-            errorEl.style.display = 'block';
-            document.getElementById('breakEvenErrorMessage').textContent = 'Veuillez sélectionner au moins une bonus sauvegardée';
-        }
-        return;
-    }
-    
-    // Calculate required multiplier
-    const requiredMultiplier = huntCost / savedStakes;
-    
-    const difficultyInfo = getBreakevenDifficultyInfo(requiredMultiplier);
-    
-    // Display result
-    if (resultEl) {
-        resultEl.style.display = 'block';
-        resultEl.style.background = difficultyInfo.background;
-        resultEl.style.borderColor = difficultyInfo.color;
-        
-        if (multiplierEl) {
-            multiplierEl.textContent = requiredMultiplier.toFixed(2) + 'x';
-            multiplierEl.style.color = difficultyInfo.color;
-        }
-        
-        if (difficultyEl) {
-            difficultyEl.textContent = difficultyInfo.label;
-            difficultyEl.style.color = difficultyInfo.color;
-        }
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
     }
 }
 
 // Export functions for potential external use
 window.BonusHuntApp = {
     showToast,
-    createNewSession,
-    addBonusToList,
-    recordBonusResult,
-    recordGain,
-    initializeBreakeven,
-    calculateBreakeven,
-    toggleBonusSaved
+    formatCurrency,
+    displayCurrentBonus
 };
