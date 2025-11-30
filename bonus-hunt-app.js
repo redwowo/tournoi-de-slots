@@ -650,6 +650,42 @@ function updateCollectionBreakevenCard() {
     }
     
     updateTrendBadge(requiredMultiplier);
+    updateCompactBreakevenDisplay(requiredMultiplier, totalStake);
+}
+
+function updateCompactBreakevenDisplay(multiplier, totalStake) {
+    const container = document.getElementById('machineListContainer');
+    if (!container) return;
+    
+    const parent = container.parentElement;
+    if (!parent) return;
+    
+    let compactDisplay = parent.querySelector('#compactBreakevenDisplay');
+    
+    if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
+        if (!compactDisplay) {
+            compactDisplay = document.createElement('div');
+            compactDisplay.id = 'compactBreakevenDisplay';
+            compactDisplay.style.cssText = `
+                display: none;
+                text-align: center;
+                padding: 0.5rem 1rem;
+                margin-bottom: 1rem;
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--primary-color);
+                background: rgba(59, 130, 246, 0.08);
+                border: 1px solid rgba(59, 130, 246, 0.2);
+                border-radius: 8px;
+            `;
+            parent.insertBefore(compactDisplay, container);
+        }
+        
+        compactDisplay.style.display = 'block';
+        compactDisplay.textContent = `x${Math.round(multiplier)}`;
+    } else if (compactDisplay) {
+        compactDisplay.style.display = 'none';
+    }
 }
 
 function updateTrendBadge(multiplier) {
