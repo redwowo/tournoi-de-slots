@@ -283,10 +283,20 @@ function getBonusPriceFromBonus(bonus) {
 
 function getBonusPriceForResult(result) {
     if (!result) return 0;
+    
+    // First try bonusPrice field
     const directAmount = parseAmount(result.bonusPrice);
     if (directAmount !== null) {
         return directAmount;
     }
+    
+    // Fallback to stake (the amount paid for the bonus)
+    const stakeAmount = parseAmount(result.stake);
+    if (stakeAmount !== null) {
+        return stakeAmount;
+    }
+    
+    // Last resort: try to find the bonus in openingPhaseState
     const linkedBonus = openingPhaseState.bonuses.find(b => b.id === result.bonusId);
     return getBonusPriceFromBonus(linkedBonus);
 }
