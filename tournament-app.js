@@ -1698,8 +1698,7 @@ function resetTournamentWithOption(keepPlayers) {
   const loadingOverlay = document.getElementById("loadingOverlay");
   if (loadingOverlay) loadingOverlay.style.display = "none";
 
-  // Rediriger vers la page d'accueil après réinitialisation
-  window.location.href = "/";
+  // Keep the user on the current tournament page - no redirect needed
 }
 
 // Effacer toutes les données
@@ -1711,8 +1710,39 @@ function clearAllData() {
   }
   
   localStorage.removeItem("tournamentData")
-  // Recharger la page pour repartir de zéro
-  window.location.href = "/";
+  
+  // Réinitialiser l'état du tournoi à son état initial
+  TournamentApp.players = []
+  TournamentApp.matches = []
+  TournamentApp.eliminated = []
+  TournamentApp.eliminationHistory = []
+  TournamentApp.winner = ""
+  TournamentApp.tournamentStarted = false
+  TournamentApp.tournamentCompleted = false
+  
+  // Réinitialiser l'interface utilisateur
+  const bracket = document.getElementById("bracket");
+  if (bracket) bracket.style.display = "none";
+  const resetButton = document.getElementById("resetButton");
+  if (resetButton) resetButton.style.display = "none";
+  const launchDraw = document.getElementById("launchDraw");
+  if (launchDraw) launchDraw.style.display = "none";
+  const eliminationHistoryBtn = document.getElementById("eliminationHistoryBtn");
+  if (eliminationHistoryBtn) eliminationHistoryBtn.style.display = "none";
+  const addPlayerContainer = document.getElementById("addPlayerContainer");
+  if (addPlayerContainer) addPlayerContainer.style.display = "block";
+  const randomSlotBtn = document.getElementById("randomSlotBtn");
+  if (randomSlotBtn) randomSlotBtn.style.display = "block";
+  const count = document.getElementById("count");
+  if (count) count.innerText = `Slot ajoutés : 0/16`;
+  
+  // Mettre à jour l'affichage des joueurs
+  updatePlayersDisplay()
+  
+  // Initialiser un nouveau bracket vide
+  initBracket()
+  
+  showToast("Données effacées", "Toutes les données du tournoi ont été effacées.", "success")
 }
 
 // Mettre à jour le score d'un match
