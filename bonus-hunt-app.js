@@ -388,10 +388,6 @@ let breakEvenState = {
     totalSavedStakes: 0
 };
 
-const collectionBreakevenState = {
-    lastMultiplier: null
-};
-
 // Machine form handler for the multi-step wizard
 function setupMachineFormHandler() {
     const machineForm = document.getElementById('machineForm');
@@ -539,192 +535,44 @@ function updateMachineStats() {
 }
 
 function setupCollectionBreakevenCard() {
-    const currentBalanceInput = document.getElementById('currentBalanceInput');
-    if (!currentBalanceInput) return;
-    
-    currentBalanceInput.addEventListener('input', handleCurrentBalanceInput);
-    syncCurrentBalanceInput();
-    updateCollectionBreakevenCard();
-}
-
-function syncCurrentBalanceInput() {
-    if (typeof app === 'undefined' || !app.sessionData) return;
-    const input = document.getElementById('currentBalanceInput');
-    if (!input) return;
-    
-    const startBalance = Number(app.sessionData.balance) || 0;
-    let currentBalance = app.sessionData.currentBalance;
-    
-    if (typeof currentBalance !== 'number' || isNaN(currentBalance)) {
-        currentBalance = startBalance;
-    }
-    
-    app.sessionData.currentBalance = currentBalance;
-    input.value = currentBalance.toFixed(2);
-}
-
-function handleCurrentBalanceInput(event) {
-    if (typeof app === 'undefined' || !app.sessionData) return;
-    
-    const value = parseFloat(event.target.value);
-    if (!isNaN(value)) {
-        app.sessionData.currentBalance = value;
-    } else {
-        app.sessionData.currentBalance = null;
-    }
-    
-    if (typeof app.updateHeaderBalance === 'function') {
-        app.updateHeaderBalance();
-    }
-    
     updateCollectionBreakevenCard();
 }
 
 function updateCollectionBreakevenCard() {
-    const card = document.getElementById('collectionBreakevenCard');
-    if (!card || typeof app === 'undefined' || !app.sessionData) return;
+    if (typeof app === 'undefined' || !app.sessionData) return;
     
     const machines = Array.isArray(app.sessionData.machines) ? app.sessionData.machines : [];
-    const startBalance = Number(app.sessionData.balance) || 0;
-    const currentBalance = (typeof app.sessionData.currentBalance === 'number' && !isNaN(app.sessionData.currentBalance))
-        ? app.sessionData.currentBalance
-        : startBalance;
-    
+    const huntPrice = Number(app.sessionData.huntPrice) || 0;
     const totalStake = machines.reduce((sum, machine) => sum + (parseFloat(machine.stake) || 0), 0);
-    const huntCostRaw = startBalance - currentBalance;
-    const huntCost = Math.max(0, huntCostRaw);
     let requiredMultiplier = null;
     
-    if (totalStake > 0) {
-        requiredMultiplier = Math.max(0, huntCost / totalStake);
-    } else {
-        collectionBreakevenState.lastMultiplier = null;
+    if (totalStake > 0 && huntPrice > 0) {
+        requiredMultiplier = huntPrice / totalStake;
     }
     
-    const huntCostEl = document.getElementById('collectionHuntCost');
-    const savedValueEl = document.getElementById('collectionSavedValue');
-    const multiplierEl = document.getElementById('collectionMultiplier');
-    const multiplierHintEl = document.getElementById('collectionMultiplierHint');
-    const difficultyChip = document.getElementById('collectionDifficulty');
-    const difficultyTextEl = document.getElementById('collectionDifficultyText');
-    
-    if (huntCostEl) {
-        huntCostEl.textContent = formatCurrency(huntCostRaw);
-    }
-    if (savedValueEl) {
-        savedValueEl.textContent = formatCurrency(totalStake);
-    }
-    
-    if (multiplierEl) {
-        if (requiredMultiplier !== null && isFinite(requiredMultiplier)) {
-            multiplierEl.textContent = `${requiredMultiplier.toFixed(2)}x`;
-            if (multiplierHintEl) {
-                multiplierHintEl.textContent = huntCostRaw <= 0
-                    ? 'Breakeven déjà atteint'
-                    : 'Objectif nécessaire pour rentrer dans ses frais';
-            }
-        } else {
-            multiplierEl.textContent = '—';
-            if (multiplierHintEl) {
-                multiplierHintEl.textContent = 'Ajoutez des machines pour commencer';
-            }
-        }
-    }
-    
-    const difficultyInfo = getBreakevenDifficultyInfo(requiredMultiplier);
-    
-    if (difficultyChip) {
-        difficultyChip.style.background = difficultyInfo.background;
-        difficultyChip.style.borderColor = difficultyInfo.color;
-        difficultyChip.style.color = difficultyInfo.color;
-    }
-    if (difficultyTextEl) {
-        difficultyTextEl.textContent = (requiredMultiplier !== null && totalStake > 0)
-            ? difficultyInfo.label
-            : 'Ajoutez des machines pour commencer';
-        if (requiredMultiplier !== null && isFinite(requiredMultiplier)) {
-            difficultyTextEl.style.color = difficultyInfo.color;
-        } else {
-            difficultyTextEl.style.color = '';
-        }
-    }
-    
-    updateTrendBadge(requiredMultiplier);
     updateCompactBreakevenDisplay(requiredMultiplier, totalStake);
 }
 
 function updateCompactBreakevenDisplay(multiplier, totalStake) {
-    const container = document.getElementById('machineListContainer');
-    if (!container) return;
-    
-    const parent = container.parentElement;
-    if (!parent) return;
-    
-    let compactDisplay = parent.querySelector('#compactBreakevenDisplay');
+    let compactDisplay = document.getElementById('compactBreakevenDisplay');
+    if (!compactDisplay) return;
     
     if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
-        if (!compactDisplay) {
-            compactDisplay = document.createElement('div');
-            compactDisplay.id = 'compactBreakevenDisplay';
-            compactDisplay.style.cssText = `
-                display: none;
-                text-align: center;
-                padding: 0.5rem 1rem;
-                margin-bottom: 1rem;
-                font-size: 1rem;
-                font-weight: 600;
-                color: var(--primary-color);
-                background: rgba(59, 130, 246, 0.08);
-                border: 1px solid rgba(59, 130, 246, 0.2);
-                border-radius: 8px;
-            `;
-            parent.insertBefore(compactDisplay, container);
-        }
-        
-        compactDisplay.style.display = 'block';
-        compactDisplay.textContent = `x${Math.round(multiplier)}`;
-    } else if (compactDisplay) {
+        compactDisplay.style.cssText = `
+            text-align: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+        `;
+        compactDisplay.textContent = `Breakeven: x${Math.round(multiplier)}`;
+    } else {
         compactDisplay.style.display = 'none';
     }
-}
-
-function updateTrendBadge(multiplier) {
-    const trendBadge = document.getElementById('collectionTrendBadge');
-    if (!trendBadge) return;
-    
-    const trend = getBreakevenTrend(multiplier);
-    trendBadge.classList.remove('trend-easier', 'trend-harder', 'trend-stable');
-    trendBadge.classList.add(`trend-${trend}`);
-    
-    let label = '→ Stable';
-    if (trend === 'easier') {
-        label = '↓ Plus facile';
-    } else if (trend === 'harder') {
-        label = '↑ Plus difficile';
-    }
-    
-    trendBadge.textContent = label;
-}
-
-function getBreakevenTrend(multiplier) {
-    if (multiplier === null || !isFinite(multiplier)) {
-        collectionBreakevenState.lastMultiplier = null;
-        return 'stable';
-    }
-    
-    const previous = collectionBreakevenState.lastMultiplier;
-    collectionBreakevenState.lastMultiplier = multiplier;
-    
-    if (previous === null || !isFinite(previous)) {
-        return 'stable';
-    }
-    
-    const delta = multiplier - previous;
-    if (Math.abs(delta) < 0.01) {
-        return 'stable';
-    }
-    
-    return delta < 0 ? 'easier' : 'harder';
 }
 
 function getBreakevenDifficultyInfo(multiplier) {
