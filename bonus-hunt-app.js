@@ -366,6 +366,14 @@ let openingPhaseState = {
     results: []
 };
 
+// Breakeven calculation state
+let breakEvenState = {
+    savedBonusIndices: new Set(),
+    startBalance: 0,
+    endBalance: null,
+    totalSavedStakes: 0
+};
+
 // Machine form handler for the multi-step wizard
 function setupMachineFormHandler() {
     const machineForm = document.getElementById('machineForm');
@@ -576,18 +584,24 @@ function addResultToOpeningList(result) {
         emptyState.remove();
     }
     
+    const resultIndex = openingPhaseState.results.indexOf(result);
+    const isSaved = breakEvenState.savedBonusIndices.has(resultIndex);
+    
     const resultItem = document.createElement('div');
     resultItem.className = 'result-item';
+    resultItem.setAttribute('data-result-index', resultIndex);
     resultItem.style.cssText = `
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding: 1rem;
         background: var(--bg-color);
-        border: 1px solid var(--border-color);
+        border: 2px solid var(--border-color);
         border-radius: 8px;
         gap: 1rem;
         margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+        ${isSaved ? 'border-color: var(--success-color); background: rgba(16, 185, 129, 0.1);' : ''}
     `;
     
     const resultInfo = document.createElement('div');
@@ -600,7 +614,26 @@ function addResultToOpeningList(result) {
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×${result.multiplier}</div>
     `;
     
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.style.cssText = `
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: ${isSaved ? 'var(--success-color)' : 'var(--bg-color)'};
+        color: ${isSaved ? 'white' : 'var(--text-color)'};
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+    `;
+    saveBtn.textContent = isSaved ? '✓ Saved' : 'Save';
+    saveBtn.onclick = function() {
+        toggleBonusSaved(resultIndex);
+    };
+    
     resultItem.appendChild(resultInfo);
+    resultItem.appendChild(saveBtn);
     container.appendChild(resultItem);
 }
 
@@ -620,12 +653,18 @@ function showSessionSummary() {
     // Show summary message
     const summaryMsg = `
         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-top: 2rem;">
-            <h3>Session Terminée</h3>
+            <h3>Toutes les Machines Ouvertes</h3>
             <p>Mise totale: ${totalStake.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
             </p>
+            <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--muted-text);">
+                Sélectionnez les bonuses à conserver puis calculez le breakeven
+            </p>
+            <button class="btn btn-success" style="margin-top: 1rem; width: auto;" onclick="app.goToBreakeven()">
+                <i data-lucide="target"></i> Calculer le Breakeven
+            </button>
         </div>
     `;
     
@@ -635,11 +674,219 @@ function showSessionSummary() {
     }
 }
 
+// Breakeven calculation functions
+function initializeBreakeven() {
+    // Set the start balance
+    const startBalance = app.sessionData ? app.sessionData.balance : 0;
+    breakEvenState.startBalance = startBalance;
+    
+    document.getElementById('breakEvenStartBalance').value = startBalance.toFixed(2);
+    
+    // Update the saved bonuses list
+    updateBreakevenBonusList();
+    
+    // Calculate if we have an end balance
+    calculateBreakeven();
+}
+
+function toggleBonusSaved(resultIndex) {
+    if (breakEvenState.savedBonusIndices.has(resultIndex)) {
+        breakEvenState.savedBonusIndices.delete(resultIndex);
+    } else {
+        breakEvenState.savedBonusIndices.add(resultIndex);
+    }
+    
+    // Update the visual state in opening list
+    updateOpeningListSavedState();
+    
+    // Update breakeven bonus list
+    updateBreakevenBonusList();
+    
+    // Recalculate
+    calculateBreakeven();
+}
+
+function updateOpeningListSavedState() {
+    const items = document.querySelectorAll('[data-result-index]');
+    items.forEach((item) => {
+        const resultIndex = parseInt(item.getAttribute('data-result-index'));
+        const isSaved = breakEvenState.savedBonusIndices.has(resultIndex);
+        const btn = item.querySelector('button');
+        
+        if (isSaved) {
+            item.style.borderColor = 'var(--success-color)';
+            item.style.background = 'rgba(16, 185, 129, 0.1)';
+            if (btn) {
+                btn.style.background = 'var(--success-color)';
+                btn.style.color = 'white';
+                btn.textContent = '✓ Saved';
+            }
+        } else {
+            item.style.borderColor = 'var(--border-color)';
+            item.style.background = 'var(--bg-color)';
+            if (btn) {
+                btn.style.background = 'var(--bg-color)';
+                btn.style.color = 'var(--text-color)';
+                btn.textContent = 'Save';
+            }
+        }
+    });
+}
+
+function updateBreakevenBonusList() {
+    const container = document.getElementById('breakEvenBonusList');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    let totalSavedStakes = 0;
+    
+    if (breakEvenState.savedBonusIndices.size === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i data-lucide="inbox"></i>
+                <p>Aucune bonus sauvegardée. Retournez à l'étape Ouverture et sélectionnez les bonuses à conserver.</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    } else {
+        breakEvenState.savedBonusIndices.forEach((resultIndex) => {
+            if (resultIndex < openingPhaseState.results.length) {
+                const result = openingPhaseState.results[resultIndex];
+                totalSavedStakes += result.stake;
+                
+                const bonusItem = document.createElement('div');
+                bonusItem.style.cssText = `
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1rem;
+                    background: rgba(16, 185, 129, 0.1);
+                    border: 1px solid var(--success-color);
+                    border-radius: 8px;
+                    gap: 1rem;
+                    margin-bottom: 0.5rem;
+                `;
+                
+                const bonusInfo = document.createElement('div');
+                bonusInfo.style.cssText = 'flex: 1;';
+                bonusInfo.innerHTML = `
+                    <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.machineName)}</div>
+                    <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€</div>
+                `;
+                
+                bonusItem.appendChild(bonusInfo);
+                container.appendChild(bonusItem);
+            }
+        });
+    }
+    
+    breakEvenState.totalSavedStakes = totalSavedStakes;
+}
+
+function calculateBreakeven() {
+    const startBalance = parseFloat(document.getElementById('breakEvenStartBalance').value) || 0;
+    const endBalance = parseFloat(document.getElementById('breakEvenEndBalance').value);
+    const huntCost = startBalance - endBalance;
+    const savedStakes = breakEvenState.totalSavedStakes;
+    
+    const huntCostEl = document.getElementById('breakEvenHuntCost');
+    const savedValueEl = document.getElementById('breakEvenSavedValue');
+    const resultEl = document.getElementById('breakEvenResult');
+    const errorEl = document.getElementById('breakEvenError');
+    const multiplierEl = document.getElementById('breakEvenMultiplier');
+    const difficultyEl = document.getElementById('breakEvenDifficulty');
+    
+    // Hide error and result initially
+    errorEl.style.display = 'none';
+    resultEl.style.display = 'none';
+    
+    // Update displayed values
+    if (huntCostEl) {
+        huntCostEl.textContent = huntCost.toFixed(2) + '€';
+    }
+    if (savedValueEl) {
+        savedValueEl.textContent = savedStakes.toFixed(2) + '€';
+    }
+    
+    // Validate inputs
+    if (isNaN(endBalance) || endBalance === null || endBalance === '') {
+        if (errorEl) {
+            errorEl.style.display = 'none';
+        }
+        return;
+    }
+    
+    if (huntCost < 0) {
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            document.getElementById('breakEvenErrorMessage').textContent = 'Le solde de fin ne peut pas être supérieur au solde de départ';
+        }
+        return;
+    }
+    
+    if (savedStakes <= 0) {
+        if (errorEl) {
+            errorEl.style.display = 'block';
+            document.getElementById('breakEvenErrorMessage').textContent = 'Veuillez sélectionner au moins une bonus sauvegardée';
+        }
+        return;
+    }
+    
+    // Calculate required multiplier
+    const requiredMultiplier = huntCost / savedStakes;
+    
+    // Determine difficulty
+    let difficulty = '';
+    let difficultyColor = '';
+    let difficultyBg = '';
+    
+    if (requiredMultiplier <= 30) {
+        difficulty = '✓ Facile (≤30x)';
+        difficultyColor = '#10b981';
+        difficultyBg = '#d1fae5';
+    } else if (requiredMultiplier <= 60) {
+        difficulty = '◐ Moyen (40-60x)';
+        difficultyColor = '#f59e0b';
+        difficultyBg = '#fef3c7';
+    } else if (requiredMultiplier < 100) {
+        difficulty = '⚠ Difficile (60-100x)';
+        difficultyColor = '#f59e0b';
+        difficultyBg = '#fef3c7';
+    } else {
+        difficulty = '✗ Très Difficile (≥100x)';
+        difficultyColor = '#ef4444';
+        difficultyBg = '#fee2e2';
+    }
+    
+    // Display result
+    if (resultEl) {
+        resultEl.style.display = 'block';
+        resultEl.style.background = difficultyBg;
+        resultEl.style.borderColor = difficultyColor;
+        
+        if (multiplierEl) {
+            multiplierEl.textContent = requiredMultiplier.toFixed(2) + 'x';
+            multiplierEl.style.color = difficultyColor;
+        }
+        
+        if (difficultyEl) {
+            difficultyEl.textContent = difficulty;
+            difficultyEl.style.color = difficultyColor;
+        }
+    }
+}
+
 // Export functions for potential external use
 window.BonusHuntApp = {
     showToast,
     createNewSession,
     addBonusToList,
     recordBonusResult,
-    recordGain
+    recordGain,
+    initializeBreakeven,
+    calculateBreakeven,
+    toggleBonusSaved
 };

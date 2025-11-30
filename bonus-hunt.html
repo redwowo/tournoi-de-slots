@@ -71,6 +71,7 @@
         <div class="step" id="step-2"><i data-lucide="wallet"></i> 2. Budget</div>
         <div class="step" id="step-3"><i data-lucide="gamepad2"></i> 3. Machines</div>
         <div class="step" id="step-4"><i data-lucide="gift"></i> 4. Ouverture</div>
+        <div class="step" id="step-5"><i data-lucide="target"></i> 5. Breakeven</div>
     </div>
 
     <main class="bonus-hunt-main">
@@ -230,6 +231,68 @@
             </div>
         </section>
 
+        <!-- Step 5: Breakeven Calculator -->
+        <section id="view-breakeven" class="game-view">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <button class="btn btn-outline" onclick="app.goToOpening()"><i data-lucide="arrow-left"></i> Retour</button>
+                <button class="btn btn-primary" onclick="app.finishSession()">Terminer la session</button>
+            </div>
+
+            <div class="panel" style="background: linear-gradient(135deg, var(--card-bg) 0%, var(--item-bg) 100%); border: 2px solid var(--primary-color);">
+                <div class="panel-content" style="padding: 2rem;">
+                    
+                    <h2 style="text-align: center; margin-top: 0;">Calcul du Breakeven</h2>
+                    <p style="text-align: center; color: var(--muted-text);">Entrez votre balance finale après la collection pour calculer le multiplicateur requis</p>
+
+                    <form id="breakEvenForm" class="config-form" style="max-width: 600px; margin: 2rem auto;">
+                        <div class="form-group">
+                            <label>Solde Départ (€)</label>
+                            <input type="number" id="breakEvenStartBalance" placeholder="0.00" step="0.01" readonly style="background: var(--bg-color); opacity: 0.7;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Solde Fin Collection (€)</label>
+                            <input type="number" id="breakEvenEndBalance" placeholder="0.00" step="0.01" oninput="app.calculateBreakeven()">
+                        </div>
+
+                        <div style="background: var(--bg-color); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                            <div class="stat-item">
+                                <span>Coût du Hunt</span>
+                                <strong id="breakEvenHuntCost">0.00€</strong>
+                            </div>
+                            <div class="stat-item" style="margin-top: 0.5rem;">
+                                <span>Valeur des Mises Sauvegardées</span>
+                                <strong id="breakEvenSavedValue">0.00€</strong>
+                            </div>
+                        </div>
+
+                        <div class="panel" style="background: var(--success-bg); border: 2px solid var(--success-color); padding: 1.5rem; text-align: center; margin: 1rem 0; display: none;" id="breakEvenResult">
+                            <div style="margin-bottom: 1rem;">
+                                <p style="margin: 0; color: var(--muted-text); font-size: 0.9rem;">Multiplicateur Requis</p>
+                                <h1 style="margin: 0.5rem 0; font-size: 3rem; color: var(--success-color);" id="breakEvenMultiplier">0.00x</h1>
+                            </div>
+                            <div style="padding: 1rem; background: rgba(255,255,255,0.5); border-radius: 8px;">
+                                <p style="margin: 0; font-weight: bold; color: var(--heading-color);" id="breakEvenDifficulty">Évaluation</p>
+                            </div>
+                        </div>
+
+                        <div id="breakEvenError" style="background: #fee2e2; border: 1px solid #ef4444; color: #c81d25; padding: 1rem; border-radius: 8px; margin: 1rem 0; display: none;">
+                            <p style="margin: 0;" id="breakEvenErrorMessage"></p>
+                        </div>
+                    </form>
+
+                    <div class="panel" style="margin-top: 2rem;">
+                        <div class="panel-header">
+                            <h3 style="margin: 0;">Bonuses Sauvegardées</h3>
+                        </div>
+                        <div class="panel-content">
+                            <div id="breakEvenBonusList" class="bonus-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <script src="/bonus-hunt-navigation.js"></script>
@@ -300,6 +363,23 @@
                 }
             },
 
+            // Step 5: Breakeven Calculation
+            goToBreakeven: function() {
+                this.currentStep = 5;
+                this.switchView('view-breakeven', 5);
+                
+                // Initialize breakeven data
+                if (typeof initializeBreakeven !== 'undefined') {
+                    initializeBreakeven();
+                }
+            },
+
+            calculateBreakeven: function() {
+                if (typeof calculateBreakeven !== 'undefined') {
+                    calculateBreakeven();
+                }
+            },
+
             recordLoss: function() {
                 const gainInput = document.getElementById('gainAmount');
                 gainInput.value = '0';
@@ -325,6 +405,18 @@
                 alert("Session terminée ! Bravo.");
                 // Logique de sauvegarde finale
                 location.reload(); 
+            },
+
+            markBonusAsSaved: function(resultIndex) {
+                if (typeof markBonusAsSaved !== 'undefined') {
+                    markBonusAsSaved(resultIndex);
+                }
+            },
+
+            toggleBonusSaved: function(resultIndex) {
+                if (typeof toggleBonusSaved !== 'undefined') {
+                    toggleBonusSaved(resultIndex);
+                }
             },
 
             updateHeaderBalance: function() {
