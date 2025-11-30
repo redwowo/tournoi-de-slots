@@ -29,6 +29,7 @@ function initializeBonusHuntApp() {
     
     // Set up machine form handler
     setupMachineFormHandler();
+    setupCollectionBreakevenCard();
 }
 
 function setupActionListeners() {
@@ -241,6 +242,19 @@ function setupFilterListeners() {
     }
 }
 
+const currencyFormatter = new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+});
+
+function formatCurrency(value) {
+    const number = Number(value);
+    if (!isFinite(number)) {
+        return '0,00€';
+    }
+    return `${currencyFormatter.format(number)}€`;
+}
+
 // Placeholder functions for future implementation
 function showCreateSessionDialog() {
     showToast('Création de session - À implémenter', 'info');
@@ -374,6 +388,10 @@ let breakEvenState = {
     totalSavedStakes: 0
 };
 
+const collectionBreakevenState = {
+    lastMultiplier: null
+};
+
 // Machine form handler for the multi-step wizard
 function setupMachineFormHandler() {
     const machineForm = document.getElementById('machineForm');
@@ -502,9 +520,9 @@ function removeMachine(machineId) {
 }
 
 function updateMachineStats() {
-    const machines = app.sessionData && app.sessionData.machines ? app.sessionData.machines : [];
+    const machines = app.sessionData && Array.isArray(app.sessionData.machines) ? app.sessionData.machines : [];
     const machineCount = machines.length;
-    const totalStake = machines.reduce((sum, m) => sum + m.stake, 0);
+    const totalStake = machines.reduce((sum, m) => sum + (parseFloat(m.stake) || 0), 0);
     
     const countEl = document.getElementById('machineCount');
     const stakeEl = document.getElementById('totalStake');
@@ -513,8 +531,212 @@ function updateMachineStats() {
         countEl.textContent = machineCount;
     }
     if (stakeEl) {
-        stakeEl.textContent = totalStake.toFixed(2) + '€';
+        stakeEl.textContent = formatCurrency(totalStake);
     }
+    if (typeof app !== 'undefined' && typeof app.updateCollectionBreakevenUI === 'function') {
+        app.updateCollectionBreakevenUI();
+    }
+}
+
+function setupCollectionBreakevenCard() {
+    const currentBalanceInput = document.getElementById('currentBalanceInput');
+    if (!currentBalanceInput) return;
+    
+    currentBalanceInput.addEventListener('input', handleCurrentBalanceInput);
+    syncCurrentBalanceInput();
+    updateCollectionBreakevenCard();
+}
+
+function syncCurrentBalanceInput() {
+    if (typeof app === 'undefined' || !app.sessionData) return;
+    const input = document.getElementById('currentBalanceInput');
+    if (!input) return;
+    
+    const startBalance = Number(app.sessionData.balance) || 0;
+    let currentBalance = app.sessionData.currentBalance;
+    
+    if (typeof currentBalance !== 'number' || isNaN(currentBalance)) {
+        currentBalance = startBalance;
+    }
+    
+    app.sessionData.currentBalance = currentBalance;
+    input.value = currentBalance.toFixed(2);
+}
+
+function handleCurrentBalanceInput(event) {
+    if (typeof app === 'undefined' || !app.sessionData) return;
+    
+    const value = parseFloat(event.target.value);
+    if (!isNaN(value)) {
+        app.sessionData.currentBalance = value;
+    } else {
+        app.sessionData.currentBalance = null;
+    }
+    
+    if (typeof app.updateHeaderBalance === 'function') {
+        app.updateHeaderBalance();
+    }
+    
+    updateCollectionBreakevenCard();
+}
+
+function updateCollectionBreakevenCard() {
+    const card = document.getElementById('collectionBreakevenCard');
+    if (!card || typeof app === 'undefined' || !app.sessionData) return;
+    
+    const machines = Array.isArray(app.sessionData.machines) ? app.sessionData.machines : [];
+    const startBalance = Number(app.sessionData.balance) || 0;
+    const currentBalance = (typeof app.sessionData.currentBalance === 'number' && !isNaN(app.sessionData.currentBalance))
+        ? app.sessionData.currentBalance
+        : startBalance;
+    
+    const totalStake = machines.reduce((sum, machine) => sum + (parseFloat(machine.stake) || 0), 0);
+    const huntCostRaw = startBalance - currentBalance;
+    const huntCost = Math.max(0, huntCostRaw);
+    let requiredMultiplier = null;
+    
+    if (totalStake > 0) {
+        requiredMultiplier = Math.max(0, huntCost / totalStake);
+    } else {
+        collectionBreakevenState.lastMultiplier = null;
+    }
+    
+    const huntCostEl = document.getElementById('collectionHuntCost');
+    const savedValueEl = document.getElementById('collectionSavedValue');
+    const multiplierEl = document.getElementById('collectionMultiplier');
+    const multiplierHintEl = document.getElementById('collectionMultiplierHint');
+    const difficultyChip = document.getElementById('collectionDifficulty');
+    const difficultyTextEl = document.getElementById('collectionDifficultyText');
+    
+    if (huntCostEl) {
+        huntCostEl.textContent = formatCurrency(huntCostRaw);
+    }
+    if (savedValueEl) {
+        savedValueEl.textContent = formatCurrency(totalStake);
+    }
+    
+    if (multiplierEl) {
+        if (requiredMultiplier !== null && isFinite(requiredMultiplier)) {
+            multiplierEl.textContent = `${requiredMultiplier.toFixed(2)}x`;
+            if (multiplierHintEl) {
+                multiplierHintEl.textContent = huntCostRaw <= 0
+                    ? 'Breakeven déjà atteint'
+                    : 'Objectif nécessaire pour rentrer dans ses frais';
+            }
+        } else {
+            multiplierEl.textContent = '—';
+            if (multiplierHintEl) {
+                multiplierHintEl.textContent = 'Ajoutez des machines pour commencer';
+            }
+        }
+    }
+    
+    const difficultyInfo = getBreakevenDifficultyInfo(requiredMultiplier);
+    
+    if (difficultyChip) {
+        difficultyChip.style.background = difficultyInfo.background;
+        difficultyChip.style.borderColor = difficultyInfo.color;
+        difficultyChip.style.color = difficultyInfo.color;
+    }
+    if (difficultyTextEl) {
+        difficultyTextEl.textContent = (requiredMultiplier !== null && totalStake > 0)
+            ? difficultyInfo.label
+            : 'Ajoutez des machines pour commencer';
+        if (requiredMultiplier !== null && isFinite(requiredMultiplier)) {
+            difficultyTextEl.style.color = difficultyInfo.color;
+        } else {
+            difficultyTextEl.style.color = '';
+        }
+    }
+    
+    updateTrendBadge(requiredMultiplier);
+}
+
+function updateTrendBadge(multiplier) {
+    const trendBadge = document.getElementById('collectionTrendBadge');
+    if (!trendBadge) return;
+    
+    const trend = getBreakevenTrend(multiplier);
+    trendBadge.classList.remove('trend-easier', 'trend-harder', 'trend-stable');
+    trendBadge.classList.add(`trend-${trend}`);
+    
+    let label = '→ Stable';
+    if (trend === 'easier') {
+        label = '↓ Plus facile';
+    } else if (trend === 'harder') {
+        label = '↑ Plus difficile';
+    }
+    
+    trendBadge.textContent = label;
+}
+
+function getBreakevenTrend(multiplier) {
+    if (multiplier === null || !isFinite(multiplier)) {
+        collectionBreakevenState.lastMultiplier = null;
+        return 'stable';
+    }
+    
+    const previous = collectionBreakevenState.lastMultiplier;
+    collectionBreakevenState.lastMultiplier = multiplier;
+    
+    if (previous === null || !isFinite(previous)) {
+        return 'stable';
+    }
+    
+    const delta = multiplier - previous;
+    if (Math.abs(delta) < 0.01) {
+        return 'stable';
+    }
+    
+    return delta < 0 ? 'easier' : 'harder';
+}
+
+function getBreakevenDifficultyInfo(multiplier) {
+    if (typeof multiplier !== 'number' || !isFinite(multiplier)) {
+        return {
+            label: 'En attente des données',
+            color: 'var(--muted-text)',
+            background: 'var(--bg-color)'
+        };
+    }
+    
+    if (multiplier <= 0) {
+        return {
+            label: '✓ Breakeven atteint',
+            color: '#10b981',
+            background: '#d1fae5'
+        };
+    }
+    
+    if (multiplier <= 30) {
+        return {
+            label: '✓ Facile (≤30x)',
+            color: '#10b981',
+            background: '#d1fae5'
+        };
+    }
+    
+    if (multiplier <= 60) {
+        return {
+            label: '◐ Moyen (40-60x)',
+            color: '#fbbf24',
+            background: '#fef3c7'
+        };
+    }
+    
+    if (multiplier < 100) {
+        return {
+            label: '⚠ Difficile (60-100x)',
+            color: '#f97316',
+            background: '#ffedd5'
+        };
+    }
+    
+    return {
+        label: '✗ Très Difficile (≥100x)',
+        color: '#ef4444',
+        background: '#fee2e2'
+    };
 }
 
 function escapeHtml(text) {
@@ -805,10 +1027,10 @@ function calculateBreakeven() {
     
     // Update displayed values
     if (huntCostEl) {
-        huntCostEl.textContent = huntCost.toFixed(2) + '€';
+        huntCostEl.textContent = formatCurrency(huntCost);
     }
     if (savedValueEl) {
-        savedValueEl.textContent = savedStakes.toFixed(2) + '€';
+        savedValueEl.textContent = formatCurrency(savedStakes);
     }
     
     // Validate inputs
@@ -838,43 +1060,22 @@ function calculateBreakeven() {
     // Calculate required multiplier
     const requiredMultiplier = huntCost / savedStakes;
     
-    // Determine difficulty
-    let difficulty = '';
-    let difficultyColor = '';
-    let difficultyBg = '';
-    
-    if (requiredMultiplier <= 30) {
-        difficulty = '✓ Facile (≤30x)';
-        difficultyColor = '#10b981';
-        difficultyBg = '#d1fae5';
-    } else if (requiredMultiplier <= 60) {
-        difficulty = '◐ Moyen (40-60x)';
-        difficultyColor = '#f59e0b';
-        difficultyBg = '#fef3c7';
-    } else if (requiredMultiplier < 100) {
-        difficulty = '⚠ Difficile (60-100x)';
-        difficultyColor = '#f59e0b';
-        difficultyBg = '#fef3c7';
-    } else {
-        difficulty = '✗ Très Difficile (≥100x)';
-        difficultyColor = '#ef4444';
-        difficultyBg = '#fee2e2';
-    }
+    const difficultyInfo = getBreakevenDifficultyInfo(requiredMultiplier);
     
     // Display result
     if (resultEl) {
         resultEl.style.display = 'block';
-        resultEl.style.background = difficultyBg;
-        resultEl.style.borderColor = difficultyColor;
+        resultEl.style.background = difficultyInfo.background;
+        resultEl.style.borderColor = difficultyInfo.color;
         
         if (multiplierEl) {
             multiplierEl.textContent = requiredMultiplier.toFixed(2) + 'x';
-            multiplierEl.style.color = difficultyColor;
+            multiplierEl.style.color = difficultyInfo.color;
         }
         
         if (difficultyEl) {
-            difficultyEl.textContent = difficulty;
-            difficultyEl.style.color = difficultyColor;
+            difficultyEl.textContent = difficultyInfo.label;
+            difficultyEl.style.color = difficultyInfo.color;
         }
     }
 }
