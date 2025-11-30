@@ -2754,8 +2754,24 @@ h1 img {
   transition: transform 0.3s ease;
 }
 
+/* Style spécifique pour l'image bonushuntimage.png dans la carte Bonus Hunt */
+.mode-card-icon img[src="bonushuntimage.png"],
+.mode-card-icon img[src="/bonushuntimage.png"] {
+  width: 100%;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 .mode-card:hover .mode-card-icon {
   transform: scale(1.1);
+}
+
+/* Surcharge du scale pour l'image bonushuntimage.png au survol */
+.mode-card:hover .mode-card-icon img[src="bonushuntimage.png"],
+.mode-card:hover .mode-card-icon img[src="/bonushuntimage.png"] {
+  transform: scale(1.05);
 }
 
 .mode-card-title {
@@ -2966,6 +2982,14 @@ h1 img {
   .mode-card-icon svg {
     width: 48px;
     height: 48px;
+  }
+  
+  /* Style mobile pour l'image bonushuntimage.png */
+  .mode-card-icon img[src="bonushuntimage.png"],
+  .mode-card-icon img[src="/bonushuntimage.png"] {
+    max-height: 150px;
+    width: 100%;
+    height: auto;
   }
   
   .mode-card-title {
