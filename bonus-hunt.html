@@ -120,8 +120,8 @@
                                 <input type="text" id="bonusName" placeholder="Ex: Book of Ra" required>
                             </div>
                             <div class="form-group">
-                                <label>Mise (€)</label>
-                                <input type="number" id="bonusStake" placeholder="1.00" step="0.01" required>
+                                <label>Prix du bonus (€)</label>
+                                <input type="number" id="bonusStake" placeholder="100.00" step="0.01" required>
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%;">Ajouter</button>
                         </form>
@@ -132,10 +132,6 @@
                             <div class="stat-item">
                                 <span>Bonus ajoutés</span>
                                 <strong id="bonusCount">0</strong>
-                            </div>
-                            <div class="stat-item">
-                                <span>Mise totale</span>
-                                <strong id="totalStake">0.00€</strong>
                             </div>
                         </div>
 
@@ -180,7 +176,7 @@
                     
                     <h4 class="text-muted">Bonus actuel</h4>
                     <h1 id="openingBonusName" style="font-size: 2.5rem; margin: 0.5rem 0;">Nom du Bonus</h1>
-                    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Mise: <span id="openingBetAmount">2.00€</span></p>
+                    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Prix: <span id="openingBetAmount">2.00€</span></p>
 
                     <form id="gainForm" class="gain-form" style="max-width: 300px; margin: 0 auto;">
                         <div class="form-group">

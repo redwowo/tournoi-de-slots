@@ -138,7 +138,7 @@ function addBonusToList(bonus) {
     bonusInfo.style.cssText = 'flex: 1;';
     bonusInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(bonus.name)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${bonus.stake.toFixed(2)}€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${bonus.stake.toFixed(2)}€</div>
     `;
     
     const removeBtn = document.createElement('button');
@@ -195,13 +195,9 @@ function updateBonusStats() {
     const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
     
     const countEl = document.getElementById('bonusCount');
-    const stakeEl = document.getElementById('totalStake');
     
     if (countEl) {
         countEl.textContent = bonusCount;
-    }
-    if (stakeEl) {
-        stakeEl.textContent = formatCurrency(totalStake);
     }
     
     updateCompactBreakevenDisplay();
@@ -341,7 +337,7 @@ function addResultToOpeningList(result) {
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -466,7 +462,7 @@ function reloadResultDisplay(resultIndex, resultItem) {
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -496,10 +492,10 @@ function updateSessionSummaryTotals() {
     if (summaryDiv && summaryDiv.querySelector('h3')) {
         summaryDiv.innerHTML = `
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Mise totale: ${totalStake.toFixed(2)}€</p>
+            <p>Prix total des bonus: ${totalStake.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
+                Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
             </p>
         `;
     }
@@ -527,10 +523,10 @@ function showSessionSummary() {
     const summaryMsg = `
         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem;">
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Mise totale: ${totalStake.toFixed(2)}€</p>
+            <p>Prix total des bonus: ${totalStake.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
+                Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
             </p>
         </div>
     `;
