@@ -224,6 +224,11 @@ app.get('/tournois', (req, res) => {
   res.sendFile(path.join(__dirname, 'tournois.html'));
 });
 
+// Redirige /spectate-tournoi vers spectate-tournoi.html (AVANT express.static)
+app.get('/spectate-tournoi', (req, res) => {
+  res.sendFile(path.join(__dirname, 'spectate-tournoi.html'));
+});
+
 // Route pour les tournois spécifiques (ex: /tournoi/s4emrt9h)
 app.get('/tournoi/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'tournoi.html'));

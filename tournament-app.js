@@ -2168,6 +2168,9 @@ window.initializeTournamentApp = async () => {
     localStorage.removeItem('spectatorMode');
   }
 
+  // Mettre à jour le bouton retour en fonction du mode spectateur
+  updateBackButtonForSpectatorMode();
+
   // 4. Charger les données locales SEULEMENT si pas en mode spectateur
   if (!isSpectatorMode) {
     loadDataFromLocalStorage();
@@ -2868,6 +2871,22 @@ function enableActionsIfNotSpectator() {
 
 // ... existing code ...
 
+// Met à jour le bouton retour en fonction du mode spectateur
+function updateBackButtonForSpectatorMode() {
+  const backButton = document.getElementById('backButton');
+  if (backButton) {
+    if (isSpectatorMode) {
+      // En mode spectateur, le bouton retour mène à /tournoi
+      backButton.href = '/tournoi';
+      backButton.title = 'Retour à la page des tournois';
+    } else {
+      // En mode normal, le bouton retour mène à / (menu principal)
+      backButton.href = '/';
+      backButton.title = 'Retour au menu principal';
+    }
+  }
+}
+
 // Bascule le mode spectateur
 function toggleSpectatorMode() {
   isSpectatorMode = !isSpectatorMode;
@@ -2878,6 +2897,9 @@ function toggleSpectatorMode() {
   } else {
     enableActionsIfNotSpectator();
   }
+  
+  // Mettre à jour le bouton retour
+  updateBackButtonForSpectatorMode();
 }
 
 // Initialise le mode spectateur (détecte seulement, n'applique pas les restrictions)

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spectate Tournoi - Tournois en cours</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="/admin-styles.css">
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="dark">
+  <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">🌓</button>
+
+  <!-- Bouton retour vers la page des tournois -->
+  <a href="/tournoi" class="back-button-standalone" title="Retour à la page des tournois">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m15 18-6-6 6-6"></path>
+    </svg>
+  </a>
+
+  <h1 style="text-align:center; color: #e11d48; font-family: Arial, sans-serif; margin-top: 2rem; margin-bottom: 2rem; letter-spacing: 1px; font-size: 2.2rem;">
+    <img src="/sept.png" alt="Slot" style="height: 32px; vertical-align: middle; margin-right: 0.5em;">Tournois en cours
+  </h1>
+  <div class="sidebar" style="margin: 0 auto; max-width: 400px;">
+    <div id="tournamentsList"><p>Chargement en cours...</p></div>
+    <div id="pagination" style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem;"></div>
+    <button onclick="redirectToTournament()" class="btn-outline" style="width: 100%; margin-top: 2rem;">Retour à la page des tournois</button>
+  </div>
+  <script>
+    function redirectToTournament() {
+      window.location.href = '/tournoi';
+    }
+
+    // Fonction pour rejoindre un tournoi en mode spectateur (copiée depuis tournament-app.js)
+    function joinTournamentAsSpectator(tournamentId) {
+      localStorage.setItem('spectatorMode', 'true');
+      window.location.href = `/tournoi?tournament=${tournamentId}`;
+    }
+    
+    // Configuration Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyB6aCO2sSWT-Symbty0K83sPzVXwRQAvAk",
+      authDomain: "tournoi-de-slots.firebaseapp.com",
+      projectId: "tournoi-de-slots",
+      storageBucket: "tournoi-de-slots.appspot.com",
+      messagingSenderId: "834358073654",
+      appId: "1:834358073654:web:6d935be1322c9450e37b97",
+      measurementId: "G-MZKD5K781T"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let allTournaments = [];
+    let currentPage = 1;
+    const perPage = 10;
+
+    async function loadActiveTournaments() {
+      const container = document.getElementById('tournamentsList');
+      container.innerHTML = '<p>Chargement en cours...</p>';
+      try {
+        const snapshot = await db.collection("tournois")
+          .where("state.tournamentCompleted", "==", false)
+          .get();
+        const tournaments = [];
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.state && !data.state.tournamentCompleted) {
+            tournaments.push({
+              id: doc.id,
+              ...data.state
+            });
+          }
+        });
+        tournaments.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+          const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+          return dateB - dateA;
+        });
+        allTournaments = tournaments;
+        currentPage = 1;
+        renderTournamentsPage();
+      } catch (error) {
+        container.innerHTML = '<p style="color:red">Erreur lors du chargement des tournois.</p>';
+      }
+    }
+
+    function renderTournamentsPage() {
+      const container = document.getElementById('tournamentsList');
+      const pagination = document.getElementById('pagination');
+      const total = allTournaments.length;
+      const totalPages = Math.ceil(total / perPage);
+      if (total === 0) {
+        container.innerHTML = '<p>Aucun tournoi en cours.</p>';
+        pagination.innerHTML = '';
+        return;
+      }
+      const start = (currentPage - 1) * perPage;
+      const end = start + perPage;
+      const pageTournaments = allTournaments.slice(start, end);
+      container.innerHTML = pageTournaments.map(t => `
+        <div style="background: var(--item-bg); border-radius: 0.5rem; box-shadow: 0 2px 10px var(--shadow-color); padding: 1.1rem 1.2rem; margin-bottom: 1.2rem; border: 1.5px solid #e11d48;">
+          <div style="font-weight: bold; color: #ffb86b; font-size: 1.1em; margin-bottom: 0.2em;">${t.name ? t.name : 'Tournoi sans nom'}</div>
+          <div style="font-size: 0.97em; color: var(--muted-text); margin-bottom: 0.2em;"><b>ID:</b> ${t.id}</div>
+          <div style="font-size: 1em; color: var(--text-color); margin-bottom: 0.7em;"><b>Joueurs:</b> ${t.players ? t.players.length : 0}/16</div>
+          <button class="btn-outline" style="width: 100%;" onclick="joinTournamentAsSpectator('${t.id}')">Spectate</button>
+        </div>
+      `).join('');
+      // Pagination
+      pagination.innerHTML = '';
+      if (totalPages > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn-outline';
+        prevBtn.textContent = 'Précédent';
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => { currentPage--; renderTournamentsPage(); };
+        pagination.appendChild(prevBtn);
+        const pageInfo = document.createElement('span');
+        pageInfo.style.margin = '0 1em';
+        pageInfo.textContent = `Page ${currentPage} / ${totalPages}`;
+        pagination.appendChild(pageInfo);
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn-outline';
+        nextBtn.textContent = 'Suivant';
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => { currentPage++; renderTournamentsPage(); };
+        pagination.appendChild(nextBtn);
+      }
+    }
+
+    // Theme management
+    function initializeTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'dark';
+      document.documentElement.className = savedTheme;
+      
+      const themeToggle = document.getElementById('themeToggle');
+      if (themeToggle) {
+        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌓';
+        themeToggle.addEventListener('click', () => {
+          const currentTheme = document.documentElement.className;
+          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+          document.documentElement.className = newTheme;
+          localStorage.setItem('theme', newTheme);
+          themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
+        });
+      }
+    }
+
+    window.onload = () => {
+      initializeTheme();
+      loadActiveTournaments();
+    };
+    </script>
+    <script src="/admin-auth.js"></script>
+</body>
+</html>
