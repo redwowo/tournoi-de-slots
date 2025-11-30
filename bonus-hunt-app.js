@@ -90,6 +90,7 @@ function handleBonusFormSubmit(event) {
         id: Date.now(),
         name: bonusName,
         stake: bonusStake,
+        bonusPrice: bonusStake,
         result: null,
         createdAt: new Date().toISOString()
     };
@@ -136,9 +137,11 @@ function addBonusToList(bonus) {
     
     const bonusInfo = document.createElement('div');
     bonusInfo.style.cssText = 'flex: 1;';
+    const bonusPriceValue = typeof bonus.bonusPrice === 'number' ? bonus.bonusPrice : parseFloat(bonus.bonusPrice);
+    const priceToDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue : bonus.stake;
     bonusInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(bonus.name)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${bonus.stake.toFixed(2)}€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${priceToDisplay.toFixed(2)}€</div>
     `;
     
     const removeBtn = document.createElement('button');
@@ -257,6 +260,37 @@ function escapeHtml(text) {
     return text.replace(/[&<>"']/g, m => map[m]);
 }
 
+function parseAmount(value) {
+    if (typeof value === 'number') {
+        return Number.isFinite(value) ? value : null;
+    }
+    const parsed = parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function getBonusPriceFromBonus(bonus) {
+    if (!bonus) return 0;
+    const candidateKeys = ['bonusPrice', 'price', 'bonusCost', 'cost', 'buyPrice', 'purchasePrice', 'totalCost'];
+    for (const key of candidateKeys) {
+        const amount = parseAmount(bonus[key]);
+        if (amount !== null) {
+            return amount;
+        }
+    }
+    const stakeAmount = parseAmount(bonus.stake);
+    return stakeAmount !== null ? stakeAmount : 0;
+}
+
+function getBonusPriceForResult(result) {
+    if (!result) return 0;
+    const directAmount = parseAmount(result.bonusPrice);
+    if (directAmount !== null) {
+        return directAmount;
+    }
+    const linkedBonus = openingPhaseState.bonuses.find(b => b.id === result.bonusId);
+    return getBonusPriceFromBonus(linkedBonus);
+}
+
 function handleOpeningGainSubmit(event) {
     event.preventDefault();
     const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
@@ -264,12 +298,18 @@ function handleOpeningGainSubmit(event) {
     
     if (!currentBonus) return;
     
+    const betAmount = parseAmount(currentBonus.stake);
+    const normalizedStake = betAmount !== null ? betAmount : 0;
+    const bonusPrice = getBonusPriceFromBonus(currentBonus);
+    const multiplierValue = normalizedStake > 0 ? (gainAmount / normalizedStake).toFixed(2) : '0';
+
     const result = {
         bonusId: currentBonus.id,
         bonusName: currentBonus.name,
-        stake: currentBonus.stake,
+        stake: normalizedStake,
+        bonusPrice,
         gain: gainAmount,
-        multiplier: gainAmount > 0 ? (gainAmount / currentBonus.stake).toFixed(2) : '0',
+        multiplier: multiplierValue,
         createdAt: new Date().toISOString()
     };
     
@@ -335,9 +375,11 @@ function addResultToOpeningList(result) {
     resultInfo.style.cssText = 'flex: 1;';
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+    const bonusPriceValue = getBonusPriceForResult(result);
+    const priceDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue.toFixed(2) : '0.00';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix du bonus: ${priceDisplay}€ | Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -460,9 +502,11 @@ function reloadResultDisplay(resultIndex, resultItem) {
     resultInfo.style.cssText = 'flex: 1;';
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+    const bonusPriceValue = getBonusPriceForResult(result);
+    const priceDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue.toFixed(2) : '0.00';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix du bonus: ${priceDisplay}€ | Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -484,15 +528,15 @@ function reloadResultDisplay(resultIndex, resultItem) {
 }
 
 function updateSessionSummaryTotals() {
-    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.stake) || 0), 0);
+    const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-    const profitLoss = totalGain - totalStake;
+    const profitLoss = totalGain - totalBonusPrice;
     
     const summaryDiv = document.querySelector('.bonus-list > div:first-child');
     if (summaryDiv && summaryDiv.querySelector('h3')) {
         summaryDiv.innerHTML = `
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Prix total des bonus: ${totalStake.toFixed(2)}€</p>
+            <p>Prix total des bonus: ${totalBonusPrice.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
@@ -503,9 +547,9 @@ function updateSessionSummaryTotals() {
 
 function showSessionSummary() {
     // Calculate totals
-    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.stake) || 0), 0);
+    const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-    const profitLoss = totalGain - totalStake;
+    const profitLoss = totalGain - totalBonusPrice;
     
     // Hide the machine frame (opening-phase-panel)
     const openingPanel = document.querySelector('.opening-phase-panel');
@@ -523,7 +567,7 @@ function showSessionSummary() {
     const summaryMsg = `
         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem;">
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Prix total des bonus: ${totalStake.toFixed(2)}€</p>
+            <p>Prix total des bonus: ${totalBonusPrice.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
