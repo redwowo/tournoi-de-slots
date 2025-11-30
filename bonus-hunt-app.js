@@ -26,6 +26,9 @@ function initializeBonusHuntApp() {
     
     // Load existing data if any
     loadExistingData();
+    
+    // Set up machine form handler
+    setupMachineFormHandler();
 }
 
 function setupActionListeners() {
@@ -354,6 +357,282 @@ function showToast(message, type = 'info') {
             toast.parentNode.removeChild(toast);
         }
     }, 3000);
+}
+
+// Opening phase tracking
+let openingPhaseState = {
+    currentMachineIndex: 0,
+    machines: [],
+    results: []
+};
+
+// Machine form handler for the multi-step wizard
+function setupMachineFormHandler() {
+    const machineForm = document.getElementById('machineForm');
+    if (machineForm) {
+        machineForm.addEventListener('submit', handleMachineFormSubmit);
+    }
+    
+    // Also setup gain form if we're in opening phase
+    const gainForm = document.getElementById('gainForm');
+    if (gainForm) {
+        gainForm.addEventListener('submit', handleOpeningGainSubmit);
+    }
+}
+
+function handleMachineFormSubmit(event) {
+    event.preventDefault();
+    const machineName = document.getElementById('machineName').value;
+    const machineStake = parseFloat(document.getElementById('machineStake').value);
+    
+    if (!machineName.trim() || !machineStake || machineStake <= 0) {
+        showToast('Veuillez remplir correctement tous les champs', 'warning');
+        return;
+    }
+    
+    const machine = {
+        id: Date.now(),
+        name: machineName,
+        stake: machineStake,
+        result: null,
+        createdAt: new Date().toISOString()
+    };
+    
+    // Add to app state
+    if (app.sessionData && Array.isArray(app.sessionData.machines)) {
+        app.sessionData.machines.push(machine);
+    }
+    
+    addMachineToList(machine);
+    updateMachineStats();
+    
+    // Reset form
+    document.getElementById('machineName').value = '';
+    document.getElementById('machineStake').value = '';
+    
+    showToast('Machine ajoutée avec succès', 'success');
+}
+
+function addMachineToList(machine) {
+    const container = document.getElementById('machineListContainer');
+    
+    if (!container) return;
+    
+    // Remove empty state if it exists
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const machineItem = document.createElement('div');
+    machineItem.className = 'machine-item';
+    machineItem.setAttribute('data-machine-id', machine.id);
+    machineItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        gap: 1rem;
+    `;
+    
+    const machineInfo = document.createElement('div');
+    machineInfo.style.cssText = 'flex: 1;';
+    machineInfo.innerHTML = `
+        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(machine.name)}</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${machine.stake.toFixed(2)}€</div>
+    `;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn btn-danger';
+    removeBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+    removeBtn.innerHTML = '<i data-lucide="trash-2"></i> Supprimer';
+    removeBtn.onclick = function() {
+        removeMachine(machine.id);
+    };
+    
+    machineItem.appendChild(machineInfo);
+    machineItem.appendChild(removeBtn);
+    container.appendChild(machineItem);
+    
+    // Recreate icons
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function removeMachine(machineId) {
+    if (app.sessionData && Array.isArray(app.sessionData.machines)) {
+        app.sessionData.machines = app.sessionData.machines.filter(m => m.id !== machineId);
+    }
+    
+    const machineItem = document.querySelector(`[data-machine-id="${machineId}"]`);
+    if (machineItem) {
+        machineItem.remove();
+    }
+    
+    updateMachineStats();
+    
+    // Show empty state if no machines left
+    const container = document.getElementById('machineListContainer');
+    if (container && container.children.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i data-lucide="inbox"></i>
+                <p>Aucune machine ajoutée. Commencez par ajouter une machine !</p>
+            </div>
+        `;
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    }
+    
+    showToast('Machine supprimée', 'success');
+}
+
+function updateMachineStats() {
+    const machines = app.sessionData && app.sessionData.machines ? app.sessionData.machines : [];
+    const machineCount = machines.length;
+    const totalStake = machines.reduce((sum, m) => sum + m.stake, 0);
+    
+    const countEl = document.getElementById('machineCount');
+    const stakeEl = document.getElementById('totalStake');
+    
+    if (countEl) {
+        countEl.textContent = machineCount;
+    }
+    if (stakeEl) {
+        stakeEl.textContent = totalStake.toFixed(2) + '€';
+    }
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function handleOpeningGainSubmit(event) {
+    event.preventDefault();
+    const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
+    const currentMachine = openingPhaseState.machines[openingPhaseState.currentMachineIndex];
+    
+    if (!currentMachine) return;
+    
+    const result = {
+        machineId: currentMachine.id,
+        machineName: currentMachine.name,
+        stake: currentMachine.stake,
+        gain: gainAmount,
+        multiplier: gainAmount > 0 ? (gainAmount / currentMachine.stake).toFixed(2) : '0',
+        createdAt: new Date().toISOString()
+    };
+    
+    openingPhaseState.results.push(result);
+    
+    // Add to opening list display
+    addResultToOpeningList(result);
+    
+    // Move to next machine
+    openingPhaseState.currentMachineIndex++;
+    
+    if (openingPhaseState.currentMachineIndex < openingPhaseState.machines.length) {
+        displayCurrentMachine();
+    } else {
+        showSessionSummary();
+    }
+    
+    // Reset form
+    document.getElementById('gainAmount').value = '';
+    document.getElementById('gainMultiplier').value = '';
+}
+
+function displayCurrentMachine() {
+    const currentMachine = openingPhaseState.machines[openingPhaseState.currentMachineIndex];
+    
+    if (!currentMachine) return;
+    
+    document.getElementById('openingMachineName').textContent = currentMachine.name;
+    document.getElementById('openingBetAmount').textContent = currentMachine.stake.toFixed(2) + '€';
+    document.getElementById('gainAmount').value = '';
+    document.getElementById('gainMultiplier').value = '';
+}
+
+function addResultToOpeningList(result) {
+    const container = document.getElementById('openingListContainer');
+    if (!container) return;
+    
+    // Remove empty state if it exists
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const resultItem = document.createElement('div');
+    resultItem.className = 'result-item';
+    resultItem.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: var(--bg-color);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+    `;
+    
+    const resultInfo = document.createElement('div');
+    resultInfo.style.cssText = 'flex: 1;';
+    
+    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+    resultInfo.innerHTML = `
+        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.machineName)}</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: ${result.gain.toFixed(2)}€</div>
+        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×${result.multiplier}</div>
+    `;
+    
+    resultItem.appendChild(resultInfo);
+    container.appendChild(resultItem);
+}
+
+function showSessionSummary() {
+    // Calculate totals
+    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + r.stake, 0);
+    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + r.gain, 0);
+    const profitLoss = totalGain - totalStake;
+    
+    // Disable the gain form
+    const gainForm = document.getElementById('gainForm');
+    if (gainForm) {
+        gainForm.style.opacity = '0.5';
+        gainForm.style.pointerEvents = 'none';
+    }
+    
+    // Show summary message
+    const summaryMsg = `
+        <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-top: 2rem;">
+            <h3>Session Terminée</h3>
+            <p>Mise totale: ${totalStake.toFixed(2)}€</p>
+            <p>Gain total: ${totalGain.toFixed(2)}€</p>
+            <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
+                Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
+            </p>
+        </div>
+    `;
+    
+    const container = document.getElementById('openingListContainer');
+    if (container) {
+        container.innerHTML = summaryMsg + container.innerHTML;
+    }
 }
 
 // Export functions for potential external use
