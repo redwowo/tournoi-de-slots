@@ -44,6 +44,104 @@
         .step { opacity: 0.5; font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
         .step.active { opacity: 1; color: var(--primary-color); }
         .step i { width: 20px; height: 20px; }
+        
+        .realtime-breakeven-card {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(15, 23, 42, 0.08);
+        }
+        .realtime-breakeven-card h4 {
+            margin: 0;
+        }
+        .realtime-breakeven-card p {
+            margin: 0.25rem 0 0;
+            color: var(--muted-text);
+            font-size: 0.9rem;
+        }
+        .breakeven-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        .trend-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--muted-text);
+            white-space: nowrap;
+        }
+        .trend-badge.trend-easier {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+        }
+        .trend-badge.trend-harder {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+        }
+        .trend-badge.trend-stable {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--muted-text);
+        }
+        .breakeven-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+        }
+        .breakeven-stat {
+            padding: 0.9rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-color);
+        }
+        .breakeven-stat span {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--muted-text);
+        }
+        .breakeven-stat strong {
+            display: block;
+            margin-top: 0.25rem;
+            font-size: 1.2rem;
+            color: var(--heading-color);
+        }
+        .breakeven-stat.highlight {
+            grid-column: span 2;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(14, 165, 233, 0.12));
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+        .breakeven-stat.highlight h2 {
+            margin: 0.2rem 0 0;
+            font-size: 2.5rem;
+            color: var(--heading-color);
+        }
+        .difficulty-chip {
+            margin-top: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        .breakeven-hint {
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+        }
+        @media (max-width: 600px) {
+            .breakeven-stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .breakeven-stat.highlight {
+                grid-column: span 1;
+            }
+        }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -157,6 +255,42 @@
                             <div class="stat-item">
                                 <span>Mise totale</span>
                                 <strong id="totalStake">0.00€</strong>
+                            </div>
+                        </div>
+
+                        <div class="realtime-breakeven-card" id="collectionBreakevenCard">
+                            <div class="breakeven-card-header">
+                                <div>
+                                    <h4>Breakeven en temps réel</h4>
+                                    <p>Suivez le coût actuel du hunt au fur et à mesure de la collecte.</p>
+                                </div>
+                                <span class="trend-badge trend-stable" id="collectionTrendBadge">→ Stable</span>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 1rem;">
+                                <label>Solde actuel (€)</label>
+                                <input type="number" id="currentBalanceInput" placeholder="0.00" step="0.01">
+                                <small class="breakeven-hint">Mettre à jour après chaque bonus ajouté</small>
+                            </div>
+
+                            <div class="breakeven-stats-grid">
+                                <div class="breakeven-stat">
+                                    <span>Coût du Hunt</span>
+                                    <strong id="collectionHuntCost">0.00€</strong>
+                                </div>
+                                <div class="breakeven-stat">
+                                    <span>Valeur des mises collectées</span>
+                                    <strong id="collectionSavedValue">0.00€</strong>
+                                </div>
+                                <div class="breakeven-stat highlight">
+                                    <span>Multiplicateur requis</span>
+                                    <h2 id="collectionMultiplier">—</h2>
+                                    <small class="breakeven-hint" id="collectionMultiplierHint">Ajoutez des machines pour commencer</small>
+                                </div>
+                            </div>
+
+                            <div class="difficulty-chip" id="collectionDifficulty">
+                                <span id="collectionDifficultyText">En attente de données</span>
                             </div>
                         </div>
 
@@ -306,6 +440,7 @@
             sessionData: {
                 name: '',
                 balance: 0,
+                currentBalance: null,
                 machines: []
             },
 
@@ -335,9 +470,14 @@
                     return;
                 }
                 this.sessionData.balance = balance;
+                if (typeof this.sessionData.currentBalance !== 'number' || isNaN(this.sessionData.currentBalance)) {
+                    this.sessionData.currentBalance = balance;
+                }
                 this.currentStep = 3;
                 this.switchView('view-add-machines', 3);
                 this.updateHeaderBalance();
+                this.syncCurrentBalanceInput();
+                this.updateCollectionBreakevenUI();
             },
 
             // Step 4: Opening/Activation
@@ -420,8 +560,35 @@
             },
 
             updateHeaderBalance: function() {
-                document.getElementById('headerStartBalance').innerText = this.sessionData.balance + '€';
-                document.getElementById('headerCurrentBalance').innerText = this.sessionData.balance + '€';
+                const startBalance = this.sessionData.balance || 0;
+                const currentBalance = (typeof this.sessionData.currentBalance === 'number' && !isNaN(this.sessionData.currentBalance))
+                    ? this.sessionData.currentBalance
+                    : startBalance;
+                const formatter = (typeof formatCurrency === 'function')
+                    ? formatCurrency
+                    : (value => `${(Number(value) || 0).toFixed(2)}€`);
+                document.getElementById('headerStartBalance').innerText = formatter(startBalance);
+                document.getElementById('headerCurrentBalance').innerText = formatter(currentBalance);
+            },
+
+            syncCurrentBalanceInput: function() {
+                if (typeof syncCurrentBalanceInput === 'function') {
+                    syncCurrentBalanceInput();
+                    return;
+                }
+                const input = document.getElementById('currentBalanceInput');
+                if (!input) return;
+                const startBalance = this.sessionData.balance || 0;
+                const currentBalance = (typeof this.sessionData.currentBalance === 'number' && !isNaN(this.sessionData.currentBalance))
+                    ? this.sessionData.currentBalance
+                    : startBalance;
+                input.value = currentBalance.toFixed(2);
+            },
+
+            updateCollectionBreakevenUI: function() {
+                if (typeof updateCollectionBreakevenCard === 'function') {
+                    updateCollectionBreakevenCard();
+                }
             },
 
             // Utilitaire pour changer les classes
