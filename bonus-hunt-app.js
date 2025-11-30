@@ -484,8 +484,8 @@ function reloadResultDisplay(resultIndex, resultItem) {
 }
 
 function updateSessionSummaryTotals() {
-    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + r.stake, 0);
-    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + r.gain, 0);
+    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.stake) || 0), 0);
+    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
     const profitLoss = totalGain - totalStake;
     
     const summaryDiv = document.querySelector('.bonus-list > div:first-child');
@@ -503,8 +503,8 @@ function updateSessionSummaryTotals() {
 
 function showSessionSummary() {
     // Calculate totals
-    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + r.stake, 0);
-    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + r.gain, 0);
+    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.stake) || 0), 0);
+    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
     const profitLoss = totalGain - totalStake;
     
     // Hide the machine frame (opening-phase-panel)
