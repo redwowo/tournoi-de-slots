@@ -112,7 +112,7 @@ body {
   justify-content: center;
   align-items: flex-start;
   gap: 2rem;
-  margin-top: 1.5rem;
+  margin-top: 4rem; /* Augmenté pour compenser l'absence de header */
   max-width: 1400px; /* Increased from 1200px */
   margin-left: auto;
   margin-right: auto;
@@ -2642,6 +2642,35 @@ h1 img {
   border-color: var(--btn-bg);
 }
 
+/* Bouton retour standalone (en haut à gauche, sans header) */
+.back-button-standalone {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-color);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 2px 5px var(--shadow-color);
+}
+
+.back-button-standalone:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border-color: var(--btn-bg);
+}
+
 .page-title {
   font-size: 1.8rem;
   font-weight: bold;
@@ -2769,7 +2798,7 @@ h1 img {
   align-items: center;
   background: linear-gradient(135deg, var(--bg-color) 0%, var(--card-bg) 100%);
   margin-top: 0;
-  padding-top: 80px; /* Account for navigation header */
+  padding-top: 80px; /* Account for fixed buttons */
   box-sizing: border-box;
 }
 
@@ -2908,6 +2937,16 @@ h1 img {
     width: 20px;
     height: 20px;
   }
+
+  .back-button-standalone {
+    width: 35px;
+    height: 35px;
+  }
+
+  .back-button-standalone svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2958,6 +2997,16 @@ h1 img {
 
   .navigation-header .logo-home img,
   .back-button svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .back-button-standalone {
+    width: 30px;
+    height: 30px;
+  }
+
+  .back-button-standalone svg {
     width: 16px;
     height: 16px;
   }
