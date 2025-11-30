@@ -26,7 +26,7 @@
     // Fonction pour rejoindre un tournoi en mode spectateur (copiée depuis tournament-app.js)
     function joinTournamentAsSpectator(tournamentId) {
       localStorage.setItem('spectatorMode', 'true');
-      window.location.href = `/?tournament=${tournamentId}`;
+      window.location.href = `/tournoi?tournament=${tournamentId}`;
     }
     
     // Configuration Firebase
