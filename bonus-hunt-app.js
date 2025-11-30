@@ -559,6 +559,7 @@ function updateCompactBreakevenDisplay(multiplier, totalStake) {
     
     if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
         compactDisplay.style.cssText = `
+            display: block;
             text-align: center;
             padding: 0.75rem 1rem;
             margin-bottom: 1rem;
