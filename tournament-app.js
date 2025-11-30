@@ -2711,8 +2711,9 @@ async function loadActiveTournaments() {
 // Fonction pour rejoindre un tournoi en mode spectateur
 function joinTournamentAsSpectator(tournamentId) {
   isSpectatorMode = true;
-  // Rediriger vers la page d'accueil avec le paramètre du tournoi
-  window.location.href = `/?tournament=${tournamentId}`;
+  localStorage.setItem('spectatorMode', 'true');
+  // Rediriger vers la page de tournoi avec le paramètre du tournoi
+  window.location.href = `/tournoi?tournament=${tournamentId}`;
 }
 
 // Désactive les actions si spectateur
