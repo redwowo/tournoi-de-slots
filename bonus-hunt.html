@@ -3,390 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonus Hunt Tracker - Mode Bonus Hunt</title>
+    <title>Bonus Hunt Tracker - Mode Séquentiel</title>
     <link rel="icon" type="image/png" href="/fly.png">
     <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/admin-styles.css">
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <style>
+        /* Logique d'affichage des vues */
+        .game-view { display: none; animation: fadeIn 0.4s ease-out; }
+        .game-view.active { display: block; }
+        
+        /* Pour centrer la vue de démarrage */
+        #view-setup {
+            height: 80vh;
+            display: none; /* Sera géré par JS */
+            align-items: center;
+            justify-content: center;
+        }
+        #view-setup.active { display: flex; }
+
+        .hunt-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 900px) {
+            .hunt-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Barre de progression des étapes */
+        .stepper {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .step { opacity: 0.5; font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
+        .step.active { opacity: 1; color: var(--primary-color); }
+        .step i { width: 20px; height: 20px; }
+    </style>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Sticky Header -->
-    <header class="bonus-hunt-header" data-sticky="true">
+
+    <header class="bonus-hunt-header">
         <div class="header-nav">
-            <a href="/" class="back-button" title="Retour au menu principal" data-action="navigate-home">
-                <i data-lucide="chevron-left" width="24" height="24"></i>
-            </a>
+            <a href="/" class="back-button"><i data-lucide="chevron-left"></i></a>
             <div class="logo-section">
-                <img src="/fly.png" alt="Logo" class="header-logo">
-                <h1 class="header-title">Bonus Hunt Tracker</h1>
+                <h1 class="header-title">Bonus Hunt</h1>
             </div>
         </div>
-        
         <div class="header-controls">
-            <div class="session-selector" data-component="session-selector">
-                <select id="currentSessionSelect" class="session-select" data-action="change-session">
-                    <option value="">Session actuelle</option>
-                </select>
+            <div class="kpi-card-mini" style="display:flex; gap:1rem; align-items:center;">
+                <span class="badge">Start: <b id="headerStartBalance">0€</b></span>
+                <span class="badge">Actuel: <b id="headerCurrentBalance">0€</b></span>
             </div>
-            
-            <div class="header-actions">
-                <button class="btn btn-primary" id="newSessionBtn" data-action="create-session">
-                    <i data-lucide="plus" width="16" height="16"></i>
-                    Nouvelle session
-                </button>
-                <button class="btn btn-secondary" id="exportBtn" data-action="export-data">
-                    <i data-lucide="download" width="16" height="16"></i>
-                    Exporter
-                </button>
-                <button class="btn btn-outline" id="helpBtn" data-action="show-help">
-                    <i data-lucide="help-circle" width="16" height="16"></i>
-                    Aide
-                </button>
-            </div>
-            
-            <div class="header-toggles">
-                <button class="toggle-btn" id="spectatorToggle" data-action="toggle-spectator" title="Mode spectateur">
-                    <i data-lucide="eye" width="16" height="16"></i>
-                </button>
-                <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème" data-action="toggle-theme">
-                    <i data-lucide="sun" width="16" height="16"></i>
-                </button>
-            </div>
+            <button class="theme-toggle" id="themeToggle"><i data-lucide="sun"></i></button>
         </div>
     </header>
 
-    <!-- Main Container -->
+    <div class="stepper">
+        <div class="step" id="step-1"><i data-lucide="settings"></i> 1. Session</div>
+        <div class="step" id="step-2"><i data-lucide="crosshair"></i> 2. Chasse</div>
+        <div class="step" id="step-3"><i data-lucide="gift"></i> 3. Ouverture</div>
+    </div>
+
     <main class="bonus-hunt-main">
-        <!-- KPI Dashboard -->
-        <section class="kpi-dashboard" data-section="kpi">
-            <div class="kpi-grid">
-                <div class="kpi-card" data-kpi="balance-initial">
-                    <div class="kpi-icon">
-                        <i data-lucide="wallet" width="24" height="24"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-label">Balance initiale</h3>
-                        <p class="kpi-value" id="initialBalanceValue">0,00€</p>
-                    </div>
+
+        <section id="view-setup" class="game-view active">
+            <div class="config-card" style="max-width: 500px; width: 100%;">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <i data-lucide="play-circle" style="width: 64px; height: 64px; color: var(--primary-color);"></i>
+                    <h2>Nouvelle Session</h2>
+                    <p class="text-muted">Configurez votre balance de départ pour commencer.</p>
                 </div>
                 
-                <div class="kpi-card" data-kpi="break-even">
-                    <div class="kpi-icon">
-                        <i data-lucide="target" width="24" height="24"></i>
+                <form id="sessionForm" class="config-form">
+                    <div class="form-group">
+                        <label>Nom de la session</label>
+                        <input type="text" id="sessionName" placeholder="Session du jour" required>
                     </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-label">Break-even</h3>
-                        <p class="kpi-value" id="breakEvenValue">0,00€</p>
+                    <div class="form-group">
+                        <label>Balance de départ (€)</label>
+                        <input type="number" id="sessionBalance" placeholder="100.00" step="0.01" required>
                     </div>
-                </div>
-                
-                <div class="kpi-card" data-kpi="bonus-count">
-                    <div class="kpi-icon">
-                        <i data-lucide="gift" width="24" height="24"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-label">Bonus collectés</h3>
-                        <p class="kpi-value" id="bonusCountValue">0</p>
-                    </div>
-                </div>
-                
-                <div class="kpi-card" data-kpi="profit-loss">
-                    <div class="kpi-icon">
-                        <i data-lucide="trending-up" width="24" height="24"></i>
-                    </div>
-                    <div class="kpi-content">
-                        <h3 class="kpi-label">Profit/Perte</h3>
-                        <p class="kpi-value" id="profitLossValue">0,00€</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Configuration Section -->
-        <section class="config-section" data-section="configuration">
-            <div class="config-grid">
-                <!-- Session Creation -->
-                <div class="config-card" data-config="session-creation">
-                    <h3 class="config-title">
-                        <i data-lucide="plus-circle" width="20" height="20"></i>
-                        Créer une session
-                    </h3>
-                    <form id="sessionForm" class="config-form" data-form="session">
-                        <div class="form-group">
-                            <label for="sessionName">Nom de la session</label>
-                            <input type="text" id="sessionName" placeholder="Ma session bonus hunt" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="sessionBalance">Balance initiale</label>
-                            <input type="number" id="sessionBalance" placeholder="100.00" step="0.01" min="0" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="play" width="16" height="16"></i>
-                            Démarrer la session
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Balance Configuration -->
-                <div class="config-card" data-config="balance-config">
-                    <h3 class="config-title">
-                        <i data-lucide="settings" width="20" height="20"></i>
-                        Configuration balance
-                    </h3>
-                    <form id="balanceForm" class="config-form" data-form="balance">
-                        <div class="form-group">
-                            <label for="currentBalance">Balance actuelle</label>
-                            <input type="number" id="currentBalance" placeholder="0.00" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label for="targetBalance">Objectif</label>
-                            <input type="number" id="targetBalance" placeholder="0.00" step="0.01" min="0">
-                        </div>
-                        <button type="submit" class="btn btn-secondary">
-                            <i data-lucide="save" width="16" height="16"></i>
-                            Mettre à jour
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Add Bonus -->
-                <div class="config-card" data-config="add-bonus">
-                    <h3 class="config-title">
-                        <i data-lucide="gift" width="20" height="20"></i>
-                        Ajouter un bonus
-                    </h3>
-                    <form id="bonusForm" class="config-form" data-form="bonus">
-                        <div class="form-group">
-                            <label for="bonusGame">Jeu</label>
-                            <input type="text" id="bonusGame" placeholder="Nom du jeu" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="bonusAmount">Mise</label>
-                            <input type="number" id="bonusAmount" placeholder="1.00" step="0.01" min="0" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="plus" width="16" height="16"></i>
-                            Ajouter le bonus
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </section>
-
-        <!-- Main Content Grid -->
-        <div class="content-grid">
-            <!-- Bonus List Panel -->
-            <section class="panel bonus-list-panel" data-panel="bonus-list">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i data-lucide="list" width="20" height="20"></i>
-                        Liste des bonus
-                    </h2>
-                    <div class="panel-actions">
-                        <button class="btn btn-sm btn-outline" data-action="clear-bonus-list">
-                            <i data-lucide="trash-2" width="14" height="14"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="panel-content">
-                    <div class="bonus-list" id="bonusListContainer" data-list="bonus">
-                        <!-- Bonus items will be dynamically added here -->
-                        <div class="empty-state" data-empty="bonus-list">
-                            <i data-lucide="inbox" width="48" height="48"></i>
-                            <p>Aucun bonus ajouté</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Opening Phase Panel -->
-            <section class="panel opening-phase-panel" data-panel="opening-phase">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i data-lucide="play-circle" width="20" height="20"></i>
-                        Phase d'ouverture
-                    </h2>
-                    <div class="panel-actions">
-                        <button class="btn btn-sm btn-primary" id="startOpeningBtn" data-action="start-opening">
-                            <i data-lucide="play" width="14" height="14"></i>
-                            Commencer
-                        </button>
-                    </div>
-                </div>
-                <div class="panel-content">
-                    <div class="opening-controls" data-controls="opening">
-                        <div class="current-bonus" id="currentBonusDisplay">
-                            <p class="bonus-name">En attente...</p>
-                            <p class="bonus-stake">Mise: --</p>
-                        </div>
-                        <div class="opening-actions">
-                            <button class="btn btn-success" data-action="record-win">
-                                <i data-lucide="check-circle" width="16" height="16"></i>
-                                Gagné
-                            </button>
-                            <button class="btn btn-danger" data-action="record-loss">
-                                <i data-lucide="x-circle" width="16" height="16"></i>
-                                Perdu
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Gain Entry Panel -->
-            <section class="panel gain-entry-panel" data-panel="gain-entry">
-                <div class="panel-header">
-                    <h2 class="panel-title">
-                        <i data-lucide="trending-up" width="20" height="20"></i>
-                        Saisie des gains
-                    </h2>
-                </div>
-                <div class="panel-content">
-                    <form id="gainForm" class="gain-form" data-form="gain">
-                        <div class="form-group">
-                            <label for="gainAmount">Montant du gain</label>
-                            <input type="number" id="gainAmount" placeholder="0.00" step="0.01" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="gainMultiplier">Multiplicateur</label>
-                            <input type="number" id="gainMultiplier" placeholder="1.0" step="0.1" min="0" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save" width="16" height="16"></i>
-                            Enregistrer le gain
-                        </button>
-                    </form>
-                </div>
-            </section>
-        </div>
-
-        <!-- Stats and Charts Section -->
-        <section class="stats-section" data-section="stats">
-            <div class="stats-grid">
-                <div class="panel stats-panel" data-panel="statistics">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <i data-lucide="bar-chart-2" width="20" height="20"></i>
-                            Statistiques
-                        </h2>
-                    </div>
-                    <div class="panel-content">
-                        <div class="stats-overview" data-stats="overview">
-                            <div class="stat-item">
-                                <span class="stat-label">Taux de réussite</span>
-                                <span class="stat-value" id="winRateValue">0%</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Gain moyen</span>
-                                <span class="stat-value" id="avgWinValue">0,00€</span>
-                            </div>
-                            <div class="stat-item">
-                                <span class="stat-label">Plus gros gain</span>
-                                <span class="stat-value" id="biggestWinValue">0,00€</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="panel charts-panel" data-panel="charts">
-                    <div class="panel-header">
-                        <h2 class="panel-title">
-                            <i data-lucide="line-chart" width="20" height="20"></i>
-                            Graphiques
-                        </h2>
-                    </div>
-                    <div class="panel-content">
-                        <div class="chart-container" data-chart="progression">
-                            <canvas id="progressionChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Session History -->
-        <section class="panel session-history-panel" data-panel="session-history">
-            <div class="panel-header">
-                <h2 class="panel-title">
-                    <i data-lucide="history" width="20" height="20"></i>
-                    Historique des sessions
-                </h2>
-                <div class="panel-actions">
-                    <button class="btn btn-sm btn-outline" data-action="refresh-history">
-                        <i data-lucide="refresh-cw" width="14" height="14"></i>
+                    <button type="button" class="btn btn-primary" onclick="app.goToHunt()">
+                        <i data-lucide="arrow-right"></i> Commencer la Chasse
                     </button>
-                </div>
+                    <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                        <label style="font-size: 0.8rem;">Ou reprendre une session :</label>
+                        <select id="currentSessionSelect" class="session-select" style="width: 100%;">
+                            <option value="">Choisir...</option>
+                        </select>
+                    </div>
+                </form>
             </div>
-            <div class="panel-content">
-                <div class="session-list" id="sessionHistoryContainer" data-list="sessions">
-                    <!-- Session items will be dynamically added here -->
-                    <div class="empty-state" data-empty="session-history">
-                        <i data-lucide="clock" width="48" height="48"></i>
-                        <p>Aucune session précédente</p>
+        </section>
+
+        <section id="view-hunt" class="game-view">
+            <div class="hunt-grid">
+                <div class="left-col">
+                    <div class="config-card sticky-card" style="position: sticky; top: 100px;">
+                        <h3 class="config-title"><i data-lucide="plus"></i> Ajouter un Bonus</h3>
+                        <form id="bonusForm" class="config-form">
+                            <div class="form-group">
+                                <label>Jeu (Slot)</label>
+                                <input type="text" id="bonusGame" placeholder="Rechercher..." required>
+                                </div>
+                            <div class="form-group">
+                                <label>Mise (€)</label>
+                                <input type="number" id="bonusAmount" placeholder="1.00" step="0.01" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="width: 100%;">Ajouter</button>
+                        </form>
+
+                        <div class="divider"></div>
+
+                        <div class="stats-overview" style="background: var(--bg-color); padding: 1rem; border-radius: 8px;">
+                            <div class="stat-item">
+                                <span>Bonus collectés</span>
+                                <strong id="huntBonusCount">0</strong>
+                            </div>
+                            <div class="stat-item">
+                                <span>Coût total</span>
+                                <strong id="huntTotalCost">0.00€</strong>
+                            </div>
+                        </div>
+
+                        <br>
+                        <button class="btn btn-success" style="width: 100%;" onclick="app.goToOpening()">
+                            <i data-lucide="play"></i> Lancer l'Ouverture
+                        </button>
+                    </div>
+                </div>
+
+                <div class="right-col">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h2>Liste des Bonus</h2>
+                        </div>
+                        <div class="panel-content">
+                             <div class="bonus-list" id="bonusListContainer">
+                                <div class="empty-state">
+                                    <i data-lucide="inbox"></i>
+                                    <p>La liste est vide. Ajoutez votre premier bonus !</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Filters and Search -->
-        <section class="filters-section" data-section="filters">
-            <div class="filters-container">
-                <div class="search-box" data-component="search">
-                    <i data-lucide="search" width="20" height="20"></i>
-                    <input type="text" id="searchInput" placeholder="Rechercher un jeu..." data-action="search">
+        <section id="view-opening" class="game-view">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <button class="btn btn-outline" onclick="app.goToHunt()"><i data-lucide="arrow-left"></i> Retour à l'ajout</button>
+                <button class="btn btn-primary" onclick="app.finishSession()">Terminer la session</button>
+            </div>
+
+            <div class="panel opening-phase-panel" style="background: linear-gradient(135deg, var(--card-bg) 0%, var(--item-bg) 100%); border: 2px solid var(--primary-color);">
+                <div class="panel-content" style="text-align: center; padding: 2rem;">
+                    
+                    <h4 class="text-muted">Bonus actuel</h4>
+                    <h1 id="openingGameName" style="font-size: 2.5rem; margin: 0.5rem 0;">Nom du Jeu</h1>
+                    <p style="font-size: 1.2rem; margin-bottom: 2rem;">Mise: <span id="openingBetAmount">2.00€</span></p>
+
+                    <form id="gainForm" class="gain-form" style="max-width: 300px; margin: 0 auto;">
+                        <div class="form-group">
+                            <label>Gain (€)</label>
+                            <input type="number" id="gainAmount" placeholder="0.00" step="0.01" style="font-size: 1.5rem; text-align: center;">
+                        </div>
+                        <div class="form-group">
+                            <label>Multiplicateur (Auto)</label>
+                            <input type="text" id="gainMultiplier" readonly style="background: transparent; border: none; text-align: center;">
+                        </div>
+                        
+                        <div class="opening-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
+                            <button type="button" class="btn btn-danger" style="flex:1">0€ (RIP)</button>
+                            <button type="submit" class="btn btn-success" style="flex:1">Valider</button>
+                        </div>
+                    </form>
                 </div>
-                <div class="filter-options" data-component="filters">
-                    <select id="categoryFilter" data-filter="category">
-                        <option value="">Toutes les catégories</option>
-                    </select>
-                    <select id="statusFilter" data-filter="status">
-                        <option value="">Tous les statuts</option>
-                        <option value="pending">En attente</option>
-                        <option value="won">Gagné</option>
-                        <option value="lost">Perdu</option>
-                    </select>
+            </div>
+
+            <div class="panel" style="margin-top: 2rem;">
+                <div class="panel-header">
+                    <h2>Avancement</h2>
+                </div>
+                <div class="panel-content">
+                    <div id="openingListContainer" class="bonus-list"></div>
                 </div>
             </div>
         </section>
+
     </main>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer" data-container="toast"></div>
-
-    <!-- Spectator Notice Modal -->
-    <div class="modal" id="spectatorModal" data-modal="spectator">
-        <div class="modal-overlay" data-action="close-spectator-modal"></div>
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i data-lucide="eye" width="20" height="20"></i>
-                    Mode spectateur
-                </h3>
-                <button class="modal-close" data-action="close-spectator-modal">
-                    <i data-lucide="x" width="20" height="20"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Vous êtes actuellement en mode spectateur. Les modifications ne seront pas sauvegardées.</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" data-action="close-spectator-modal">Compris</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Legal Notice -->
-    <div class="legal-notice-icon" id="legalNoticeIcon" style="position: fixed; bottom: 20px; left: 20px; z-index: 51; cursor: pointer;" data-action="toggle-legal">
-        <img src="/about-us.png" alt="Mentions légales" style="width: 40px; height: 40px;">
-    </div>
-    <div class="legal-notice-slide" id="legalNoticeSlide">
-        Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
-    </div>
-
     <script src="/bonus-hunt-navigation.js"></script>
-    <script src="/bonus-hunt-app.js"></script>
+    <script src="/bonus-hunt-app.js"></script> <script>
+        // Initialisation des icônes
+        lucide.createIcons();
+
+        const app = {
+            state: 'setup', // setup, hunt, opening
+
+            // Transition vers la Chasse
+            goToHunt: function() {
+                // TODO: Ajouter ici la logique de création de session (Firebase/LocalStorage)
+                // ex: if (!sessionName.value) return alert('Nom requis');
+                
+                this.switchView('view-hunt', 2);
+                
+                // Mettre à jour l'affichage header
+                const startBal = document.getElementById('sessionBalance').value || 0;
+                document.getElementById('headerStartBalance').innerText = startBal + '€';
+                document.getElementById('headerCurrentBalance').innerText = startBal + '€';
+            },
+
+            // Transition vers l'Ouverture
+            goToOpening: function() {
+                // Vérifier s'il y a des bonus
+                // if (bonusList.length === 0) return alert('Aucun bonus !');
+                this.switchView('view-opening', 3);
+            },
+            
+            finishSession: function() {
+                alert("Session terminée ! Bravo.");
+                // Logique de sauvegarde finale
+                location.reload(); 
+            },
+
+            // Utilitaire pour changer les classes
+            switchView: function(viewId, stepNumber) {
+                // Masquer toutes les vues
+                document.querySelectorAll('.game-view').forEach(el => el.classList.remove('active'));
+                // Afficher la cible
+                document.getElementById(viewId).classList.add('active');
+
+                // Mettre à jour le stepper (1, 2, 3)
+                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                document.getElementById('step-' + stepNumber).classList.add('active');
+                
+                // Scroll top
+                window.scrollTo(0,0);
+            }
+        };
+    </script>
 </body>
 </html>
