@@ -142,6 +142,19 @@
                 grid-column: span 1;
             }
         }
+        
+        /* Compact Breakeven Info Box */
+        #compactBreakevenDisplay {
+            text-align: center;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+        }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -214,6 +227,10 @@
                     <div class="form-group">
                         <label>Balance de départ (€)</label>
                         <input type="number" id="sessionBalance" placeholder="100.00" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prix du Hunt (€)</label>
+                        <input type="number" id="huntPrice" placeholder="50.00" step="0.01" required>
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 1rem;">
                         <button type="button" class="btn btn-outline" style="flex: 1;" onclick="app.goToCreateSession()">
@@ -440,6 +457,7 @@
             sessionData: {
                 name: '',
                 balance: 0,
+                huntPrice: 0,
                 currentBalance: null,
                 machines: []
             },
@@ -465,11 +483,17 @@
             // Step 3: Add Machines
             goToAddMachines: function() {
                 const balance = parseFloat(document.getElementById('sessionBalance').value);
+                const huntPrice = parseFloat(document.getElementById('huntPrice').value);
                 if (!balance || balance <= 0) {
                     alert('Veuillez entrer une balance valide');
                     return;
                 }
+                if (!huntPrice || huntPrice <= 0) {
+                    alert('Veuillez entrer un prix de hunt valide');
+                    return;
+                }
                 this.sessionData.balance = balance;
+                this.sessionData.huntPrice = huntPrice;
                 if (typeof this.sessionData.currentBalance !== 'number' || isNaN(this.sessionData.currentBalance)) {
                     this.sessionData.currentBalance = balance;
                 }
