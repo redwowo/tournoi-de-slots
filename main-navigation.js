@@ -6,8 +6,24 @@ class MainNavigation {
     }
 
     init() {
+        this.checkLegacyTournamentLinks();
         this.initializeTheme();
         this.checkStoredMode();
+    }
+
+    checkLegacyTournamentLinks() {
+        // Check for legacy tournament links and redirect to proper tournament page
+        const urlParams = new URLSearchParams(window.location.search);
+        const tournamentId = urlParams.get('tournament');
+        
+        if (tournamentId) {
+            // Set spectator mode in localStorage
+            localStorage.setItem('spectatorMode', 'true');
+            
+            // Redirect to tournament page with same parameter
+            window.location.href = `/tournoi?tournament=${tournamentId}`;
+            return;
+        }
     }
 
     checkStoredMode() {
