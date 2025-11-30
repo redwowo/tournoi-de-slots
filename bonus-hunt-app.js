@@ -341,12 +341,168 @@ function addResultToOpeningList(result) {
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: ${result.gain.toFixed(2)}€</div>
-        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×${result.multiplier}</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn btn-outline';
+    editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+    editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
+    editBtn.onclick = function() {
+        editResult(resultIndex, resultItem);
+    };
+    
     resultItem.appendChild(resultInfo);
+    resultItem.appendChild(editBtn);
     container.appendChild(resultItem);
+}
+
+function editResult(resultIndex, resultItem) {
+    const result = openingPhaseState.results[resultIndex];
+    if (!result) return;
+    
+    const resultInfo = resultItem.querySelector('div');
+    const currentGain = result.gain;
+    const currentMultiplier = result.multiplier;
+    
+    const editForm = document.createElement('div');
+    editForm.style.cssText = `
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem;
+        background: rgba(59, 130, 246, 0.05);
+        border-radius: 4px;
+    `;
+    
+    const gainInput = document.createElement('input');
+    gainInput.type = 'number';
+    gainInput.value = currentGain;
+    gainInput.step = '0.01';
+    gainInput.style.cssText = `
+        width: 100px;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        background: var(--bg-color);
+        color: var(--text-color);
+    `;
+    
+    const saveBtn = document.createElement('button');
+    saveBtn.type = 'button';
+    saveBtn.className = 'btn btn-success';
+    saveBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+    saveBtn.innerHTML = '<i data-lucide="check"></i> OK';
+    
+    const cancelBtn = document.createElement('button');
+    cancelBtn.type = 'button';
+    cancelBtn.className = 'btn btn-outline';
+    cancelBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+    cancelBtn.innerHTML = '<i data-lucide="x"></i>';
+    
+    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+    const multiplierDisplay = document.createElement('span');
+    multiplierDisplay.style.cssText = `
+        min-width: 50px;
+        text-align: center;
+        font-weight: bold;
+        color: ${multiplierColor};
+    `;
+    multiplierDisplay.textContent = '×' + currentMultiplier;
+    
+    editForm.appendChild(document.createTextNode('Gain: '));
+    editForm.appendChild(gainInput);
+    editForm.appendChild(document.createTextNode('€'));
+    editForm.appendChild(multiplierDisplay);
+    editForm.appendChild(saveBtn);
+    editForm.appendChild(cancelBtn);
+    
+    const editBtn = resultItem.querySelector('button');
+    editBtn.style.display = 'none';
+    
+    resultInfo.innerHTML = '';
+    resultInfo.appendChild(editForm);
+    
+    function updateMultiplier() {
+        const newGain = parseFloat(gainInput.value) || 0;
+        const newMultiplier = (newGain / result.stake).toFixed(2);
+        multiplierDisplay.textContent = '×' + newMultiplier;
+        const newMultiplierColor = newGain > 0 ? 'var(--success-color)' : '#ef4444';
+        multiplierDisplay.style.color = newMultiplierColor;
+    }
+    
+    gainInput.addEventListener('input', updateMultiplier);
+    gainInput.focus();
+    
+    saveBtn.onclick = function() {
+        const newGain = parseFloat(gainInput.value) || 0;
+        result.gain = newGain;
+        result.multiplier = (newGain / result.stake).toFixed(2);
+        
+        reloadResultDisplay(resultIndex, resultItem);
+        updateSessionSummaryTotals();
+    };
+    
+    cancelBtn.onclick = function() {
+        reloadResultDisplay(resultIndex, resultItem);
+    };
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function reloadResultDisplay(resultIndex, resultItem) {
+    const result = openingPhaseState.results[resultIndex];
+    if (!result) return;
+    
+    resultItem.innerHTML = '';
+    
+    const resultInfo = document.createElement('div');
+    resultInfo.style.cssText = 'flex: 1;';
+    
+    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+    resultInfo.innerHTML = `
+        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
+    `;
+    
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'btn btn-outline';
+    editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+    editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
+    editBtn.onclick = function() {
+        editResult(resultIndex, resultItem);
+    };
+    
+    resultItem.appendChild(resultInfo);
+    resultItem.appendChild(editBtn);
+    
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
+function updateSessionSummaryTotals() {
+    const totalStake = openingPhaseState.results.reduce((sum, r) => sum + r.stake, 0);
+    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + r.gain, 0);
+    const profitLoss = totalGain - totalStake;
+    
+    const summaryDiv = document.querySelector('.bonus-list > div:first-child');
+    if (summaryDiv && summaryDiv.querySelector('h3')) {
+        summaryDiv.innerHTML = `
+            <h3>Tous les Bonus Ouverts</h3>
+            <p>Mise totale: ${totalStake.toFixed(2)}€</p>
+            <p>Gain total: ${totalGain.toFixed(2)}€</p>
+            <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
+                Résultat: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
+            </p>
+        `;
+    }
 }
 
 function showSessionSummary() {
@@ -355,16 +511,21 @@ function showSessionSummary() {
     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + r.gain, 0);
     const profitLoss = totalGain - totalStake;
     
-    // Disable the gain form
-    const gainForm = document.getElementById('gainForm');
-    if (gainForm) {
-        gainForm.style.opacity = '0.5';
-        gainForm.style.pointerEvents = 'none';
+    // Hide the machine frame (opening-phase-panel)
+    const openingPanel = document.querySelector('.opening-phase-panel');
+    if (openingPanel) {
+        openingPanel.style.display = 'none';
+    }
+    
+    // Update the progress panel header to be more prominent
+    const progressPanel = document.querySelector('.panel[style*="margin-top: 2rem;"]');
+    if (progressPanel) {
+        progressPanel.style.marginTop = '0';
     }
     
     // Show summary message
     const summaryMsg = `
-        <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-top: 2rem;">
+        <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem;">
             <h3>Tous les Bonus Ouverts</h3>
             <p>Mise totale: ${totalStake.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
