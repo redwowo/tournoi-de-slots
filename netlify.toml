@@ -17,6 +17,11 @@
   status = 200
 
 [[redirects]]
+  from = "/spectate-tournoi"
+  to = "/spectate-tournoi.html"
+  status = 200
+
+[[redirects]]
   from = "/tournoi/*"
   to = "/tournoi.html"
   status = 200

@@ -8,6 +8,7 @@ class TournamentNavigation {
     init() {
         this.initializeTheme();
         this.storeCurrentMode();
+        this.updateBackButtonForSpectator();
     }
 
     storeCurrentMode() {
@@ -30,6 +31,24 @@ class TournamentNavigation {
                 localStorage.setItem('theme', newTheme);
                 themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
             });
+        }
+    }
+
+    updateBackButtonForSpectator() {
+        // Vérifier si on est en mode spectateur
+        const spectatorMode = localStorage.getItem('spectatorMode') === 'true';
+        const backButton = document.getElementById('backButton');
+        
+        if (backButton) {
+            if (spectatorMode) {
+                // En mode spectateur, le bouton retour mène à /tournoi
+                backButton.href = '/tournoi';
+                backButton.title = 'Retour à la page des tournois';
+            } else {
+                // En mode normal, le bouton retour mène à / (menu principal)
+                backButton.href = '/';
+                backButton.title = 'Retour au menu principal';
+            }
         }
     }
 }
