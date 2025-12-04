@@ -8,18 +8,18 @@
     <link rel="stylesheet" href="/styles.css">
     <style>
         /* Logique d'affichage des vues */
-        .game-view { 
-            display: none; 
+        .game-view {
+            display: none;
             opacity: 0;
-            transform: translateY(20px) scale(0.98);
-            transition: all 0.3s ease-out;
+            transform: scale(0.95);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .game-view.active { 
-            display: block; 
+        .game-view.active {
+            display: block;
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: scale(1);
         }
-        
+
         /* Pour centrer la vue de démarrage */
         #view-setup {
             height: 80vh;
@@ -35,7 +35,7 @@
             gap: 2rem;
             margin-top: 1rem;
         }
-        
+
         @media (max-width: 900px) {
             .hunt-grid { grid-template-columns: 1fr; }
         }
@@ -50,10 +50,20 @@
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
         }
-        .step { opacity: 0.5; font-weight: bold; display: flex; align-items: center; gap: 0.5rem; }
-        .step.active { opacity: 1; color: var(--primary-color); }
+        .step {
+            opacity: 0.5;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: opacity 0.3s ease;
+        }
+        .step.active {
+            opacity: 1;
+            color: var(--primary-color);
+        }
         .step i { width: 20px; height: 20px; }
-        
+
         /* Compact Breakeven Info Box */
         #compactBreakevenDisplay {
             text-align: center;
@@ -65,6 +75,27 @@
             background: rgba(59, 130, 246, 0.08);
             border: 1px solid rgba(59, 130, 246, 0.2);
             border-radius: 8px;
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Bonus hunt card animations */
+        .config-card {
+            animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .panel {
+            animation: fadeInScale 0.4s cubic-bezier(0.4, 0, 0.2, 1) 0.1s backwards;
         }
     </style>
     <script src="https://unpkg.com/lucide@latest"></script>

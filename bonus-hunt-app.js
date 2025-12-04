@@ -137,6 +137,8 @@ function addBonusToList(bonus) {
         border: 1px solid var(--border-color);
         border-radius: 8px;
         gap: 1rem;
+        opacity: 0;
+        animation: itemFadeInScale 0.3s ease-out forwards;
     `;
     
     const bonusInfo = document.createElement('div');
@@ -212,46 +214,48 @@ function updateBonusStats() {
 }
 
 function updateCompactBreakevenDisplay() {
-    const container = document.getElementById('bonusListContainer');
-    if (!container || !app.sessionData) return;
-    
-    const bonuses = Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
-    const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
-    const huntPrice = app.sessionData.huntPrice || 0;
-    
-    let multiplier = null;
-    if (totalStake > 0 && huntPrice > 0) {
-        multiplier = huntPrice / totalStake;
-    }
-    
-    const parent = container.parentElement;
-    if (!parent) return;
-    
-    let compactDisplay = parent.querySelector('#compactBreakevenDisplay');
-    
-    if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
-        if (!compactDisplay) {
-            compactDisplay = document.createElement('div');
-            compactDisplay.id = 'compactBreakevenDisplay';
-            compactDisplay.style.cssText = `
-                text-align: center;
-                padding: 0.75rem 1rem;
-                margin-bottom: 1rem;
-                font-size: 1.1rem;
-                font-weight: 600;
-                color: var(--primary-color);
-                background: rgba(59, 130, 246, 0.08);
-                border: 1px solid rgba(59, 130, 246, 0.2);
-                border-radius: 8px;
-            `;
-            parent.insertBefore(compactDisplay, container);
-        }
-        
-        compactDisplay.style.display = 'block';
-        compactDisplay.textContent = `x${Math.round(multiplier)}`;
-    } else if (compactDisplay) {
-        compactDisplay.style.display = 'none';
-    }
+     const container = document.getElementById('bonusListContainer');
+     if (!container || !app.sessionData) return;
+
+     const bonuses = Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
+     const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
+     const huntPrice = app.sessionData.huntPrice || 0;
+
+     let multiplier = null;
+     if (totalStake > 0 && huntPrice > 0) {
+         // Convert total stake to currency value using spinPrice × 100 formula
+         const totalBonusValue = totalStake * 100;
+         multiplier = huntPrice / totalBonusValue;
+     }
+
+     const parent = container.parentElement;
+     if (!parent) return;
+
+     let compactDisplay = parent.querySelector('#compactBreakevenDisplay');
+
+     if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
+         if (!compactDisplay) {
+             compactDisplay = document.createElement('div');
+             compactDisplay.id = 'compactBreakevenDisplay';
+             compactDisplay.style.cssText = `
+                 text-align: center;
+                 padding: 0.75rem 1rem;
+                 margin-bottom: 1rem;
+                 font-size: 1.1rem;
+                 font-weight: 600;
+                 color: var(--primary-color);
+                 background: rgba(59, 130, 246, 0.08);
+                 border: 1px solid rgba(59, 130, 246, 0.2);
+                 border-radius: 8px;
+             `;
+             parent.insertBefore(compactDisplay, container);
+         }
+
+         compactDisplay.style.display = 'block';
+         compactDisplay.textContent = `x${multiplier.toFixed(2)}`;
+     } else if (compactDisplay) {
+         compactDisplay.style.display = 'none';
+     }
 }
 
 function escapeHtml(text) {
@@ -398,6 +402,8 @@ function addResultToOpeningList(result) {
         border-radius: 8px;
         gap: 1rem;
         margin-bottom: 0.5rem;
+        opacity: 0;
+        animation: itemFadeInScale 0.3s ease-out forwards;
         transition: all 0.3s ease;
     `;
     
@@ -560,61 +566,75 @@ function reloadResultDisplay(resultIndex, resultItem) {
 }
 
 function updateSessionSummaryTotals() {
-    const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
-    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-    const profitLoss = totalGain - totalBonusPrice;
-    
-    const summaryDiv = document.querySelector('.bonus-list > div:first-child');
-    if (summaryDiv && summaryDiv.querySelector('h3')) {
-        summaryDiv.innerHTML = `
-            <h3>Tous les Bonus Ouverts</h3>
-            <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
-            <p>Gain total: ${totalGain.toFixed(2)}€</p>
-            <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
-            </p>
-        `;
-    }
+     const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
+     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+     const profitLoss = totalGain - totalBonusPrice;
+
+     // Calculate net result based on starting balance (huntPrice)
+     const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
+     const finalBalance = startingBalance + profitLoss;
+     const netResult = finalBalance - startingBalance;
+
+     const summaryDiv = document.querySelector('.bonus-list > div:first-child');
+     if (summaryDiv && summaryDiv.querySelector('h3')) {
+         summaryDiv.innerHTML = `
+             <h3>Tous les Bonus Ouverts</h3>
+             <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
+             <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
+             <p>Gain total: ${totalGain.toFixed(2)}€</p>
+             <p>Solde final: ${finalBalance.toFixed(2)}€</p>
+             <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
+                 Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
+             </p>
+         `;
+     }
 }
 
 function showSessionSummary() {
-    // Calculate totals
-    const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
-    const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-    const profitLoss = totalGain - totalBonusPrice;
-    
-    // Hide the machine frame (opening-phase-panel)
-    const openingPanel = document.querySelector('.opening-phase-panel');
-    if (openingPanel) {
-        openingPanel.style.display = 'none';
-    }
-    
-    // Update the progress panel header to be more prominent
-    const progressPanel = document.querySelector('.panel[style*="margin-top: 2rem;"]');
-    if (progressPanel) {
-        progressPanel.style.marginTop = '0';
-    }
-    
-    // Show summary message
-    const summaryMsg = `
-        <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem;">
-            <h3>Tous les Bonus Ouverts</h3>
-            <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
-            <p>Gain total: ${totalGain.toFixed(2)}€</p>
-            <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
-            </p>
-        </div>
-    `;
-    
-    const container = document.getElementById('openingListContainer');
-    if (container) {
-        container.innerHTML = summaryMsg + container.innerHTML;
-    }
-    
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+     // Calculate totals
+     const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
+     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+     const profitLoss = totalGain - totalBonusPrice;
+
+     // Calculate net result based on starting balance (huntPrice)
+     const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
+     const finalBalance = startingBalance + profitLoss;
+     const netResult = finalBalance - startingBalance;
+
+     // Hide the machine frame (opening-phase-panel)
+     const openingPanel = document.querySelector('.opening-phase-panel');
+     if (openingPanel) {
+         openingPanel.style.display = 'none';
+     }
+
+     // Update the progress panel header to be more prominent
+     const progressPanel = document.querySelector('.panel[style*="margin-top: 2rem;"]');
+     if (progressPanel) {
+         progressPanel.style.marginTop = '0';
+     }
+
+     // Show summary message
+     const summaryMsg = `
+         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem; opacity: 0; animation: summaryFadeIn 0.5s ease-out forwards;">
+             <h3>Tous les Bonus Ouverts</h3>
+             <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
+             <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
+             <p>Gain total: ${totalGain.toFixed(2)}€</p>
+             <p>Solde final: ${finalBalance.toFixed(2)}€</p>
+             <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
+                 Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
+             </p>
+         </div>
+     `;
+
+     const container = document.getElementById('openingListContainer');
+     if (container) {
+         container.innerHTML = summaryMsg + container.innerHTML;
+     }
+
+     if (typeof lucide !== 'undefined') {
+         lucide.createIcons();
+     }
 }
 
 // Export functions for potential external use
