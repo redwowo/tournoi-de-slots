@@ -225,7 +225,10 @@ function updateCompactBreakevenDisplay() {
      if (totalStake > 0 && huntPrice > 0) {
          // Convert total stake to currency value using spinPrice × 100 formula
          const totalBonusValue = totalStake * 100;
-         multiplier = huntPrice / totalBonusValue;
+         // CORRECT formula: breakeven = bonusValue / spinPrice
+         // Here: totalBonusValue represents the sum of all bonus values
+         // huntPrice represents the budget/spinPrice equivalent
+         multiplier = totalBonusValue / huntPrice;
      }
 
      const parent = container.parentElement;
