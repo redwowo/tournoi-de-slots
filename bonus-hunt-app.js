@@ -219,16 +219,14 @@ function updateCompactBreakevenDisplay() {
 
      const bonuses = Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
      const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
-     const huntPrice = app.sessionData.huntPrice || 0;
+     const startingBalance = app.sessionData.huntPrice || 0;
 
      let multiplier = null;
-     if (totalStake > 0 && huntPrice > 0) {
+     if (totalStake > 0 && startingBalance > 0) {
          // Convert total stake to currency value using spinPrice × 100 formula
          const totalBonusValue = totalStake * 100;
-         // CORRECT formula: breakeven = bonusValue / spinPrice
-         // Here: totalBonusValue represents the sum of all bonus values
-         // huntPrice represents the budget/spinPrice equivalent
-         multiplier = totalBonusValue / huntPrice;
+         // CORRECT formula: breakeven = (startingBalance / totalBonusValue) × 100
+         multiplier = (startingBalance / totalBonusValue) * 100;
      }
 
      const parent = container.parentElement;
@@ -259,7 +257,7 @@ function updateCompactBreakevenDisplay() {
      } else if (compactDisplay) {
          compactDisplay.style.display = 'none';
      }
-}
+ }
 
 function escapeHtml(text) {
     const map = {
