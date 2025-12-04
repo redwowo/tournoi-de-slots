@@ -79,18 +79,22 @@ let openingPhaseState = {
 function handleBonusFormSubmit(event) {
     event.preventDefault();
     const bonusName = document.getElementById('bonusName').value;
-    const bonusStake = parseFloat(document.getElementById('bonusStake').value);
+    const spinPrice = parseFloat(document.getElementById('bonusStake').value);
     
-    if (!bonusName.trim() || !bonusStake || bonusStake <= 0) {
+    if (!bonusName.trim() || !spinPrice || spinPrice <= 0) {
         showToast('Veuillez remplir correctement tous les champs', 'warning');
         return;
     }
     
+    // Calculate bonus value: spinPrice × 100
+    const bonusValue = spinPrice * 100;
+    
     const bonus = {
         id: Date.now(),
         name: bonusName,
-        stake: bonusStake,
-        bonusPrice: bonusStake,
+        stake: spinPrice, // Keep original spinPrice for reference
+        bonusPrice: bonusValue, // Store the actual currency value
+        bonusValue: bonusValue, // Store explicitly for clarity
         result: null,
         createdAt: new Date().toISOString()
     };
@@ -137,11 +141,12 @@ function addBonusToList(bonus) {
     
     const bonusInfo = document.createElement('div');
     bonusInfo.style.cssText = 'flex: 1;';
-    const bonusPriceValue = typeof bonus.bonusPrice === 'number' ? bonus.bonusPrice : parseFloat(bonus.bonusPrice);
-    const priceToDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue : bonus.stake;
+    // Use bonusValue (calculated as spinPrice × 100) for display
+    const bonusValue = bonus.bonusValue || bonus.bonusPrice;
+    const priceToDisplay = Number.isFinite(bonusValue) ? bonusValue : (bonus.stake * 100);
     bonusInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(bonus.name)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix: ${priceToDisplay.toFixed(2)}€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceToDisplay.toFixed(2)}€</div>
     `;
     
     const removeBtn = document.createElement('button');
@@ -284,21 +289,31 @@ function getBonusPriceFromBonus(bonus) {
 function getBonusPriceForResult(result) {
     if (!result) return 0;
     
-    // First try bonusPrice field
+    // First try bonusValue field (the correct currency value)
+    const bonusValueAmount = parseAmount(result.bonusValue);
+    if (bonusValueAmount !== null) {
+        return bonusValueAmount;
+    }
+    
+    // Then try bonusPrice field (should now contain the calculated value)
     const directAmount = parseAmount(result.bonusPrice);
     if (directAmount !== null) {
         return directAmount;
     }
     
-    // Fallback to stake (the amount paid for the bonus)
+    // Fallback: calculate from stake (spinPrice × 100)
     const stakeAmount = parseAmount(result.stake);
     if (stakeAmount !== null) {
-        return stakeAmount;
+        return stakeAmount * 100; // Convert spinPrice to actual currency value
     }
     
     // Last resort: try to find the bonus in openingPhaseState
     const linkedBonus = openingPhaseState.bonuses.find(b => b.id === result.bonusId);
-    return getBonusPriceFromBonus(linkedBonus);
+    if (linkedBonus) {
+        return linkedBonus.bonusValue || (linkedBonus.stake * 100);
+    }
+    
+    return 0;
 }
 
 function handleOpeningGainSubmit(event) {
@@ -311,13 +326,16 @@ function handleOpeningGainSubmit(event) {
     const betAmount = parseAmount(currentBonus.stake);
     const normalizedStake = betAmount !== null ? betAmount : 0;
     const bonusPrice = getBonusPriceFromBonus(currentBonus);
+    const bonusValue = currentBonus.bonusValue || (normalizedStake * 100);
+    // Use stake (spinPrice) for multiplier calculation
     const multiplierValue = normalizedStake > 0 ? (gainAmount / normalizedStake).toFixed(2) : '0';
 
     const result = {
         bonusId: currentBonus.id,
         bonusName: currentBonus.name,
         stake: normalizedStake,
-        bonusPrice,
+        bonusPrice: bonusValue, // Store the actual currency value
+        bonusValue: bonusValue, // Store explicitly for clarity
         gain: gainAmount,
         multiplier: multiplierValue,
         createdAt: new Date().toISOString()
@@ -348,7 +366,9 @@ function displayCurrentBonus() {
     if (!currentBonus) return;
     
     document.getElementById('openingBonusName').textContent = currentBonus.name;
-    document.getElementById('openingBetAmount').textContent = currentBonus.stake.toFixed(2) + '€';
+    // Display the bonus value (spinPrice × 100) instead of just the stake
+    const bonusValue = currentBonus.bonusValue || (currentBonus.stake * 100);
+    document.getElementById('openingBetAmount').textContent = bonusValue.toFixed(2) + '€';
     document.getElementById('gainAmount').value = '';
     document.getElementById('gainMultiplier').value = '';
 }
@@ -385,11 +405,11 @@ function addResultToOpeningList(result) {
     resultInfo.style.cssText = 'flex: 1;';
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    const bonusPriceValue = getBonusPriceForResult(result);
-    const priceDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue.toFixed(2) : '0.00';
+    const bonusValue = getBonusPriceForResult(result);
+    const priceDisplay = Number.isFinite(bonusValue) ? bonusValue.toFixed(2) : '0.00';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix du bonus: ${priceDisplay}€ | Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceDisplay}€ | Mise: ${(result.stake * 100).toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -475,7 +495,8 @@ function editResult(resultIndex, resultItem) {
     
     function updateMultiplier() {
         const newGain = parseFloat(gainInput.value) || 0;
-        const newMultiplier = (newGain / result.stake).toFixed(2);
+        // Use stake (spinPrice) for multiplier calculation, not bonusValue
+        const newMultiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
         multiplierDisplay.textContent = '×' + newMultiplier;
         const newMultiplierColor = newGain > 0 ? 'var(--success-color)' : '#ef4444';
         multiplierDisplay.style.color = newMultiplierColor;
@@ -487,7 +508,8 @@ function editResult(resultIndex, resultItem) {
     saveBtn.onclick = function() {
         const newGain = parseFloat(gainInput.value) || 0;
         result.gain = newGain;
-        result.multiplier = (newGain / result.stake).toFixed(2);
+        // Use stake (spinPrice) for multiplier calculation, not bonusValue
+        result.multiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
         
         reloadResultDisplay(resultIndex, resultItem);
         updateSessionSummaryTotals();
@@ -512,11 +534,11 @@ function reloadResultDisplay(resultIndex, resultItem) {
     resultInfo.style.cssText = 'flex: 1;';
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    const bonusPriceValue = getBonusPriceForResult(result);
-    const priceDisplay = Number.isFinite(bonusPriceValue) ? bonusPriceValue.toFixed(2) : '0.00';
+    const bonusValue = getBonusPriceForResult(result);
+    const priceDisplay = Number.isFinite(bonusValue) ? bonusValue.toFixed(2) : '0.00';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Prix du bonus: ${priceDisplay}€ | Mise: ${result.stake.toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceDisplay}€ | Mise: ${(result.stake * 100).toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -546,7 +568,7 @@ function updateSessionSummaryTotals() {
     if (summaryDiv && summaryDiv.querySelector('h3')) {
         summaryDiv.innerHTML = `
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Prix total des bonus: ${totalBonusPrice.toFixed(2)}€</p>
+            <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€
@@ -577,7 +599,7 @@ function showSessionSummary() {
     const summaryMsg = `
         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem;">
             <h3>Tous les Bonus Ouverts</h3>
-            <p>Prix total des bonus: ${totalBonusPrice.toFixed(2)}€</p>
+            <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
             <p>Gain total: ${totalGain.toFixed(2)}€</p>
             <p style="font-size: 1.2rem; font-weight: bold; color: ${profitLoss >= 0 ? 'var(--success-color)' : '#ef4444'};">
                 Résultat net: ${profitLoss >= 0 ? '+' : ''}${profitLoss.toFixed(2)}€

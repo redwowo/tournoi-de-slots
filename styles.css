@@ -105,6 +105,9 @@ body {
   min-height: 100vh;
   box-sizing: border-box;
   transition: background-color 0.3s ease, color 0.3s ease;
+  opacity: 0;
+  transform: translateY(10px) scale(0.99);
+  animation: pageLoad 0.4s ease-out forwards;
 }
 
 .main-container {
@@ -389,11 +392,11 @@ button:disabled {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -60%);
+    transform: translate(-50%, -50%) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -562,22 +565,22 @@ h1 {
 
 @keyframes slideIn {
   from {
-    transform: translateX(100%);
+    transform: translateY(-20px) scale(0.95);
     opacity: 0;
   }
   to {
-    transform: translateX(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
 }
 
 @keyframes slideOut {
   from {
-    transform: translateX(0);
+    transform: translateY(0) scale(1);
     opacity: 1;
   }
   to {
-    transform: translateX(100%);
+    transform: translateY(-20px) scale(0.95);
     opacity: 0;
   }
 }
@@ -765,20 +768,20 @@ h1 {
 @keyframes shake {
   0%,
   100% {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
   }
   10%,
   30%,
   50%,
   70%,
   90% {
-    transform: translateX(-5px);
+    transform: translateX(-2px) scale(0.98);
   }
   20%,
   40%,
   60%,
   80% {
-    transform: translateX(5px);
+    transform: translateX(2px) scale(0.98);
   }
 }
 
@@ -2530,6 +2533,17 @@ input[type="number"] {
   /* supprimé */
 }
 
+@keyframes pageLoad {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 /* Animation sur les images du titre */
 h1 img {
   /* supprimé */
@@ -2707,6 +2721,9 @@ h1 img {
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 2rem;
   margin-top: 2rem;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  animation: fadeInScale 0.5s ease-out forwards;
 }
 
 .mode-card {
@@ -3518,11 +3535,11 @@ h1 img {
 @keyframes modalSlideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -3658,11 +3675,11 @@ h1 img {
 @keyframes toastSlideIn {
   from {
     opacity: 0;
-    transform: translateX(100%);
+    transform: translateY(-20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0) scale(1);
   }
 }
 

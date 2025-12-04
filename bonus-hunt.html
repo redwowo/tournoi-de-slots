@@ -8,8 +8,17 @@
     <link rel="stylesheet" href="/styles.css">
     <style>
         /* Logique d'affichage des vues */
-        .game-view { display: none; animation: fadeIn 0.4s ease-out; }
-        .game-view.active { display: block; }
+        .game-view { 
+            display: none; 
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.3s ease-out;
+        }
+        .game-view.active { 
+            display: block; 
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
         
         /* Pour centrer la vue de démarrage */
         #view-setup {
@@ -120,8 +129,8 @@
                                 <input type="text" id="bonusName" placeholder="Ex: Book of Ra" required>
                             </div>
                             <div class="form-group">
-                                <label>Prix du bonus (€)</label>
-                                <input type="number" id="bonusStake" placeholder="100.00" step="0.01" required>
+                                <label>Prix du spin (0.1, 0.2, etc.)</label>
+                                <input type="number" id="bonusStake" placeholder="0.10" step="0.01" required>
                             </div>
                             <button type="submit" class="btn btn-primary" style="width: 100%;">Ajouter</button>
                         </form>
@@ -280,15 +289,20 @@
 
             updateMultiplier: function() {
                 const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
-                const betAmountText = document.getElementById('openingBetAmount').textContent;
-                const betAmount = parseFloat(betAmountText);
-                
-                if (!betAmount || betAmount <= 0) {
+                // Get current bonus to access original stake (spinPrice)
+                const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
+                if (!currentBonus) {
                     document.getElementById('gainMultiplier').value = '';
                     return;
                 }
                 
-                const multiplier = (gainAmount / betAmount).toFixed(2);
+                const stakeAmount = currentBonus.stake; // Use spinPrice, not bonusValue
+                if (!stakeAmount || stakeAmount <= 0) {
+                    document.getElementById('gainMultiplier').value = '';
+                    return;
+                }
+                
+                const multiplier = (gainAmount / stakeAmount).toFixed(2);
                 document.getElementById('gainMultiplier').value = '×' + multiplier;
             },
             
@@ -300,9 +314,17 @@
             // Utilitaire pour changer les classes
             switchView: function(viewId, stepNumber) {
                 // Masquer toutes les vues
-                document.querySelectorAll('.game-view').forEach(el => el.classList.remove('active'));
-                // Afficher la cible
-                document.getElementById(viewId).classList.add('active');
+                document.querySelectorAll('.game-view').forEach(el => {
+                    el.classList.remove('active');
+                    // Force reflow to reset animation
+                    void el.offsetWidth;
+                });
+                
+                // Afficher la cible avec un petit délai pour l'animation
+                setTimeout(() => {
+                    const targetView = document.getElementById(viewId);
+                    targetView.classList.add('active');
+                }, 10);
 
                 // Mettre à jour le stepper (1, 2, 3)
                 document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
