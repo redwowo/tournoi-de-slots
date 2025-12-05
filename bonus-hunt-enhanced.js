@@ -37,16 +37,6 @@ function setupGamingEffects() {
         }
     });
 
-    // Enhanced toast notifications
-    const originalShowToast = showToast;
-    showToast = function(message, type = 'info') {
-        originalShowToast(message, type);
-        
-        if (type === 'success') {
-            createSuccessParticles();
-        }
-    };
-
     // Enhanced input focus effects
     document.querySelectorAll('input').forEach(input => {
         input.addEventListener('focus', () => {
@@ -79,27 +69,6 @@ function createRippleEffect(button, e) {
     button.appendChild(ripple);
     
     setTimeout(() => ripple.remove(), 600);
-}
-
-function createSuccessParticles() {
-    for (let i = 0; i < 10; i++) {
-        setTimeout(() => {
-            const particle = document.createElement('div');
-            particle.style.position = 'fixed';
-            particle.style.width = '4px';
-            particle.style.height = '4px';
-            particle.style.background = 'var(--bonus-success)';
-            particle.style.borderRadius = '50%';
-            particle.style.pointerEvents = 'none';
-            particle.style.left = `${Math.random() * window.innerWidth}px`;
-            particle.style.top = `${window.innerHeight}px`;
-            particle.style.animation = 'particleRise 2s ease-out forwards';
-            particle.style.zIndex = '9999';
-            
-            document.body.appendChild(particle);
-            setTimeout(() => particle.remove(), 2000);
-        }, i * 100);
-    }
 }
 
 function enhanceStepTransition(fromViewId, toViewId) {
@@ -138,25 +107,6 @@ function addGlowEffect(element, color = 'cyan') {
         element.style.borderColor = 'var(--bonus-border)';
         element.style.boxShadow = '';
     }, 2000);
-}
-
-function createFloatingParticles(container, count = 5) {
-    for (let i = 0; i < count; i++) {
-        const particle = document.createElement('div');
-        particle.style.position = 'absolute';
-        particle.style.width = '2px';
-        particle.style.height = '2px';
-        particle.style.background = 'var(--bonus-cyan)';
-        particle.style.borderRadius = '50%';
-        particle.style.pointerEvents = 'none';
-        particle.style.left = `${Math.random() * 100}%`;
-        particle.style.top = `${Math.random() * 100}%`;
-        particle.style.animation = `particleFloat ${2 + Math.random() * 2}s ease-in-out infinite`;
-        particle.style.animationDelay = `${Math.random() * 2}s`;
-        
-        container.style.position = 'relative';
-        container.appendChild(particle);
-    }
 }
 
 function enhanceFormValidation() {
@@ -206,31 +156,14 @@ function animateStepIndicator(stepNumber) {
 
 // Initialize enhanced features
 document.addEventListener('DOMContentLoaded', () => {
-    // Add floating particles to glass cards
-    document.querySelectorAll('.glass-card').forEach(card => {
-        createFloatingParticles(card, 3);
-    });
-    
     // Enhanced form validation
     enhanceFormValidation();
-    
-    // Enhanced step transitions
-    if (window.app) {
-        const originalSwitchView = window.app.switchView;
-        window.app.switchView = function(viewId, stepNumber) {
-            enhanceStepTransition(window.app.currentViewId || 'view-creation', viewId);
-            animateStepIndicator(stepNumber);
-            window.app.currentViewId = viewId;
-        };
-    }
 });
 
 // Export enhanced functions
 window.BonusHuntEnhanced = {
     animateViewEntry,
     createRippleEffect,
-    createSuccessParticles,
     enhanceStepTransition,
-    addGlowEffect,
-    createFloatingParticles
+    addGlowEffect
 };
