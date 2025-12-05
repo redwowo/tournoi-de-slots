@@ -4327,6 +4327,56 @@ h1 img {
   display: none;
 }
 
+/* Fix for mouse cursor glitch on collection buttons */
+#view-collection .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: box-shadow 0.2s ease !important;
+}
+
+#view-collection .btn:hover {
+  transform: none !important;
+  box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3) !important;
+}
+
+#view-collection .btn::before,
+#view-collection .btn::after {
+  display: none !important;
+}
+
+#view-collection .form-actions .btn,
+#view-collection .form-nav .btn {
+  position: relative;
+  z-index: 10 !important;
+}
+
+/* Ensure form container doesn't interfere with mouse events */
+#view-collection .config-card {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+#view-collection .config-form {
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+#view-collection .form-group {
+  position: relative;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+/* Fix input focus to prevent cursor issues */
+#view-collection input:focus {
+  outline: none;
+  border-color: var(--bonus-cyan);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+}
+
 .bonus-hunt-body .btn {
   display: inline-flex;
   align-items: center;
@@ -4337,7 +4387,7 @@ h1 img {
   font-weight: 600;
   cursor: pointer;
   padding: 0.75rem 1.25rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: box-shadow 0.2s ease;
   position: relative;
   z-index: 6;
 }
@@ -4372,7 +4422,7 @@ h1 img {
 }
 
 .bonus-hunt-body .btn:hover {
-  transform: translateY(-2px);
+  /* transform: translateY(-2px); Removed to fix mouse glitch */
 }
 
 .collection-layout {
