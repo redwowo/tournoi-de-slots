@@ -1,36 +1,90 @@
 // Bonus Hunt Application JavaScript
-// This file contains the main application logic for the Bonus Hunt Tracker
+// Application logic for the redesigned Bonus Hunt Tracker
 
-// Initialize Lucide icons
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Lucide icons
     if (typeof lucide !== 'undefined') {
         lucide.createIcons();
     }
-    
-    // Initialize the Bonus Hunt application
+
     initializeBonusHuntApp();
 });
 
+const HISTORY_STORAGE_KEY = 'bonusHuntHistory';
+const PROVIDER_ARTWORKS = {
+    'hacksaw': '/hacksawlogo.png',
+    'hacksaw gaming': '/hacksawlogo.png',
+    'pragmatic': '/pragmaticplaylogo.png',
+    'pragmatic play': '/pragmaticplaylogo.png',
+    'nolimit': '/nolimitcitylogo.png',
+    'nolimit city': '/nolimitcitylogo.png',
+    'bgaming': '/BGaminglogo.png',
+    'relax': '/slot.png',
+    'relax gaming': '/slot.png',
+    'push gaming': '/slot.png'
+};
+
+let selectedHistoryIndex = null;
+
+let openingPhaseState = {
+    currentBonusIndex: 0,
+    bonuses: [],
+    results: [],
+    summarySaved: false
+};
+
 function initializeBonusHuntApp() {
-    console.log('Bonus Hunt App initialized');
-    
-    // Set up form handlers
     setupFormHandlers();
+    setupSidebarToggle();
+    renderBonusCollectionList();
+    renderSessionHistory();
+    updateKeyStats();
 }
 
 function setupFormHandlers() {
-    // Bonus form
     const bonusForm = document.getElementById('bonusForm');
     if (bonusForm) {
         bonusForm.addEventListener('submit', handleBonusFormSubmit);
     }
-    
-    // Gain form
+
     const gainForm = document.getElementById('gainForm');
     if (gainForm) {
         gainForm.addEventListener('submit', handleOpeningGainSubmit);
     }
+
+    const cancelEditBtn = document.getElementById('cancelEditButton');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', () => {
+            if (window.app && typeof window.app.cancelBonusEdit === 'function') {
+                window.app.cancelBonusEdit();
+            }
+        });
+    }
+}
+
+function setupSidebarToggle() {
+    const toggle = document.getElementById('mobileSidebarToggle');
+    const closeBtn = document.getElementById('sidebarClose');
+    const overlay = document.getElementById('sidebarOverlay');
+
+    const closeSidebar = () => document.body.classList.remove('sidebar-open');
+
+    if (toggle) {
+        toggle.addEventListener('click', () => document.body.classList.add('sidebar-open'));
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeSidebar);
+    }
+
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+    }
+
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            document.body.classList.remove('sidebar-open');
+        }
+    });
 }
 
 const currencyFormatter = new Intl.NumberFormat('fr-FR', {
@@ -46,21 +100,49 @@ function formatCurrency(value) {
     return `${currencyFormatter.format(number)}€`;
 }
 
-// Toast notification function
+function formatNetResultDisplay(value) {
+    if (!isFinite(value)) {
+        return '--';
+    }
+    if (value === 0) {
+        return '0,00€';
+    }
+    const sign = value > 0 ? '+' : '-';
+    return `${sign}${formatCurrency(Math.abs(value))}`;
+}
+
+function formatSessionDate(dateString) {
+    if (!dateString) return '';
+    try {
+        return new Intl.DateTimeFormat('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit'
+        }).format(new Date(dateString));
+    } catch (error) {
+        return '';
+    }
+}
+
+function refreshLucideIcons() {
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+}
+
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
         console.log(`[${type}] ${message}`);
         return;
     }
-    
+
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-    
     toastContainer.appendChild(toast);
-    
-    // Auto remove after 3 seconds
+
     setTimeout(() => {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
@@ -68,206 +150,304 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Opening phase tracking
-let openingPhaseState = {
-    currentBonusIndex: 0,
-    bonuses: [],
-    results: []
-};
+function getBonusArtwork(bonus) {
+    if (!bonus) {
+        return '/slot.png';
+    }
 
-// Bonus form handler
+    const customImage = (bonus.imageUrl || '').trim();
+    if (customImage) {
+        return customImage;
+    }
+
+    const providerKey = (bonus.provider || '').toLowerCase();
+    if (providerKey && PROVIDER_ARTWORKS[providerKey]) {
+        return PROVIDER_ARTWORKS[providerKey];
+    }
+
+    return '/slot.png';
+}
+
 function handleBonusFormSubmit(event) {
     event.preventDefault();
+
     const bonusName = document.getElementById('bonusName').value;
+    const bonusProvider = document.getElementById('bonusProvider').value;
     const spinPrice = parseFloat(document.getElementById('bonusStake').value);
-    
+    const bonusImage = document.getElementById('bonusImage').value;
+
     if (!bonusName.trim() || !spinPrice || spinPrice <= 0) {
         showToast('Veuillez remplir correctement tous les champs', 'warning');
         return;
     }
-    
-    // Calculate bonus value: spinPrice × 100
+
     const bonusValue = spinPrice * 100;
-    
-    const bonus = {
-        id: Date.now(),
-        name: bonusName,
-        stake: spinPrice, // Keep original spinPrice for reference
-        bonusPrice: bonusValue, // Store the actual currency value
-        bonusValue: bonusValue, // Store explicitly for clarity
-        result: null,
-        createdAt: new Date().toISOString()
-    };
-    
-    // Add to app state
-    if (app.sessionData && Array.isArray(app.sessionData.bonuses)) {
-        app.sessionData.bonuses.push(bonus);
+    const existingBonuses = window.app && Array.isArray(window.app.sessionData?.bonuses)
+        ? window.app.sessionData.bonuses
+        : [];
+
+    if (!window.app) return;
+
+    if (window.app.editingBonusId) {
+        const index = existingBonuses.findIndex(b => b.id === window.app.editingBonusId);
+        if (index !== -1) {
+            existingBonuses[index] = {
+                ...existingBonuses[index],
+                name: bonusName,
+                provider: bonusProvider,
+                stake: spinPrice,
+                bonusPrice: bonusValue,
+                bonusValue,
+                imageUrl: bonusImage,
+                updatedAt: new Date().toISOString()
+            };
+            showToast('Bonus mis à jour', 'success');
+        }
+
+        window.app.editingBonusId = null;
+        window.app.setBonusFormState?.('add');
+    } else {
+        const bonus = {
+            id: Date.now(),
+            name: bonusName,
+            provider: bonusProvider,
+            stake: spinPrice,
+            bonusPrice: bonusValue,
+            bonusValue,
+            imageUrl: bonusImage,
+            result: null,
+            createdAt: new Date().toISOString()
+        };
+        existingBonuses.push(bonus);
+        showToast('Bonus ajouté avec succès', 'success');
     }
-    
-    addBonusToList(bonus);
+
+    document.getElementById('bonusForm').reset();
+    renderBonusCollectionList();
     updateBonusStats();
-    
-    // Reset form
-    document.getElementById('bonusName').value = '';
-    document.getElementById('bonusStake').value = '';
-    
-    showToast('Bonus ajouté avec succès', 'success');
 }
 
-function addBonusToList(bonus) {
+function renderBonusCollectionList() {
     const container = document.getElementById('bonusListContainer');
-    
     if (!container) return;
-    
-    // Remove empty state if it exists
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const bonusItem = document.createElement('div');
-    bonusItem.className = 'bonus-item';
-    bonusItem.setAttribute('data-bonus-id', bonus.id);
-    bonusItem.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background: var(--bg-color);
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
-        gap: 1rem;
-        opacity: 0;
-        animation: itemFadeInScale 0.3s ease-out forwards;
-    `;
-    
-    const bonusInfo = document.createElement('div');
-    bonusInfo.style.cssText = 'flex: 1;';
-    // Use bonusValue (calculated as spinPrice × 100) for display
-    const bonusValue = bonus.bonusValue || bonus.bonusPrice;
-    const priceToDisplay = Number.isFinite(bonusValue) ? bonusValue : (bonus.stake * 100);
-    bonusInfo.innerHTML = `
-        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(bonus.name)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceToDisplay.toFixed(2)}€</div>
-    `;
-    
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'btn btn-danger';
-    removeBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
-    removeBtn.innerHTML = '<i data-lucide="trash-2"></i> Supprimer';
-    removeBtn.onclick = function() {
-        removeBonus(bonus.id);
-    };
-    
-    bonusItem.appendChild(bonusInfo);
-    bonusItem.appendChild(removeBtn);
-    container.appendChild(bonusItem);
-    
-    // Recreate icons
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
-}
 
-function removeBonus(bonusId) {
-    if (app.sessionData && Array.isArray(app.sessionData.bonuses)) {
-        app.sessionData.bonuses = app.sessionData.bonuses.filter(b => b.id !== bonusId);
-    }
-    
-    const bonusItem = document.querySelector(`[data-bonus-id="${bonusId}"]`);
-    if (bonusItem) {
-        bonusItem.remove();
-    }
-    
-    updateBonusStats();
-    
-    // Show empty state if no bonuses left
-    const container = document.getElementById('bonusListContainer');
-    if (container && container.children.length === 0) {
+    container.innerHTML = '';
+    const bonuses = window.app && Array.isArray(window.app.sessionData?.bonuses) ? window.app.sessionData.bonuses : [];
+
+    if (bonuses.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
                 <i data-lucide="inbox"></i>
                 <p>Aucun bonus ajouté. Commencez par ajouter un bonus !</p>
-            </div>
-        `;
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
-        }
+            </div>`;
+        refreshLucideIcons();
+        return;
     }
-    
+
+    const list = document.createElement('div');
+    list.className = 'games-grid';
+
+    bonuses.forEach(bonus => {
+        const card = document.createElement('article');
+        card.className = 'game-card';
+        card.setAttribute('data-bonus-id', bonus.id);
+
+        const thumb = document.createElement('div');
+        thumb.className = 'game-thumb';
+        const img = document.createElement('img');
+        img.src = getBonusArtwork(bonus);
+        img.alt = bonus.name || 'Slot';
+        img.loading = 'lazy';
+        thumb.appendChild(img);
+
+        const info = document.createElement('div');
+        info.className = 'game-info';
+
+        const name = document.createElement('p');
+        name.className = 'game-name';
+        name.textContent = bonus.name;
+
+        const provider = document.createElement('p');
+        provider.className = 'game-provider';
+        provider.textContent = bonus.provider || 'Provider inconnu';
+
+        const meta = document.createElement('div');
+        meta.className = 'game-meta';
+        const stakeValue = isFinite(parseFloat(bonus.stake)) ? parseFloat(bonus.stake).toFixed(2) : '0.00';
+        const bonusValue = Number.isFinite(bonus.bonusValue)
+            ? bonus.bonusValue
+            : Number(bonus.bonusPrice) || (parseFloat(bonus.stake) || 0) * 100;
+        meta.innerHTML = `
+            <span>Mise: ${stakeValue}€</span>
+            <span>Bonus: ${formatCurrency(bonusValue)}</span>
+        `;
+
+        info.appendChild(name);
+        info.appendChild(provider);
+        info.appendChild(meta);
+
+        const actions = document.createElement('div');
+        actions.className = 'game-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'icon-button';
+        editBtn.innerHTML = '<i data-lucide="pencil"></i>';
+        editBtn.addEventListener('click', () => {
+            if (window.app && typeof window.app.beginBonusEdit === 'function') {
+                window.app.beginBonusEdit(bonus.id);
+            }
+        });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'icon-button danger';
+        deleteBtn.innerHTML = '<i data-lucide="trash-2"></i>';
+        deleteBtn.addEventListener('click', () => removeBonus(bonus.id));
+
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
+        card.appendChild(thumb);
+        card.appendChild(info);
+        card.appendChild(actions);
+
+        list.appendChild(card);
+    });
+
+    container.appendChild(list);
+    refreshLucideIcons();
+}
+
+function removeBonus(bonusId) {
+    if (window.app && Array.isArray(window.app.sessionData?.bonuses)) {
+        window.app.sessionData.bonuses = window.app.sessionData.bonuses.filter(b => b.id !== bonusId);
+    }
+
+    if (window.app && window.app.editingBonusId === bonusId && typeof window.app.cancelBonusEdit === 'function') {
+        window.app.cancelBonusEdit();
+    }
+
+    renderBonusCollectionList();
+    updateBonusStats();
     showToast('Bonus supprimé', 'success');
 }
 
 function updateBonusStats() {
-    const bonuses = app.sessionData && Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
-    const bonusCount = bonuses.length;
-    const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
-    
-    const countEl = document.getElementById('bonusCount');
-    
-    if (countEl) {
-        countEl.textContent = bonusCount;
+    updateKeyStats();
+}
+
+function calculateBreakevenMultiplier(bonuses, startingBalance) {
+    const totalStake = bonuses.reduce((sum, bonus) => sum + (parseFloat(bonus.stake) || 0), 0);
+    if (totalStake <= 0 || startingBalance <= 0) {
+        return null;
     }
-    
-    updateCompactBreakevenDisplay();
+
+    const totalBonusValue = totalStake * 100;
+    if (totalBonusValue <= 0) {
+        return null;
+    }
+
+    return (startingBalance / totalBonusValue) * 100;
 }
 
 function updateCompactBreakevenDisplay() {
-     const container = document.getElementById('bonusListContainer');
-     if (!container || !app.sessionData) return;
+    if (!window.app) return;
+    const bonuses = Array.isArray(window.app.sessionData?.bonuses) ? window.app.sessionData.bonuses : [];
+    const startingBalance = window.app.sessionData?.huntPrice || 0;
+    const multiplier = calculateBreakevenMultiplier(bonuses, startingBalance);
 
-     const bonuses = Array.isArray(app.sessionData.bonuses) ? app.sessionData.bonuses : [];
-     const totalStake = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
-     const startingBalance = app.sessionData.huntPrice || 0;
+    const chip = document.getElementById('compactBreakevenDisplay');
+    if (chip) {
+        if (multiplier) {
+            chip.style.display = 'flex';
+            chip.textContent = `Breakeven x${multiplier.toFixed(2)}`;
+        } else {
+            chip.style.display = 'none';
+        }
+    }
 
-     let multiplier = null;
-     if (totalStake > 0 && startingBalance > 0) {
-         // Convert total stake to currency value using spinPrice × 100 formula
-         const totalBonusValue = totalStake * 100;
-         // CORRECT formula: breakeven = (startingBalance / totalBonusValue) × 100
-         multiplier = (startingBalance / totalBonusValue) * 100;
-     }
+    const stat = document.getElementById('statBreakeven');
+    if (stat) {
+        stat.textContent = multiplier ? `x${multiplier.toFixed(2)}` : '--';
+    }
+}
 
-     const parent = container.parentElement;
-     if (!parent) return;
+function updateKeyStats() {
+    const bonuses = Array.isArray(window.app?.sessionData?.bonuses) ? window.app.sessionData.bonuses : [];
+    const bonusCount = bonuses.length;
+    const startingBalance = window.app?.sessionData?.huntPrice ? parseFloat(window.app.sessionData.huntPrice) : 0;
+    const totalGain = openingPhaseState.results.reduce((sum, result) => sum + (parseFloat(result.gain) || 0), 0);
+    const netResult = totalGain - startingBalance;
 
-     let compactDisplay = parent.querySelector('#compactBreakevenDisplay');
+    const huntPriceEl = document.getElementById('statHuntPrice');
+    if (huntPriceEl) {
+        huntPriceEl.textContent = formatCurrency(startingBalance);
+    }
 
-     if (totalStake > 0 && multiplier !== null && isFinite(multiplier)) {
-         if (!compactDisplay) {
-             compactDisplay = document.createElement('div');
-             compactDisplay.id = 'compactBreakevenDisplay';
-             compactDisplay.style.cssText = `
-                 text-align: center;
-                 padding: 0.75rem 1rem;
-                 margin-bottom: 1rem;
-                 font-size: 1.1rem;
-                 font-weight: 600;
-                 color: var(--primary-color);
-                 background: rgba(59, 130, 246, 0.08);
-                 border: 1px solid rgba(59, 130, 246, 0.2);
-                 border-radius: 8px;
-             `;
-             parent.insertBefore(compactDisplay, container);
-         }
+    const bonusCountEl = document.getElementById('bonusCount');
+    if (bonusCountEl) {
+        bonusCountEl.textContent = bonusCount;
+    }
 
-         compactDisplay.style.display = 'block';
-         compactDisplay.textContent = `x${multiplier.toFixed(2)}`;
-     } else if (compactDisplay) {
-         compactDisplay.style.display = 'none';
-     }
- }
+    const collectionCountEl = document.getElementById('collectionBonusCount');
+    if (collectionCountEl) {
+        collectionCountEl.textContent = bonusCount;
+    }
 
-function escapeHtml(text) {
-    const map = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;'
+    const netResultEl = document.getElementById('statNetResult');
+    if (netResultEl) {
+        if (openingPhaseState.results.length === 0) {
+            netResultEl.textContent = '--';
+            netResultEl.classList.remove('positive');
+            netResultEl.classList.remove('negative');
+        } else {
+            netResultEl.textContent = formatNetResultDisplay(netResult);
+            netResultEl.classList.toggle('positive', netResult > 0);
+            netResultEl.classList.toggle('negative', netResult < 0);
+        }
+    }
+
+    updateCompactBreakevenDisplay();
+}
+
+function handleOpeningGainSubmit(event) {
+    event.preventDefault();
+    const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
+    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
+
+    if (!currentBonus) return;
+
+    const betAmount = parseAmount(currentBonus.stake);
+    const normalizedStake = betAmount !== null ? betAmount : 0;
+    const bonusValue = currentBonus.bonusValue || (normalizedStake * 100);
+    const multiplierValue = normalizedStake > 0 ? (gainAmount / normalizedStake).toFixed(2) : '0';
+
+    const result = {
+        bonusId: currentBonus.id,
+        bonusName: currentBonus.name,
+        stake: normalizedStake,
+        bonusPrice: bonusValue,
+        bonusValue,
+        gain: gainAmount,
+        multiplier: multiplierValue,
+        createdAt: new Date().toISOString()
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+
+    openingPhaseState.results.push(result);
+    addResultToOpeningList(result);
+    updateKeyStats();
+
+    openingPhaseState.currentBonusIndex++;
+
+    if (openingPhaseState.currentBonusIndex < openingPhaseState.bonuses.length) {
+        displayCurrentBonus();
+    } else {
+        showSessionSummary();
+    }
+
+    document.getElementById('gainAmount').value = '';
+    document.getElementById('gainMultiplier').value = '';
 }
 
 function parseAmount(value) {
@@ -293,338 +473,406 @@ function getBonusPriceFromBonus(bonus) {
 
 function getBonusPriceForResult(result) {
     if (!result) return 0;
-    
-    // First try bonusValue field (the correct currency value)
+
     const bonusValueAmount = parseAmount(result.bonusValue);
     if (bonusValueAmount !== null) {
         return bonusValueAmount;
     }
-    
-    // Then try bonusPrice field (should now contain the calculated value)
+
     const directAmount = parseAmount(result.bonusPrice);
     if (directAmount !== null) {
         return directAmount;
     }
-    
-    // Fallback: calculate from stake (spinPrice × 100)
+
     const stakeAmount = parseAmount(result.stake);
     if (stakeAmount !== null) {
-        return stakeAmount * 100; // Convert spinPrice to actual currency value
+        return stakeAmount * 100;
     }
-    
-    // Last resort: try to find the bonus in openingPhaseState
+
     const linkedBonus = openingPhaseState.bonuses.find(b => b.id === result.bonusId);
     if (linkedBonus) {
         return linkedBonus.bonusValue || (linkedBonus.stake * 100);
     }
-    
+
     return 0;
-}
-
-function handleOpeningGainSubmit(event) {
-    event.preventDefault();
-    const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
-    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
-    
-    if (!currentBonus) return;
-    
-    const betAmount = parseAmount(currentBonus.stake);
-    const normalizedStake = betAmount !== null ? betAmount : 0;
-    const bonusPrice = getBonusPriceFromBonus(currentBonus);
-    const bonusValue = currentBonus.bonusValue || (normalizedStake * 100);
-    // Use stake (spinPrice) for multiplier calculation
-    const multiplierValue = normalizedStake > 0 ? (gainAmount / normalizedStake).toFixed(2) : '0';
-
-    const result = {
-        bonusId: currentBonus.id,
-        bonusName: currentBonus.name,
-        stake: normalizedStake,
-        bonusPrice: bonusValue, // Store the actual currency value
-        bonusValue: bonusValue, // Store explicitly for clarity
-        gain: gainAmount,
-        multiplier: multiplierValue,
-        createdAt: new Date().toISOString()
-    };
-    
-    openingPhaseState.results.push(result);
-    
-    // Add to opening list display
-    addResultToOpeningList(result);
-    
-    // Move to next bonus
-    openingPhaseState.currentBonusIndex++;
-    
-    if (openingPhaseState.currentBonusIndex < openingPhaseState.bonuses.length) {
-        displayCurrentBonus();
-    } else {
-        showSessionSummary();
-    }
-    
-    // Reset form
-    document.getElementById('gainAmount').value = '';
-    document.getElementById('gainMultiplier').value = '';
 }
 
 function displayCurrentBonus() {
     const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
-    
+
     if (!currentBonus) return;
-    
-    document.getElementById('openingBonusName').textContent = currentBonus.name;
-    // Display the bonus value (spinPrice × 100) instead of just the stake
+
+    const providerEl = document.getElementById('openingBonusProvider');
+    if (providerEl) {
+        providerEl.textContent = currentBonus.provider || 'Provider en attente';
+    }
+
+    const nameEl = document.getElementById('openingBonusName');
+    if (nameEl) {
+        nameEl.textContent = currentBonus.name;
+    }
+
     const bonusValue = currentBonus.bonusValue || (currentBonus.stake * 100);
-    document.getElementById('openingBetAmount').textContent = bonusValue.toFixed(2) + '€';
+    const betEl = document.getElementById('openingBetAmount');
+    if (betEl) {
+        betEl.textContent = formatCurrency(bonusValue);
+    }
+
+    const imageEl = document.getElementById('openingBonusImage');
+    if (imageEl) {
+        imageEl.src = getBonusArtwork(currentBonus);
+        imageEl.alt = currentBonus.name || 'Slot';
+    }
+
     document.getElementById('gainAmount').value = '';
     document.getElementById('gainMultiplier').value = '';
 }
 
 function addResultToOpeningList(result) {
-     const container = document.getElementById('openingListContainer');
-     if (!container) return;
+    const container = document.getElementById('openingListContainer');
+    if (!container) return;
 
-     // Remove empty state if it exists
-     const emptyState = container.querySelector('.empty-state');
-     if (emptyState) {
-         emptyState.remove();
-     }
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
 
-     const resultIndex = openingPhaseState.results.indexOf(result);
+    const resultIndex = openingPhaseState.results.indexOf(result);
 
-     const resultItem = document.createElement('div');
-     resultItem.className = 'result-item';
-     resultItem.setAttribute('data-result-index', resultIndex);
-     resultItem.style.cssText = `
-         display: flex;
-         justify-content: space-between;
-         align-items: center;
-         padding: 1rem;
-         background: var(--bg-color);
-         border: 2px solid var(--border-color);
-         border-radius: 8px;
-         gap: 1rem;
-         margin-bottom: 0.5rem;
-         opacity: 0;
-         animation: itemFadeInScale 0.3s ease-out forwards;
-         transition: all 0.3s ease;
-     `;
+    const resultItem = document.createElement('div');
+    resultItem.className = 'result-item';
+    resultItem.setAttribute('data-result-index', resultIndex);
 
-     const resultInfo = document.createElement('div');
-     resultInfo.style.cssText = 'flex: 1;';
+    const resultInfo = document.createElement('div');
+    resultInfo.className = 'result-info';
+    renderResultInfo(resultInfo, result);
 
-     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-     resultInfo.innerHTML = `
-         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-         <div style="font-size: 0.9rem; color: var(--muted-text);">Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
-         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
-     `;
+    const actions = document.createElement('div');
+    actions.className = 'result-actions';
 
-     const editBtn = document.createElement('button');
-     editBtn.type = 'button';
-     editBtn.className = 'btn btn-outline';
-     editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
-     editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
-     editBtn.onclick = function() {
-         editResult(resultIndex, resultItem);
-     };
+    const editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.className = 'icon-button result-edit-btn';
+    editBtn.innerHTML = '<i data-lucide="edit-2"></i>';
+    editBtn.addEventListener('click', () => editResult(resultIndex, resultItem));
 
-     resultItem.appendChild(resultInfo);
-     resultItem.appendChild(editBtn);
-     container.appendChild(resultItem);
- }
+    actions.appendChild(editBtn);
+
+    resultItem.appendChild(resultInfo);
+    resultItem.appendChild(actions);
+    container.appendChild(resultItem);
+
+    refreshLucideIcons();
+}
+
+function renderResultInfo(resultInfo, result) {
+    const multiplierClass = result.gain > 0 ? 'positive' : 'negative';
+    resultInfo.innerHTML = `
+        <p class="result-name">${escapeHtml(result.bonusName)}</p>
+        <div class="result-meta">
+            <span class="result-gain">Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</span>
+            <span class="result-multiplier ${multiplierClass}">×<span class="result-multiplier-value">${result.multiplier}</span></span>
+        </div>
+    `;
+}
 
 function editResult(resultIndex, resultItem) {
     const result = openingPhaseState.results[resultIndex];
     if (!result) return;
-    
-    const resultInfo = resultItem.querySelector('div');
-    const currentGain = result.gain;
-    const currentMultiplier = result.multiplier;
-    
+
+    const resultInfo = resultItem.querySelector('.result-info');
+    const editBtn = resultItem.querySelector('.result-edit-btn');
+    if (editBtn) {
+        editBtn.style.display = 'none';
+    }
+
     const editForm = document.createElement('div');
-    editForm.style.cssText = `
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        padding: 0.5rem;
-        background: rgba(59, 130, 246, 0.05);
-        border-radius: 4px;
-    `;
-    
+    editForm.className = 'inline-edit-form';
+
     const gainInput = document.createElement('input');
     gainInput.type = 'number';
-    gainInput.value = currentGain;
+    gainInput.value = result.gain;
     gainInput.step = '0.01';
-    gainInput.style.cssText = `
-        width: 100px;
-        padding: 0.5rem;
-        border: 1px solid var(--border-color);
-        border-radius: 4px;
-        background: var(--bg-color);
-        color: var(--text-color);
-    `;
-    
+
+    const multiplierDisplay = document.createElement('span');
+    multiplierDisplay.className = 'result-multiplier-display';
+    multiplierDisplay.textContent = `×${result.multiplier}`;
+
+    function updateMultiplier() {
+        const newGain = parseFloat(gainInput.value) || 0;
+        const newMultiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
+        multiplierDisplay.textContent = `×${newMultiplier}`;
+        multiplierDisplay.classList.toggle('positive', newGain > 0);
+        multiplierDisplay.classList.toggle('negative', newGain <= 0);
+    }
+
+    gainInput.addEventListener('input', updateMultiplier);
+
     const saveBtn = document.createElement('button');
     saveBtn.type = 'button';
     saveBtn.className = 'btn btn-success';
-    saveBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
-    saveBtn.innerHTML = '<i data-lucide="check"></i> OK';
-    
+    saveBtn.innerHTML = '<i data-lucide="check"></i>';
+
     const cancelBtn = document.createElement('button');
     cancelBtn.type = 'button';
     cancelBtn.className = 'btn btn-outline';
-    cancelBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
     cancelBtn.innerHTML = '<i data-lucide="x"></i>';
-    
-    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    const multiplierDisplay = document.createElement('span');
-    multiplierDisplay.style.cssText = `
-        min-width: 50px;
-        text-align: center;
-        font-weight: bold;
-        color: ${multiplierColor};
-    `;
-    multiplierDisplay.textContent = '×' + currentMultiplier;
-    
+
     editForm.appendChild(document.createTextNode('Gain: '));
     editForm.appendChild(gainInput);
-    editForm.appendChild(document.createTextNode('€'));
+    editForm.appendChild(document.createTextNode(' €'));
     editForm.appendChild(multiplierDisplay);
     editForm.appendChild(saveBtn);
     editForm.appendChild(cancelBtn);
-    
-    const editBtn = resultItem.querySelector('button');
-    editBtn.style.display = 'none';
-    
+
     resultInfo.innerHTML = '';
     resultInfo.appendChild(editForm);
-    
-    function updateMultiplier() {
-        const newGain = parseFloat(gainInput.value) || 0;
-        // Use stake (spinPrice) for multiplier calculation, not bonusValue
-        const newMultiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
-        multiplierDisplay.textContent = '×' + newMultiplier;
-        const newMultiplierColor = newGain > 0 ? 'var(--success-color)' : '#ef4444';
-        multiplierDisplay.style.color = newMultiplierColor;
-    }
-    
-    gainInput.addEventListener('input', updateMultiplier);
     gainInput.focus();
-    
-    saveBtn.onclick = function() {
+
+    saveBtn.addEventListener('click', () => {
         const newGain = parseFloat(gainInput.value) || 0;
         result.gain = newGain;
-        // Use stake (spinPrice) for multiplier calculation, not bonusValue
         result.multiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
-        
         reloadResultDisplay(resultIndex, resultItem);
         updateSessionSummaryTotals();
-    };
-    
-    cancelBtn.onclick = function() {
+    });
+
+    cancelBtn.addEventListener('click', () => {
         reloadResultDisplay(resultIndex, resultItem);
-    };
-    
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+    });
+
+    refreshLucideIcons();
 }
 
 function reloadResultDisplay(resultIndex, resultItem) {
     const result = openingPhaseState.results[resultIndex];
     if (!result) return;
-    
+
     resultItem.innerHTML = '';
-    
+
     const resultInfo = document.createElement('div');
-    resultInfo.style.cssText = 'flex: 1;';
-    
-    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    resultInfo.innerHTML = `
-        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
-        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
-    `;
-    
+    resultInfo.className = 'result-info';
+    renderResultInfo(resultInfo, result);
+
+    const actions = document.createElement('div');
+    actions.className = 'result-actions';
+
     const editBtn = document.createElement('button');
     editBtn.type = 'button';
-    editBtn.className = 'btn btn-outline';
-    editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
-    editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
-    editBtn.onclick = function() {
-        editResult(resultIndex, resultItem);
-    };
-    
+    editBtn.className = 'icon-button result-edit-btn';
+    editBtn.innerHTML = '<i data-lucide="edit-2"></i>';
+    editBtn.addEventListener('click', () => editResult(resultIndex, resultItem));
+
+    actions.appendChild(editBtn);
+
     resultItem.appendChild(resultInfo);
-    resultItem.appendChild(editBtn);
-    
-    if (typeof lucide !== 'undefined') {
-        lucide.createIcons();
-    }
+    resultItem.appendChild(actions);
+
+    refreshLucideIcons();
+}
+
+function buildSummaryCardHTML(startingBalance, totalGain, netResult) {
+    const netClass = netResult >= 0 ? 'positive' : 'negative';
+    const netDisplay = netResult === 0 ? '0,00€' : formatNetResultDisplay(netResult);
+    return `
+        <h3>Session terminée</h3>
+        <div class="summary-pills">
+            <span>Solde initial: ${formatCurrency(startingBalance)}</span>
+            <span>Gain total: ${formatCurrency(totalGain)}</span>
+        </div>
+        <p class="summary-net ${netClass}">Résultat net: ${netDisplay}</p>
+    `;
 }
 
 function updateSessionSummaryTotals() {
-     const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
-     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+    const totalGain = openingPhaseState.results.reduce((sum, result) => sum + (parseFloat(result.gain) || 0), 0);
+    const startingBalance = window.app?.sessionData?.huntPrice ? parseFloat(window.app.sessionData.huntPrice) : 0;
+    const netResult = totalGain - startingBalance;
 
-     // Calculate net result based on starting balance (huntPrice)
-     const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
-     const netResult = totalGain - startingBalance;
+    const summaryCard = document.querySelector('.session-summary-card');
+    if (summaryCard) {
+        summaryCard.innerHTML = buildSummaryCardHTML(startingBalance, totalGain, netResult);
+    }
 
-     const summaryDiv = document.querySelector('.bonus-list > div:first-child');
-     if (summaryDiv && summaryDiv.querySelector('h3')) {
-         summaryDiv.innerHTML = `
-             <h3>Tous les Bonus Ouverts</h3>
-             <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
-             <p>Gain total: ${totalGain.toFixed(2)}€</p>
-             <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                 Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
-             </p>
-         `;
-     }
- }
+    updateKeyStats();
+}
 
 function showSessionSummary() {
-     // Calculate totals
-     const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
-     const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+    const totalGain = openingPhaseState.results.reduce((sum, result) => sum + (parseFloat(result.gain) || 0), 0);
+    const startingBalance = window.app?.sessionData?.huntPrice ? parseFloat(window.app.sessionData.huntPrice) : 0;
+    const netResult = totalGain - startingBalance;
 
-     // Calculate net result based on starting balance (huntPrice)
-     const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
-     const netResult = totalGain - startingBalance;
+    const openingPanel = document.querySelector('.opening-phase-panel');
+    if (openingPanel) {
+        openingPanel.style.display = 'none';
+    }
 
-     // Hide the machine frame (opening-phase-panel)
-     const openingPanel = document.querySelector('.opening-phase-panel');
-     if (openingPanel) {
-         openingPanel.style.display = 'none';
-     }
+    const container = document.getElementById('openingListContainer');
+    if (container) {
+        const summaryCard = document.createElement('div');
+        summaryCard.className = 'session-summary-card';
+        summaryCard.innerHTML = buildSummaryCardHTML(startingBalance, totalGain, netResult);
+        container.prepend(summaryCard);
+    }
 
-     // Update the progress panel header to be more prominent
-     const progressPanel = document.querySelector('.panel[style*="margin-top: 2rem;"]');
-     if (progressPanel) {
-         progressPanel.style.marginTop = '0';
-     }
+    if (!openingPhaseState.summarySaved && openingPhaseState.results.length > 0) {
+        saveSessionToHistory({
+            id: Date.now(),
+            name: window.app?.sessionData?.name || 'Bonus Hunt',
+            date: new Date().toISOString(),
+            startingBalance,
+            totalGain,
+            netResult,
+            bonuses: openingPhaseState.bonuses,
+            results: openingPhaseState.results
+        });
+        openingPhaseState.summarySaved = true;
+        renderSessionHistory();
+    }
 
-     // Show summary message
-     const summaryMsg = `
-         <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem; opacity: 0; animation: summaryFadeIn 0.5s ease-out forwards;">
-             <h3>Tous les Bonus Ouverts</h3>
-             <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
-             <p>Gain total: ${totalGain.toFixed(2)}€</p>
-             <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
-                 Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
-             </p>
-         </div>
-     `;
+    updateKeyStats();
+    refreshLucideIcons();
+}
 
-     const container = document.getElementById('openingListContainer');
-     if (container) {
-         container.innerHTML = summaryMsg + container.innerHTML;
-     }
+function saveSessionToHistory(sessionSummary) {
+    if (typeof localStorage === 'undefined') return;
 
-     if (typeof lucide !== 'undefined') {
-         lucide.createIcons();
-     }
- }
+    const history = getSessionHistory();
+    const safeSummary = {
+        ...sessionSummary,
+        bonuses: Array.isArray(sessionSummary.bonuses)
+            ? sessionSummary.bonuses.map(bonus => ({ ...bonus }))
+            : [],
+        results: Array.isArray(sessionSummary.results)
+            ? sessionSummary.results.map(result => ({ ...result }))
+            : []
+    };
+
+    history.unshift(safeSummary);
+    if (history.length > 10) {
+        history.length = 10;
+    }
+
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    selectedHistoryIndex = 0;
+}
+
+function getSessionHistory() {
+    if (typeof localStorage === 'undefined') return [];
+    try {
+        const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (!stored) return [];
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function renderSessionHistory() {
+    const listEl = document.getElementById('sessionHistoryList');
+    if (!listEl) return;
+
+    const history = getSessionHistory();
+    listEl.innerHTML = '';
+
+    if (!history.length) {
+        listEl.innerHTML = `
+            <div class="empty-state compact">
+                <i data-lucide="clock-3"></i>
+                <p>Aucune session enregistrée</p>
+            </div>`;
+        const details = document.getElementById('sessionHistoryDetails');
+        if (details) {
+            details.innerHTML = '<h4>Aperçu</h4><p>Sélectionnez une session pour afficher les détails et revivre vos gains.</p>';
+        }
+        selectedHistoryIndex = null;
+        refreshLucideIcons();
+        return;
+    }
+
+    if (selectedHistoryIndex === null || selectedHistoryIndex >= history.length) {
+        selectedHistoryIndex = 0;
+    }
+
+    history.forEach((session, index) => {
+        const item = document.createElement('button');
+        item.type = 'button';
+        item.className = `history-item${index === selectedHistoryIndex ? ' active' : ''}`;
+        item.innerHTML = `
+            <div>
+                <p class="history-date">${formatSessionDate(session.date) || '—'}</p>
+                <p class="history-balance">Budget ${formatCurrency(session.startingBalance || 0)}</p>
+            </div>
+            <span class="history-net ${session.netResult >= 0 ? 'positive' : 'negative'}">${formatNetResultDisplay(session.netResult || 0)}</span>
+        `;
+        item.addEventListener('click', () => {
+            showSessionDetails(index);
+            if (window.innerWidth <= 1024) {
+                document.body.classList.remove('sidebar-open');
+            }
+        });
+        listEl.appendChild(item);
+    });
+
+    showSessionDetails(selectedHistoryIndex);
+    refreshLucideIcons();
+}
+
+function showSessionDetails(index) {
+    const history = getSessionHistory();
+    const session = history[index];
+    if (!session) return;
+
+    selectedHistoryIndex = index;
+    highlightActiveHistoryItem(index);
+
+    const details = document.getElementById('sessionHistoryDetails');
+    if (!details) return;
+
+    const resultsPreview = Array.isArray(session.results) ? session.results.slice(0, 3) : [];
+    const previewList = resultsPreview.length
+        ? resultsPreview.map(result => `<li>${escapeHtml(result.bonusName || 'Slot')} · ${formatCurrency(result.gain || 0)}</li>`).join('')
+        : '<li>Aucun résultat enregistré</li>';
+
+    details.innerHTML = `
+        <div class="history-detail-header">
+            <h4>${escapeHtml(session.name || 'Bonus Hunt')}</h4>
+            <span>${formatSessionDate(session.date) || ''}</span>
+        </div>
+        <div class="history-detail-stats">
+            <span class="history-pill">Budget ${formatCurrency(session.startingBalance || 0)}</span>
+            <span class="history-pill">Gains ${formatCurrency(session.totalGain || 0)}</span>
+            <span class="history-pill ${session.netResult >= 0 ? 'positive' : 'negative'}">${formatNetResultDisplay(session.netResult || 0)}</span>
+        </div>
+        <ul class="history-mini-list">${previewList}</ul>
+    `;
+}
+
+function highlightActiveHistoryItem(index) {
+    const items = document.querySelectorAll('.history-item');
+    items.forEach((item, idx) => {
+        if (idx === index) {
+            item.classList.add('active');
+        } else {
+            item.classList.remove('active');
+        }
+    });
+}
+
+function escapeHtml(text) {
+    if (typeof text !== 'string') {
+        return text || '';
+    }
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
 
 // Export functions for potential external use
 window.BonusHuntApp = {
