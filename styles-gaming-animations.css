@@ -72,22 +72,22 @@
 
 /* Enhanced button animations */
 .bonus-hunt-body .btn::before {
-  content: '';
+  /* content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
-  transition: left 0.5s ease;
+  transition: left 0.5s ease; */
 }
 
 .bonus-hunt-body .btn:hover::before {
-  left: 100%;
+  /* left: 100%; */
 }
 
 .bonus-hunt-body .btn:hover {
-  transform: translateY(-3px) scale(1.05);
+  /* transform: translateY(-3px) scale(1.05); Removed to fix mouse glitch */
   box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3);
 }
 
