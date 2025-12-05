@@ -16,20 +16,29 @@ class BonusHuntNavigation {
 
     initializeTheme() {
         // Initialiser le thème depuis localStorage
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const savedTheme = localStorage.getItem('theme') || 'dark';
         document.documentElement.className = savedTheme;
         
         // Mettre à jour le bouton toggle
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
-            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌓';
+            this.updateThemeToggleIcon(themeToggle, savedTheme);
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.className;
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 document.documentElement.className = newTheme;
                 localStorage.setItem('theme', newTheme);
-                themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
+                this.updateThemeToggleIcon(themeToggle, newTheme);
             });
+        }
+    }
+
+    updateThemeToggleIcon(toggle, theme) {
+        if (!toggle) return;
+        const icon = theme === 'dark' ? 'sun' : 'moon';
+        toggle.innerHTML = `<i data-lucide="${icon}"></i>`;
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     }
 }
