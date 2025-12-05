@@ -4377,6 +4377,111 @@ h1 img {
   box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
 }
 
+/* Fix for mouse cursor glitch on opening section buttons */
+#view-opening .btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  transform: none !important;
+  transition: box-shadow 0.2s ease !important;
+  position: relative;
+  z-index: 10 !important;
+}
+
+#view-opening .btn:hover {
+  transform: none !important;
+  box-shadow: 0 15px 30px rgba(0, 255, 255, 0.3) !important;
+}
+
+#view-opening .btn::before,
+#view-opening .btn::after {
+  display: none !important;
+}
+
+#view-opening .opening-actions .btn,
+#view-opening .opening-toolbar .btn {
+  position: relative;
+  z-index: 10 !important;
+}
+
+/* Ensure opening form container doesn't interfere with mouse events */
+#view-opening .opening-phase-panel {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+#view-opening .gain-form {
+  position: relative;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+#view-opening .form-group {
+  position: relative;
+  z-index: 7;
+  pointer-events: auto;
+}
+
+#view-opening .machine-visual {
+  position: relative;
+  z-index: 4;
+  pointer-events: auto;
+}
+
+#view-opening .machine-info {
+  position: relative;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+/* Fix input focus to prevent cursor issues in opening section */
+#view-opening input:focus {
+  outline: none;
+  border-color: var(--bonus-cyan);
+  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+}
+
+/* Fix result items mouse interactions */
+#view-opening .result-item {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 6;
+}
+
+#view-opening .result-actions {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 7;
+}
+
+#view-opening .result-edit-btn {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 8 !important;
+}
+
+/* Fix inline edit form interactions */
+#view-opening .inline-edit-form {
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 9;
+}
+
+#view-opening .inline-edit-form input {
+  pointer-events: auto !important;
+  cursor: text !important;
+  position: relative;
+  z-index: 10;
+}
+
+#view-opening .inline-edit-form button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  position: relative;
+  z-index: 11 !important;
+}
+
 .bonus-hunt-body .btn {
   display: inline-flex;
   align-items: center;

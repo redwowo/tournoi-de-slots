@@ -322,3 +322,24 @@ eyebrow {
 .error-shake {
   animation: errorShake 0.5s ease-in-out;
 }
+
+/* Mouse cursor glitch fixes for opening section */
+#view-opening .opening-phase-panel:hover {
+  transform: none !important;
+}
+
+#view-opening .result-item:hover {
+  transform: none !important;
+}
+
+#view-opening .machine-visual::before {
+  animation: none !important;
+}
+
+#view-opening .glass-card::after {
+  animation: none !important;
+}
+
+#view-opening .bonus-hunt-body .btn:hover {
+  transform: none !important;
+}
