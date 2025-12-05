@@ -3802,6 +3802,7 @@ h1 img {
   font-family: 'Orbitron', 'Space Grotesk', 'Inter', sans-serif;
   position: relative;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .bonus-hunt-body::before {
@@ -3833,6 +3834,29 @@ h1 img {
   grid-template-columns: 320px 1fr;
   min-height: 100vh;
   position: relative;
+  overflow-x: hidden;
+}
+
+.hunt-main {
+  background: var(--bonus-bg);
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 3;
+  overflow-x: hidden;
+}
+
+.game-view {
+  display: none;
+  flex: 1;
+  padding: 0;
+  position: relative;
+  z-index: 4;
+}
+
+.game-view.active {
+  display: block;
 }
 
 .hunt-sidebar {
@@ -3842,11 +3866,12 @@ h1 img {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  height: 100vh;
+  max-height: 100vh;
   position: sticky;
   top: 0;
   overflow-y: auto;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+  z-index: 5;
 }
 
 .sidebar-brand {
@@ -3997,7 +4022,7 @@ h1 img {
   gap: 1rem;
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 15;
 }
 
 .header-left {
@@ -4148,6 +4173,8 @@ h1 img {
 
 .neon-panel {
   padding: 1.5rem 2rem 2rem;
+  position: relative;
+  z-index: 4;
 }
 
 .kpi-grid {
@@ -4226,6 +4253,7 @@ h1 img {
   position: relative;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  z-index: 4;
 }
 
 .glass-card::before {
@@ -4268,6 +4296,8 @@ h1 img {
   color: var(--bonus-text);
   border-radius: 12px;
   padding: 0.75rem 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .bonus-hunt-body input:focus {
@@ -4311,6 +4341,8 @@ h1 img {
   cursor: pointer;
   padding: 0.75rem 1.25rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  z-index: 6;
 }
 
 .bonus-hunt-body .btn-primary {
@@ -4350,6 +4382,9 @@ h1 img {
   display: grid;
   grid-template-columns: 380px 1fr;
   gap: 1.5rem;
+  padding: 2rem;
+  position: relative;
+  z-index: 4;
 }
 
 .games-panel .panel-header,
@@ -4366,6 +4401,8 @@ h1 img {
   gap: 1rem;
   max-height: 70vh;
   overflow-y: auto;
+  position: relative;
+  z-index: 5;
 }
 
 .games-grid {
@@ -4447,6 +4484,9 @@ h1 img {
   display: grid;
   grid-template-columns: 420px 1fr;
   gap: 1.5rem;
+  padding: 2rem;
+  position: relative;
+  z-index: 4;
 }
 
 .current-machine {
@@ -4480,6 +4520,8 @@ h1 img {
 .results-panel,
 .games-panel {
   border-radius: 22px;
+  position: relative;
+  z-index: 4;
 }
 
 .result-item {
@@ -4562,7 +4604,7 @@ h1 img {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
-  z-index: 15;
+  z-index: 18;
 }
 
 body.sidebar-open #sidebarOverlay {
