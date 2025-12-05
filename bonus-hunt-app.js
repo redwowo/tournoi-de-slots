@@ -379,60 +379,58 @@ function displayCurrentBonus() {
 }
 
 function addResultToOpeningList(result) {
-    const container = document.getElementById('openingListContainer');
-    if (!container) return;
-    
-    // Remove empty state if it exists
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const resultIndex = openingPhaseState.results.indexOf(result);
-    
-    const resultItem = document.createElement('div');
-    resultItem.className = 'result-item';
-    resultItem.setAttribute('data-result-index', resultIndex);
-    resultItem.style.cssText = `
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        background: var(--bg-color);
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
-        gap: 1rem;
-        margin-bottom: 0.5rem;
-        opacity: 0;
-        animation: itemFadeInScale 0.3s ease-out forwards;
-        transition: all 0.3s ease;
-    `;
-    
-    const resultInfo = document.createElement('div');
-    resultInfo.style.cssText = 'flex: 1;';
-    
-    const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    const bonusValue = getBonusPriceForResult(result);
-    const priceDisplay = Number.isFinite(bonusValue) ? bonusValue.toFixed(2) : '0.00';
-    resultInfo.innerHTML = `
-        <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceDisplay}€ | Mise: ${(result.stake * 100).toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
-        <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
-    `;
-    
-    const editBtn = document.createElement('button');
-    editBtn.type = 'button';
-    editBtn.className = 'btn btn-outline';
-    editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
-    editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
-    editBtn.onclick = function() {
-        editResult(resultIndex, resultItem);
-    };
-    
-    resultItem.appendChild(resultInfo);
-    resultItem.appendChild(editBtn);
-    container.appendChild(resultItem);
-}
+     const container = document.getElementById('openingListContainer');
+     if (!container) return;
+
+     // Remove empty state if it exists
+     const emptyState = container.querySelector('.empty-state');
+     if (emptyState) {
+         emptyState.remove();
+     }
+
+     const resultIndex = openingPhaseState.results.indexOf(result);
+
+     const resultItem = document.createElement('div');
+     resultItem.className = 'result-item';
+     resultItem.setAttribute('data-result-index', resultIndex);
+     resultItem.style.cssText = `
+         display: flex;
+         justify-content: space-between;
+         align-items: center;
+         padding: 1rem;
+         background: var(--bg-color);
+         border: 2px solid var(--border-color);
+         border-radius: 8px;
+         gap: 1rem;
+         margin-bottom: 0.5rem;
+         opacity: 0;
+         animation: itemFadeInScale 0.3s ease-out forwards;
+         transition: all 0.3s ease;
+     `;
+
+     const resultInfo = document.createElement('div');
+     resultInfo.style.cssText = 'flex: 1;';
+
+     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
+     resultInfo.innerHTML = `
+         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
+         <div style="font-size: 0.9rem; color: var(--muted-text);">Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
+     `;
+
+     const editBtn = document.createElement('button');
+     editBtn.type = 'button';
+     editBtn.className = 'btn btn-outline';
+     editBtn.style.cssText = 'padding: 0.5rem 0.75rem; flex-shrink: 0;';
+     editBtn.innerHTML = '<i data-lucide="edit-2"></i> Modifier';
+     editBtn.onclick = function() {
+         editResult(resultIndex, resultItem);
+     };
+
+     resultItem.appendChild(resultInfo);
+     resultItem.appendChild(editBtn);
+     container.appendChild(resultItem);
+ }
 
 function editResult(resultIndex, resultItem) {
     const result = openingPhaseState.results[resultIndex];
@@ -541,11 +539,9 @@ function reloadResultDisplay(resultIndex, resultItem) {
     resultInfo.style.cssText = 'flex: 1;';
     
     const multiplierColor = result.gain > 0 ? 'var(--success-color)' : '#ef4444';
-    const bonusValue = getBonusPriceForResult(result);
-    const priceDisplay = Number.isFinite(bonusValue) ? bonusValue.toFixed(2) : '0.00';
     resultInfo.innerHTML = `
         <div style="font-weight: bold; color: var(--heading-color);">${escapeHtml(result.bonusName)}</div>
-        <div style="font-size: 0.9rem; color: var(--muted-text);">Valeur du bonus: ${priceDisplay}€ | Mise: ${(result.stake * 100).toFixed(2)}€ | Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
+        <div style="font-size: 0.9rem; color: var(--muted-text);">Gain: <span class="result-gain-value">${result.gain.toFixed(2)}</span>€</div>
         <div style="font-size: 0.9rem; color: ${multiplierColor}; font-weight: bold;">×<span class="result-multiplier-value">${result.multiplier}</span></div>
     `;
     
@@ -579,14 +575,13 @@ function updateSessionSummaryTotals() {
          summaryDiv.innerHTML = `
              <h3>Tous les Bonus Ouverts</h3>
              <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
-             <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
              <p>Gain total: ${totalGain.toFixed(2)}€</p>
              <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
                  Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
              </p>
          `;
      }
-}
+ }
 
 function showSessionSummary() {
      // Calculate totals
@@ -614,7 +609,6 @@ function showSessionSummary() {
          <div style="text-align: center; padding: 2rem; background: var(--bg-color); border-radius: 8px; margin-bottom: 2rem; opacity: 0; animation: summaryFadeIn 0.5s ease-out forwards;">
              <h3>Tous les Bonus Ouverts</h3>
              <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
-             <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
              <p>Gain total: ${totalGain.toFixed(2)}€</p>
              <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
                  Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
@@ -630,7 +624,7 @@ function showSessionSummary() {
      if (typeof lucide !== 'undefined') {
          lucide.createIcons();
      }
-}
+ }
 
 // Export functions for potential external use
 window.BonusHuntApp = {
