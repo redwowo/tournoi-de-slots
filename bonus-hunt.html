@@ -162,18 +162,8 @@
                                 <input type="text" id="bonusName" placeholder="Ex: Wanted Dead or a Wild" required>
                             </div>
                             <div class="form-group">
-                                <label for="bonusProvider">Provider</label>
-                                <input type="text" id="bonusProvider" placeholder="Hacksaw Gaming">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="bonusStake">Prix du spin (€)</label>
-                                    <input type="number" id="bonusStake" placeholder="0.10" step="0.01" min="0" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="bonusImage">Image du jeu (URL)</label>
-                                    <input type="url" id="bonusImage" placeholder="https://">
-                                </div>
+                                <label for="bonusStake">Prix du spin (€)</label>
+                                <input type="number" id="bonusStake" placeholder="0.10" step="0.01" min="0" required>
                             </div>
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">
@@ -423,7 +413,7 @@
                 };
                 const subtitleCopy = {
                     1: 'Définissez votre budget et donnez un nom à votre chasse aux bonus.',
-                    2: 'Ajoutez vos machines favorites avec leurs providers et préparez la session.',
+                    2: 'Ajoutez vos machines favorites et préparez la session.',
                     3: 'Ouvrez vos bonus et suivez vos gains en direct.'
                 };
 
@@ -440,9 +430,7 @@
                 if (!bonus) return;
 
                 document.getElementById('bonusName').value = bonus.name || '';
-                document.getElementById('bonusProvider').value = bonus.provider || '';
                 document.getElementById('bonusStake').value = bonus.stake || '';
-                document.getElementById('bonusImage').value = bonus.imageUrl || '';
                 this.editingBonusId = bonusId;
                 this.setBonusFormState('edit');
                 document.getElementById('bonusForm').scrollIntoView({ behavior: 'smooth' });

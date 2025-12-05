@@ -174,9 +174,7 @@ function handleBonusFormSubmit(event) {
     event.preventDefault();
 
     const bonusName = document.getElementById('bonusName').value;
-    const bonusProvider = document.getElementById('bonusProvider').value;
     const spinPrice = parseFloat(document.getElementById('bonusStake').value);
-    const bonusImage = document.getElementById('bonusImage').value;
 
     if (!bonusName.trim() || !spinPrice || spinPrice <= 0) {
         showToast('Veuillez remplir correctement tous les champs', 'warning');
@@ -196,11 +194,9 @@ function handleBonusFormSubmit(event) {
             existingBonuses[index] = {
                 ...existingBonuses[index],
                 name: bonusName,
-                provider: bonusProvider,
                 stake: spinPrice,
                 bonusPrice: bonusValue,
                 bonusValue,
-                imageUrl: bonusImage,
                 updatedAt: new Date().toISOString()
             };
             showToast('Bonus mis à jour', 'success');
@@ -212,11 +208,9 @@ function handleBonusFormSubmit(event) {
         const bonus = {
             id: Date.now(),
             name: bonusName,
-            provider: bonusProvider,
             stake: spinPrice,
             bonusPrice: bonusValue,
             bonusValue,
-            imageUrl: bonusImage,
             result: null,
             createdAt: new Date().toISOString()
         };
@@ -269,10 +263,6 @@ function renderBonusCollectionList() {
         name.className = 'game-name';
         name.textContent = bonus.name;
 
-        const provider = document.createElement('p');
-        provider.className = 'game-provider';
-        provider.textContent = bonus.provider || 'Provider inconnu';
-
         const meta = document.createElement('div');
         meta.className = 'game-meta';
         const stakeValue = isFinite(parseFloat(bonus.stake)) ? parseFloat(bonus.stake).toFixed(2) : '0.00';
@@ -285,7 +275,6 @@ function renderBonusCollectionList() {
         `;
 
         info.appendChild(name);
-        info.appendChild(provider);
         info.appendChild(meta);
 
         const actions = document.createElement('div');
@@ -506,7 +495,7 @@ function displayCurrentBonus() {
 
     const providerEl = document.getElementById('openingBonusProvider');
     if (providerEl) {
-        providerEl.textContent = currentBonus.provider || 'Provider en attente';
+        providerEl.style.display = 'none';
     }
 
     const nameEl = document.getElementById('openingBonusName');
