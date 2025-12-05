@@ -3776,27 +3776,56 @@ h1 img {
   }
 }
 
-/* Bonus Hunt Dark Theme Redesign */
+/* Bonus Hunt Dark Theme Redesign - Enhanced Gaming Experience */
 .bonus-hunt-body {
-  --bonus-bg: #03050d;
-  --bonus-panel: rgba(9, 14, 30, 0.95);
-  --bonus-sidebar: rgba(5, 8, 20, 0.95);
-  --bonus-border: rgba(255, 255, 255, 0.08);
-  --bonus-highlight: #facc15;
-  --bonus-cyan: #22d3ee;
-  --bonus-purple: #7c3aed;
-  --bonus-danger: #f43f5e;
-  --bonus-success: #34d399;
-  --bonus-muted: rgba(255, 255, 255, 0.65);
-  --bonus-text: #f8fafc;
+  --bonus-bg: #000000;
+  --bonus-panel: rgba(15, 20, 40, 0.95);
+  --bonus-sidebar: rgba(10, 15, 30, 0.95);
+  --bonus-border: rgba(255, 255, 255, 0.12);
+  --bonus-highlight: #ffd700;
+  --bonus-cyan: #00ffff;
+  --bonus-purple: #ff00ff;
+  --bonus-danger: #ff3366;
+  --bonus-success: #00ff88;
+  --bonus-muted: rgba(255, 255, 255, 0.7);
+  --bonus-text: #ffffff;
+  --bonus-neon-glow: 0 0 20px rgba(0, 255, 255, 0.5);
+  --bonus-neon-border: 2px solid #00ffff;
   padding: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.18), transparent 45%),
-    radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.25), transparent 40%),
-    #03050d;
+    radial-gradient(circle at 15% 25%, rgba(0, 255, 255, 0.15), transparent 50%),
+    radial-gradient(circle at 85% 15%, rgba(255, 0, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(255, 215, 0, 0.08), transparent 60%),
+    #000000;
   color: var(--bonus-text);
-  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-family: 'Orbitron', 'Space Grotesk', 'Inter', sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.bonus-hunt-body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 255, 255, 0.03) 2px,
+      rgba(0, 255, 255, 0.03) 4px
+    );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bonus-hunt-body > * {
+  position: relative;
+  z-index: 2;
 }
 
 .bonus-hunt-body .bonus-hunt-layout {
@@ -4053,24 +4082,68 @@ h1 img {
   display: flex;
   gap: 1rem;
   padding: 1.25rem 2rem 0;
+  position: relative;
+}
+
+.neon-stepper::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background: linear-gradient(90deg, var(--bonus-cyan), var(--bonus-purple));
+  opacity: 0.3;
+  z-index: 0;
 }
 
 .neon-stepper .step {
   flex: 1;
   border-radius: 999px;
-  padding: 0.6rem 1rem;
-  border: 1px solid var(--bonus-border);
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--bonus-border);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   color: var(--bonus-muted);
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  background: rgba(0, 0, 0, 0.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.9rem;
+}
+
+.neon-stepper .step:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 255, 255, 0.2);
+  border-color: var(--bonus-cyan);
 }
 
 .neon-stepper .step.active {
-  border-color: var(--bonus-highlight);
+  border-color: var(--bonus-cyan);
   color: var(--bonus-text);
-  box-shadow: 0 8px 25px rgba(250, 204, 21, 0.15);
+  box-shadow: 
+    0 0 20px rgba(0, 255, 255, 0.4),
+    0 8px 25px rgba(0, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+  animation: stepPulse 2s ease-in-out infinite;
+}
+
+@keyframes stepPulse {
+  0%, 100% {
+    box-shadow: 
+      0 0 20px rgba(0, 255, 255, 0.4),
+      0 8px 25px rgba(0, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 30px rgba(0, 255, 255, 0.6),
+      0 12px 35px rgba(0, 255, 255, 0.4);
+  }
 }
 
 .neon-panel {
@@ -4084,17 +4157,37 @@ h1 img {
 }
 
 .stat-card {
-  border-radius: 18px;
-  border: 1px solid var(--bonus-border);
-  padding: 1.25rem 1.5rem;
-  background: rgba(7, 11, 23, 0.9);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 20px;
+  border: 2px solid var(--bonus-border);
+  padding: 1.5rem 1.5rem;
+  background: linear-gradient(135deg, rgba(15, 20, 40, 0.95), rgba(10, 15, 30, 0.95));
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.stat-card:hover::before {
+  left: 100%;
 }
 
 .stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 25px 45px rgba(124, 58, 237, 0.25);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 
+    0 30px 60px rgba(0, 255, 255, 0.2),
+    0 0 20px rgba(0, 255, 255, 0.1);
+  border-color: var(--bonus-cyan);
 }
 
 .stat-card h3 {
@@ -4125,11 +4218,33 @@ h1 img {
 }
 
 .glass-card {
-  border: 1px solid var(--bonus-border);
-  border-radius: 22px;
-  background: rgba(7, 11, 23, 0.85);
-  padding: 1.5rem;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+  border: 2px solid var(--bonus-border);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(15, 20, 40, 0.9), rgba(10, 15, 30, 0.9));
+  padding: 2rem;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  position: relative;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--bonus-cyan), var(--bonus-purple));
+  opacity: 0.6;
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 
+    0 35px 80px rgba(0, 255, 255, 0.2),
+    0 0 25px rgba(0, 255, 255, 0.1);
+  border-color: var(--bonus-cyan);
 }
 
 .card-icon {

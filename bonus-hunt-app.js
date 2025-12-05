@@ -38,6 +38,8 @@ function initializeBonusHuntApp() {
     renderBonusCollectionList();
     renderSessionHistory();
     updateKeyStats();
+    setupEnhancedAnimations();
+    setupGamingEffects();
 }
 
 function setupFormHandlers() {

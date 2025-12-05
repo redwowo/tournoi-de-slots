@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/styles-gaming-animations.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -49,19 +50,19 @@
         <div class="hunt-main">
             <header class="bonus-hunt-header">
                 <div class="header-left">
-                    <a href="/" class="back-button" aria-label="Retour à l'accueil">
+                    <a href="/" class="back-button neon-glow" aria-label="Retour à l'accueil">
                         <i data-lucide="chevron-left"></i>
                     </a>
                     <div>
-                        <p class="eyebrow">Bonus Hunt</p>
-                        <h1 id="sessionTitle">Nouvelle session</h1>
+                        <p class="eyebrow gaming-text">Bonus Hunt</p>
+                        <h1 id="sessionTitle" class="gaming-title">Nouvelle session</h1>
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="icon-button" id="mobileSidebarToggle" aria-label="Afficher les sessions">
+                    <button class="icon-button neon-button" id="mobileSidebarToggle" aria-label="Afficher les sessions">
                         <i data-lucide="panel-left"></i>
                     </button>
-                    <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">
+                    <button class="theme-toggle neon-button" id="themeToggle" aria-label="Changer de thème">
                         <i data-lucide="sun"></i>
                     </button>
                 </div>
@@ -279,6 +280,7 @@
 
     <script src="/bonus-hunt-navigation.js"></script>
     <script src="/bonus-hunt-app.js"></script>
+    <script src="/bonus-hunt-enhanced.js"></script>
     <script>
         // Initialisation des icônes
         lucide.createIcons();
