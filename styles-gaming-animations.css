@@ -182,13 +182,9 @@
 }
 
 /* Enhanced floating animations */
-.session-chip.neon {
-  animation: floatAnimation 3s ease-in-out infinite;
-}
+/* Animation disabled for session chips */
 
-.stat-card.pulse {
-  animation: floatAnimation 2s ease-in-out infinite, neonGlow 2s ease-in-out infinite;
-}
+/* Animation disabled for stat cards */
 
 /* Enhanced text effects */
 .bonus-hunt-header h1,
