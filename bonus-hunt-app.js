@@ -569,12 +569,10 @@ function reloadResultDisplay(resultIndex, resultItem) {
 function updateSessionSummaryTotals() {
      const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
      const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-     const profitLoss = totalGain - totalBonusPrice;
 
      // Calculate net result based on starting balance (huntPrice)
      const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
-     const finalBalance = startingBalance + profitLoss;
-     const netResult = finalBalance - startingBalance;
+     const netResult = totalGain - startingBalance;
 
      const summaryDiv = document.querySelector('.bonus-list > div:first-child');
      if (summaryDiv && summaryDiv.querySelector('h3')) {
@@ -583,7 +581,6 @@ function updateSessionSummaryTotals() {
              <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
              <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
              <p>Gain total: ${totalGain.toFixed(2)}€</p>
-             <p>Solde final: ${finalBalance.toFixed(2)}€</p>
              <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
                  Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
              </p>
@@ -595,12 +592,10 @@ function showSessionSummary() {
      // Calculate totals
      const totalBonusPrice = openingPhaseState.results.reduce((sum, r) => sum + getBonusPriceForResult(r), 0);
      const totalGain = openingPhaseState.results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
-     const profitLoss = totalGain - totalBonusPrice;
 
      // Calculate net result based on starting balance (huntPrice)
      const startingBalance = app.sessionData && app.sessionData.huntPrice ? parseFloat(app.sessionData.huntPrice) : 0;
-     const finalBalance = startingBalance + profitLoss;
-     const netResult = finalBalance - startingBalance;
+     const netResult = totalGain - startingBalance;
 
      // Hide the machine frame (opening-phase-panel)
      const openingPanel = document.querySelector('.opening-phase-panel');
@@ -621,7 +616,6 @@ function showSessionSummary() {
              <p>Solde initial: ${startingBalance.toFixed(2)}€</p>
              <p>Valeur totale des bonus: ${totalBonusPrice.toFixed(2)}€</p>
              <p>Gain total: ${totalGain.toFixed(2)}€</p>
-             <p>Solde final: ${finalBalance.toFixed(2)}€</p>
              <p style="font-size: 1.2rem; font-weight: bold; color: ${netResult >= 0 ? 'var(--success-color)' : '#ef4444'};">
                  Résultat net: ${netResult >= 0 ? '+' : ''}${netResult.toFixed(2)}€
              </p>
