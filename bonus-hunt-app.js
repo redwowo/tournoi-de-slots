@@ -173,6 +173,12 @@ function getBonusArtwork(bonus) {
 function handleBonusFormSubmit(event) {
     event.preventDefault();
 
+    if (!window.app) {
+        console.error('window.app is not defined');
+        showToast('Erreur: application non initialisée', 'error');
+        return;
+    }
+
     const bonusName = document.getElementById('bonusName').value;
     const spinPrice = parseFloat(document.getElementById('bonusStake').value);
 
@@ -182,11 +188,9 @@ function handleBonusFormSubmit(event) {
     }
 
     const bonusValue = spinPrice * 100;
-    const existingBonuses = window.app && Array.isArray(window.app.sessionData?.bonuses)
+    const existingBonuses = Array.isArray(window.app.sessionData?.bonuses)
         ? window.app.sessionData.bonuses
         : [];
-
-    if (!window.app) return;
 
     if (window.app.editingBonusId) {
         const index = existingBonuses.findIndex(b => b.id === window.app.editingBonusId);
@@ -227,8 +231,14 @@ function renderBonusCollectionList() {
     const container = document.getElementById('bonusListContainer');
     if (!container) return;
 
+    if (!window.app) {
+        console.error('window.app is not defined in renderBonusCollectionList');
+        container.innerHTML = '<div class="empty-state"><p>Erreur: application non initialisée</p></div>';
+        return;
+    }
+
     container.innerHTML = '';
-    const bonuses = window.app && Array.isArray(window.app.sessionData?.bonuses) ? window.app.sessionData.bonuses : [];
+    const bonuses = Array.isArray(window.app.sessionData?.bonuses) ? window.app.sessionData.bonuses : [];
 
     if (bonuses.length === 0) {
         container.innerHTML = `

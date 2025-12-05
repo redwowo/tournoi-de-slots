@@ -268,13 +268,8 @@
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
     <div id="toastContainer" class="toast-container"></div>
 
-    <script src="/bonus-hunt-navigation.js"></script>
-    <script src="/bonus-hunt-app.js"></script>
-    <script src="/bonus-hunt-enhanced.js"></script>
     <script>
-        // Initialisation des icônes
-        lucide.createIcons();
-
+        // Définir l'objet app avant de charger les autres scripts
         const app = {
             currentStep: 1,
             editingBonusId: null,
@@ -457,6 +452,17 @@
                 }
             }
         };
+
+        // Exposer l'objet app à window pour qu'il soit accessible depuis les autres scripts
+        window.app = app;
+    </script>
+
+    <script src="/bonus-hunt-navigation.js"></script>
+    <script src="/bonus-hunt-app.js"></script>
+    <script src="/bonus-hunt-enhanced.js"></script>
+    <script>
+        // Initialisation des icônes
+        lucide.createIcons();
 
         document.addEventListener('DOMContentLoaded', () => {
             app.setBonusFormState('add');
