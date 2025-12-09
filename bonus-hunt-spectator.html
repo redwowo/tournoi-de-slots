@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectateur - Bonus Hunt</title>
+    <link rel="icon" type="image/png" href="/fly.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles-gaming-animations.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bonus-hunt-body">
+    <div class="bonus-hunt-layout spectator-mode">
+        <div class="hunt-main">
+            <header class="bonus-hunt-header">
+                <div class="header-left">
+                    <a href="/bonus-hunt" class="back-button neon-glow" aria-label="Retour au Bonus Hunt">
+                        <i data-lucide="chevron-left"></i>
+                    </a>
+                    <div>
+                        <p class="eyebrow gaming-text">Mode Spectateur 👁️</p>
+                        <h1 id="sessionTitle" class="gaming-title">Chargement...</h1>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="theme-toggle neon-button" id="themeToggle" aria-label="Changer de thème">
+                        <i data-lucide="sun"></i>
+                    </button>
+                </div>
+            </header>
+
+            <section class="session-hero">
+                <div>
+                    <p class="eyebrow" id="sessionStageLabel">Lecture seule</p>
+                    <h2 id="sessionSubtitle">Suivez cette session de Bonus Hunt en temps réel</h2>
+                </div>
+                <div class="session-meta">
+                    <span class="session-chip spectator-badge">
+                        <i data-lucide="eye"></i>
+                        Mode spectateur
+                    </span>
+                    <span class="session-chip" id="sessionStatus">
+                        <i data-lucide="activity"></i>
+                        <span id="statusText">En cours</span>
+                    </span>
+                </div>
+            </section>
+
+            <section class="kpi-dashboard neon-panel">
+                <div class="kpi-grid">
+                    <article class="stat-card">
+                        <p class="stat-label">Mise de départ</p>
+                        <h3 id="statHuntPrice">--</h3>
+                    </article>
+                    <article class="stat-card">
+                        <p class="stat-label">Nombre de bonus</p>
+                        <h3 id="bonusCount">0</h3>
+                    </article>
+                    <article class="stat-card">
+                        <p class="stat-label">Breakeven</p>
+                        <h3 id="statBreakeven">--</h3>
+                    </article>
+                    <article class="stat-card">
+                        <p class="stat-label">Résultat net</p>
+                        <h3 id="statNetResult">--</h3>
+                    </article>
+                </div>
+            </section>
+
+            <section id="bonusCollectionSection" class="game-view" style="display:none;">
+                <div class="games-panel glass-card">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Collection</p>
+                            <h3>Bonus collectés</h3>
+                        </div>
+                        <span class="session-chip" id="collectionBonusCount">0</span>
+                    </div>
+                    <div id="bonusListContainer">
+                        <div class="empty-state">
+                            <i data-lucide="inbox"></i>
+                            <p>Aucun bonus collecté pour le moment</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="bonusOpeningSection" class="game-view" style="display:none;">
+                <div class="games-panel glass-card">
+                    <div class="panel-header">
+                        <div>
+                            <p class="eyebrow">Ouverture</p>
+                            <h3>Résultats des bonus</h3>
+                        </div>
+                        <span class="session-chip" id="openingResultCount">0</span>
+                    </div>
+                    <div id="openingListContainer">
+                        <div class="empty-state">
+                            <i data-lucide="list"></i>
+                            <p>Aucun bonus ouvert pour le moment</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sessionCompletedSection" class="game-view" style="display:none;">
+                <div class="config-card glass-card">
+                    <div class="card-icon">
+                        <i data-lucide="check-circle"></i>
+                    </div>
+                    <h2>Session terminée</h2>
+                    <div id="sessionSummary"></div>
+                </div>
+            </section>
+
+            <section id="errorSection" class="game-view" style="display:none;">
+                <div class="config-card glass-card">
+                    <div class="card-icon">
+                        <i data-lucide="alert-circle"></i>
+                    </div>
+                    <h2>Session introuvable</h2>
+                    <p class="text-muted">Cette session n'existe pas ou a été supprimée.</p>
+                    <a href="/bonus-hunt" class="btn btn-primary" style="margin-top: 1.5rem;">
+                        <i data-lucide="arrow-left"></i>
+                        Retour au Bonus Hunt
+                    </a>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="/bonus-hunt-firebase.js"></script>
+    <script src="/bonus-hunt-spectator.js"></script>
+</body>
+</html>

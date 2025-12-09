@@ -153,6 +153,11 @@ function setupFormHandlers() {
             }
         });
     }
+
+    const shareBtn = document.getElementById('shareSessionButton');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', handleShareSession);
+    }
 }
 
 function setupSidebarToggle() {
@@ -1060,6 +1065,115 @@ window.BonusHuntApp = {
     displayCurrentBonus
 };
 
+// --- Share Functionality ---
+
+function getSessionShareableLink(sessionId) {
+    if (!sessionId) return null;
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/bonus-hunt/${sessionId}`;
+}
+
+function updateShareButton() {
+    const shareBtn = document.getElementById('shareSessionButton');
+    if (!shareBtn) return;
+    
+    const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
+    if (sessionId && isFirebaseEnabled) {
+        shareBtn.style.display = 'block';
+    } else {
+        shareBtn.style.display = 'none';
+    }
+}
+
+function handleShareSession() {
+    const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
+    if (!sessionId) {
+        showToast('Aucune session active à partager', 'warning');
+        return;
+    }
+    
+    const shareLink = getSessionShareableLink(sessionId);
+    if (!shareLink) {
+        showToast('Impossible de générer le lien', 'error');
+        return;
+    }
+    
+    // Copy to clipboard
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareLink)
+            .then(() => {
+                showToast('Lien copié dans le presse-papier !', 'success');
+                showShareModal(shareLink);
+            })
+            .catch(() => {
+                showShareModal(shareLink);
+            });
+    } else {
+        showShareModal(shareLink);
+    }
+}
+
+function showShareModal(shareLink) {
+    const modal = document.createElement('div');
+    modal.className = 'share-modal-overlay';
+    modal.innerHTML = `
+        <div class="share-modal glass-card">
+            <div class="share-modal-header">
+                <h3>Partager votre session</h3>
+                <button class="icon-button" onclick="this.closest('.share-modal-overlay').remove()">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="share-modal-body">
+                <p class="text-muted">Les spectateurs pourront suivre votre session en temps réel</p>
+                <div class="share-link-container">
+                    <input type="text" value="${shareLink}" readonly class="share-link-input" id="shareLinkInput">
+                    <button class="btn btn-primary" onclick="copyShareLink()">
+                        <i data-lucide="copy"></i>
+                        Copier
+                    </button>
+                </div>
+                <div class="share-info">
+                    <i data-lucide="eye"></i>
+                    <span>Mode spectateur en lecture seule</span>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    refreshLucideIcons();
+    
+    // Click outside to close
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+window.copyShareLink = function() {
+    const input = document.getElementById('shareLinkInput');
+    if (input) {
+        input.select();
+        input.setSelectionRange(0, 99999); // For mobile devices
+        
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value)
+                .then(() => {
+                    showToast('Lien copié !', 'success');
+                })
+                .catch(() => {
+                    document.execCommand('copy');
+                    showToast('Lien copié !', 'success');
+                });
+        } else {
+            document.execCommand('copy');
+            showToast('Lien copié !', 'success');
+        }
+    }
+};
+
 // --- New Override Functions ---
 
 function setupAppOverrides() {
@@ -1105,6 +1219,7 @@ function setupAppOverrides() {
                       localStorage.setItem('bonusHuntCurrentSessionId', sessionId);
                       startSessionListener(sessionId);
                  }
+                 updateShareButton();
              } catch (e) {
                  console.error('Firebase sync error:', e);
              }
@@ -1214,6 +1329,7 @@ async function loadActiveSession() {
                  }
                  
                  window.app.updateSessionHeader();
+                 updateShareButton();
                  showToast('Session restaurée', 'success');
             }
         } else {

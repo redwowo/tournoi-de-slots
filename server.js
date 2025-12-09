@@ -234,6 +234,11 @@ app.get('/tournoi/:id', (req, res) => {
   res.sendFile(path.join(__dirname, 'tournoi.html'));
 });
 
+// Route pour les bonus hunts spectateurs (ex: /bonus-hunt/bh_123456)
+app.get('/bonus-hunt/:sessionId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'bonus-hunt-spectator.html'));
+});
+
 // Sert tous les fichiers statiques du dossier courant (APRÈS les routes spécifiques)
 app.use(express.static(__dirname));
 
