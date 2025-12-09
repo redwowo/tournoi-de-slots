@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historique Bonus Hunt - Sessions Passées</title>
+    <link rel="icon" type="image/png" href="/fly.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles-gaming-animations.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bonus-hunt-body">
+
+    <div class="history-layout">
+        <header class="bonus-hunt-header">
+            <div class="header-left">
+                <a href="/bonus-hunt.html" class="back-button neon-glow" aria-label="Retour au Bonus Hunt">
+                    <i data-lucide="chevron-left"></i>
+                </a>
+                <div>
+                    <p class="eyebrow gaming-text">Bonus Hunt</p>
+                    <h1>Historique des Sessions</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="theme-toggle neon-button" id="themeToggle" aria-label="Changer de thème">
+                    <i data-lucide="sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="filters-section glass-card">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="filterDate">Filtrer par date</label>
+                    <select id="filterDate">
+                        <option value="">Toutes les dates</option>
+                        <option value="today">Aujourd'hui</option>
+                        <option value="week">Cette semaine</option>
+                        <option value="month">Ce mois</option>
+                        <option value="year">Cette année</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterResult">Filtrer par résultat</label>
+                    <select id="filterResult">
+                        <option value="">Tous les résultats</option>
+                        <option value="positive">Sessions gagnantes</option>
+                        <option value="negative">Sessions perdantes</option>
+                        <option value="breakeven">Sessions à l'équilibre</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filterMachine">Filtrer par machine</label>
+                    <select id="filterMachine">
+                        <option value="">Toutes les machines</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-outline" id="resetFilters">Réinitialiser</button>
+                    <button class="btn btn-primary" id="applyFilters">Appliquer</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="kpi-dashboard neon-panel">
+            <div class="kpi-grid">
+                <article class="stat-card">
+                    <p class="stat-label">Total Sessions</p>
+                    <h3 id="totalSessions">0</h3>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Total Gains</p>
+                    <h3 id="totalWins" class="positive">0,00€</h3>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Total Pertes</p>
+                    <h3 id="totalLosses" class="negative">0,00€</h3>
+                </article>
+                <article class="stat-card">
+                    <p class="stat-label">Moyenne/Session</p>
+                    <h3 id="averageResult">--</h3>
+                </article>
+            </div>
+        </section>
+
+        <section class="sessions-section">
+            <div class="section-header">
+                <h2>Sessions terminées</h2>
+                <div class="section-actions">
+                    <button class="btn btn-outline" id="exportHistory">
+                        <i data-lucide="download"></i>
+                        Exporter
+                    </button>
+                    <button class="btn btn-danger" id="clearOldSessions">
+                        <i data-lucide="trash-2"></i>
+                        Supprimer anciennes
+                    </button>
+                </div>
+            </div>
+
+            <div class="sessions-grid" id="sessionsGrid">
+                <div class="empty-state">
+                    <i data-lucide="clock-3"></i>
+                    <p>Aucune session terminée</p>
+                    <p class="text-muted">Commencez par créer et terminer votre première session Bonus Hunt !</p>
+                </div>
+            </div>
+
+            <div class="pagination-controls" id="paginationControls" style="display: none;">
+                <button class="btn btn-outline" id="prevPage" disabled>
+                    <i data-lucide="chevron-left"></i>
+                    Précédent
+                </button>
+                <div class="page-info">
+                    Page <span id="currentPage">1</span> / <span id="totalPages">1</span>
+                </div>
+                <button class="btn btn-outline" id="nextPage" disabled>
+                    Suivant
+                    <i data-lucide="chevron-right"></i>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="/bonus-hunt-firebase.js"></script>
+    <script src="/bonus-hunt-history.js"></script>
+    <script>
+        // Initialisation des icônes
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeHistoryApp();
+        });
+    </script>
+</body>
+</html>
