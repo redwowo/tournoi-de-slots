@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
     }
 
+    initializeBonusHuntFirebaseIntegration();
     initializeBonusHuntApp();
 });
 
@@ -32,6 +33,11 @@ let openingPhaseState = {
     summarySaved: false
 };
 
+// Firebase session management
+let currentFirebaseSession = null;
+let firebaseListenerActive = false;
+let isFirebaseEnabled = false;
+
 function initializeBonusHuntApp() {
     setupFormHandlers();
     setupSidebarToggle();
@@ -40,6 +46,76 @@ function initializeBonusHuntApp() {
     updateKeyStats();
     setupEnhancedAnimations();
     setupGamingEffects();
+}
+
+function initializeBonusHuntFirebaseIntegration() {
+    // Initialize Firebase if the module is available
+    if (typeof BonusHuntFirebase !== 'undefined') {
+        try {
+            isFirebaseEnabled = BonusHuntFirebase.initialize();
+            
+            if (isFirebaseEnabled) {
+                console.log('Bonus Hunt Firebase integration initialized');
+                
+                // Test Firebase with a sample session
+                testFirebaseConnection();
+            } else {
+                console.warn('Bonus Hunt Firebase initialization failed, using localStorage only');
+            }
+        } catch (error) {
+            console.error('Error initializing Bonus Hunt Firebase:', error);
+            isFirebaseEnabled = false;
+            console.log('Falling back to localStorage mode');
+        }
+    } else {
+        console.warn('Bonus Hunt Firebase module not loaded, using localStorage only');
+    }
+}
+
+async function testFirebaseConnection() {
+    if (!isFirebaseEnabled) {
+        console.log('Firebase not enabled, skipping connection test');
+        return;
+    }
+
+    try {
+        console.log('Testing Firebase connection for Bonus Hunt...');
+        
+        // Create a test session
+        const testSession = {
+            huntPrice: 50,
+            bonuses: [
+                {
+                    id: Date.now(),
+                    name: 'Test Slot - Firestore',
+                    stake: 0.20,
+                    bonusPrice: 20,
+                    bonusValue: 20,
+                    createdAt: new Date().toISOString()
+                }
+            ],
+            provider: 'Test Provider',
+            description: 'Firebase integration test session'
+        };
+        
+        const session = await BonusHuntFirebase.createSession(testSession);
+        
+        if (session && session.sessionId) {
+            console.log('✅ Test Firebase session created successfully:', session.sessionId);
+            
+            // Clean up test session
+            await BonusHuntFirebase.deleteSession(session.sessionId);
+            console.log('✅ Test session cleaned up successfully');
+            
+            showToast('Firebase integration active', 'success');
+        }
+    } catch (error) {
+        console.error('❌ Firebase test failed:', error);
+        
+        // Disable Firebase on test failure
+        isFirebaseEnabled = false;
+        showToast('Firebase test failed, using localStorage', 'warning');
+    }
 }
 
 function setupFormHandlers() {
