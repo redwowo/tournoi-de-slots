@@ -282,6 +282,40 @@ async function getUserBonusHuntSessions(userId = null, options = {}) {
     const safeOptions = options || {};
     const { limit = 50, status = null } = safeOptions;
 
+    const isMissingIndexError = (err) => {
+        const message = String(err?.message || '').toLowerCase();
+        return err?.code === 'failed-precondition' && (message.includes('requires an index') || message.includes('index'));
+    };
+
+    const getComparableDate = (value) => {
+        if (!value) return 0;
+        if (typeof value.toDate === 'function') {
+            return value.toDate().getTime();
+        }
+        if (typeof value.seconds === 'number') {
+            return value.seconds * 1000;
+        }
+        if (typeof value === 'string') {
+            const t = Date.parse(value);
+            return Number.isFinite(t) ? t : 0;
+        }
+        if (value instanceof Date) {
+            return value.getTime();
+        }
+        return 0;
+    };
+
+    const toSessions = (snapshot) => {
+        const sessions = [];
+        snapshot.forEach(doc => {
+            sessions.push({
+                id: doc.id,
+                ...doc.data()
+            });
+        });
+        return sessions;
+    };
+
     try {
         let query = db.collection('bonus-hunts')
             .where('userId', '==', targetUserId)
@@ -296,19 +330,32 @@ async function getUserBonusHuntSessions(userId = null, options = {}) {
         }
 
         const snapshot = await query.get();
-        const sessions = [];
+        return toSessions(snapshot);
+    } catch (error) {
+        if (!isMissingIndexError(error)) {
+            console.error('Error getting user Bonus Hunt sessions:', error);
+            throw error;
+        }
 
-        snapshot.forEach(doc => {
-            sessions.push({
-                id: doc.id,
-                ...doc.data()
-            });
-        });
+        console.warn('Missing Firestore composite index for bonus-hunts. Falling back to client-side filtering/sorting.');
+
+        const snapshot = await db.collection('bonus-hunts')
+            .where('userId', '==', targetUserId)
+            .get();
+
+        let sessions = toSessions(snapshot);
+
+        if (status) {
+            sessions = sessions.filter(s => s.status === status);
+        }
+
+        sessions.sort((a, b) => getComparableDate(b.updatedAt) - getComparableDate(a.updatedAt));
+
+        if (limit) {
+            sessions = sessions.slice(0, limit);
+        }
 
         return sessions;
-    } catch (error) {
-        console.error('Error getting user Bonus Hunt sessions:', error);
-        throw error;
     }
 }
 

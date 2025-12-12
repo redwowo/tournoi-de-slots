@@ -295,196 +295,191 @@
         }
 
         // Check on page load
-        if (checkShareableCodeRedirect()) {
-            return; // Stop execution if redirect happened
-        }
+        if (!checkShareableCodeRedirect()) {
+            // Définir l'objet app avant de charger les autres scripts
+            var app = window.app = {
+                currentStep: 1,
+                editingBonusId: null,
+                sessionData: {
+                    name: '',
+                    huntPrice: 0,
+                    bonuses: []
+                },
 
-        // Définir l'objet app avant de charger les autres scripts
-        const app = {
-            currentStep: 1,
-            editingBonusId: null,
-            sessionData: {
-                name: '',
-                huntPrice: 0,
-                bonuses: []
-            },
+                goToCreation: function() {
+                    this.currentStep = 1;
+                    this.switchView('view-creation', 1);
+                },
 
-            goToCreation: function() {
-                this.currentStep = 1;
-                this.switchView('view-creation', 1);
-            },
+                goToCollection: function() {
+                    const huntName = document.getElementById('huntName').value;
+                    const huntPrice = parseFloat(document.getElementById('huntPrice').value);
 
-            goToCollection: function() {
-                const huntName = document.getElementById('huntName').value;
-                const huntPrice = parseFloat(document.getElementById('huntPrice').value);
+                    if (!huntName.trim()) {
+                        alert('Veuillez entrer un nom pour le bonus hunt');
+                        return;
+                    }
+                    if (!huntPrice || huntPrice <= 0) {
+                        alert('Veuillez entrer un prix/budget valide');
+                        return;
+                    }
 
-                if (!huntName.trim()) {
-                    alert('Veuillez entrer un nom pour le bonus hunt');
-                    return;
-                }
-                if (!huntPrice || huntPrice <= 0) {
-                    alert('Veuillez entrer un prix/budget valide');
-                    return;
-                }
+                    this.sessionData.name = huntName;
+                    this.sessionData.huntPrice = huntPrice;
+                    this.updateSessionHeader();
+                    if (typeof updateKeyStats === 'function') {
+                        updateKeyStats();
+                    }
+                    this.currentStep = 2;
+                    this.switchView('view-collection', 2);
+                },
 
-                this.sessionData.name = huntName;
-                this.sessionData.huntPrice = huntPrice;
-                this.updateSessionHeader();
-                if (typeof updateKeyStats === 'function') {
-                    updateKeyStats();
-                }
-                this.currentStep = 2;
-                this.switchView('view-collection', 2);
-            },
+                goToOpening: function() {
+                    if (!this.sessionData.bonuses || this.sessionData.bonuses.length === 0) {
+                        alert('Veuillez ajouter au moins un bonus');
+                        return;
+                    }
 
-            goToOpening: function() {
-                if (!this.sessionData.bonuses || this.sessionData.bonuses.length === 0) {
-                    alert('Veuillez ajouter au moins un bonus');
-                    return;
-                }
+                    if (typeof openingPhaseState !== 'undefined') {
+                        openingPhaseState.bonuses = this.sessionData.bonuses;
+                        openingPhaseState.currentBonusIndex = 0;
+                        openingPhaseState.results = [];
+                        openingPhaseState.summarySaved = false;
+                    }
 
-                if (typeof openingPhaseState !== 'undefined') {
-                    openingPhaseState.bonuses = this.sessionData.bonuses;
-                    openingPhaseState.currentBonusIndex = 0;
-                    openingPhaseState.results = [];
-                    openingPhaseState.summarySaved = false;
-                }
+                    const openingList = document.getElementById('openingListContainer');
+                    if (openingList) {
+                        openingList.innerHTML = `
+                            <div class="empty-state">
+                                <i data-lucide="list"></i>
+                                <p>Aucun résultat enregistré pour le moment.</p>
+                            </div>`;
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    }
 
-                const openingList = document.getElementById('openingListContainer');
-                if (openingList) {
-                    openingList.innerHTML = `
-                        <div class="empty-state">
-                            <i data-lucide="list"></i>
-                            <p>Aucun résultat enregistré pour le moment.</p>
-                        </div>`;
-                    if (typeof lucide !== 'undefined') {
-                        lucide.createIcons();
+                    this.currentStep = 3;
+                    this.switchView('view-opening', 3);
+
+                    if (typeof displayCurrentBonus !== 'undefined') {
+                        displayCurrentBonus();
+                    }
+
+                    if (typeof updateKeyStats === 'function') {
+                        updateKeyStats();
+                    }
+                },
+
+                recordLoss: function() {
+                    const gainInput = document.getElementById('gainAmount');
+                    gainInput.value = '0';
+                    const form = document.getElementById('gainForm');
+                    form.dispatchEvent(new Event('submit'));
+                },
+
+                updateMultiplier: function() {
+                    const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
+                    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
+                    if (!currentBonus) {
+                        document.getElementById('gainMultiplier').value = '';
+                        return;
+                    }
+
+                    const stakeAmount = currentBonus.stake;
+                    if (!stakeAmount || stakeAmount <= 0) {
+                        document.getElementById('gainMultiplier').value = '';
+                        return;
+                    }
+
+                    const multiplier = (gainAmount / stakeAmount).toFixed(2);
+                    document.getElementById('gainMultiplier').value = '×' + multiplier;
+                },
+
+                finishSession: function() {
+                    alert('Session terminée ! Bravo.');
+                    location.reload();
+                },
+
+                switchView: function(viewId, stepNumber) {
+                    document.querySelectorAll('.game-view').forEach(el => {
+                        el.classList.remove('active');
+                        void el.offsetWidth;
+                    });
+
+                    setTimeout(() => {
+                        const targetView = document.getElementById(viewId);
+                        targetView.classList.add('active');
+                    }, 10);
+
+                    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                    document.getElementById('step-' + stepNumber).classList.add('active');
+                    this.updateStageLabel(stepNumber);
+                    window.scrollTo(0, 0);
+                },
+
+                updateSessionHeader: function() {
+                    const title = document.getElementById('sessionTitle');
+                    if (title) {
+                        title.textContent = this.sessionData.name || 'Nouvelle session';
+                    }
+                },
+
+                updateStageLabel: function(stepNumber) {
+                    const stageLabel = document.getElementById('sessionStageLabel');
+                    const subtitle = document.getElementById('sessionSubtitle');
+                    const stageCopy = {
+                        1: 'Étape 1 • Création',
+                        2: 'Étape 2 • Collection',
+                        3: 'Étape 3 • Ouverture'
+                    };
+                    const subtitleCopy = {
+                        1: 'Définissez votre budget et donnez un nom à votre chasse aux bonus.',
+                        2: 'Ajoutez vos machines favorites et préparez la session.',
+                        3: 'Ouvrez vos bonus et suivez vos gains en direct.'
+                    };
+
+                    if (stageLabel) {
+                        stageLabel.textContent = stageCopy[stepNumber] || 'Bonus Hunt';
+                    }
+                    if (subtitle) {
+                        subtitle.textContent = subtitleCopy[stepNumber] || '';
+                    }
+                },
+
+                beginBonusEdit: function(bonusId) {
+                    const bonus = this.sessionData.bonuses.find(b => b.id === bonusId);
+                    if (!bonus) return;
+
+                    document.getElementById('bonusName').value = bonus.name || '';
+                    document.getElementById('bonusStake').value = bonus.stake || '';
+                    this.editingBonusId = bonusId;
+                    this.setBonusFormState('edit');
+                    document.getElementById('bonusForm').scrollIntoView({ behavior: 'smooth' });
+                },
+
+                cancelBonusEdit: function() {
+                    this.editingBonusId = null;
+                    document.getElementById('bonusForm').reset();
+                    this.setBonusFormState('add');
+                },
+
+                setBonusFormState: function(mode) {
+                    const title = document.getElementById('bonusFormTitle');
+                    const buttonLabel = document.getElementById('bonusFormSubmitLabel');
+                    const cancelBtn = document.getElementById('cancelEditButton');
+                    if (mode === 'edit') {
+                        if (title) title.textContent = 'Modifier un bonus';
+                        if (buttonLabel) buttonLabel.textContent = 'Mettre à jour';
+                        if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+                    } else {
+                        if (title) title.textContent = 'Ajouter un bonus';
+                        if (buttonLabel) buttonLabel.textContent = 'Ajouter';
+                        if (cancelBtn) cancelBtn.style.display = 'none';
                     }
                 }
-
-                this.currentStep = 3;
-                this.switchView('view-opening', 3);
-
-                if (typeof displayCurrentBonus !== 'undefined') {
-                    displayCurrentBonus();
-                }
-
-                if (typeof updateKeyStats === 'function') {
-                    updateKeyStats();
-                }
-            },
-
-            recordLoss: function() {
-                const gainInput = document.getElementById('gainAmount');
-                gainInput.value = '0';
-                const form = document.getElementById('gainForm');
-                form.dispatchEvent(new Event('submit'));
-            },
-
-            updateMultiplier: function() {
-                const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
-                const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
-                if (!currentBonus) {
-                    document.getElementById('gainMultiplier').value = '';
-                    return;
-                }
-
-                const stakeAmount = currentBonus.stake;
-                if (!stakeAmount || stakeAmount <= 0) {
-                    document.getElementById('gainMultiplier').value = '';
-                    return;
-                }
-
-                const multiplier = (gainAmount / stakeAmount).toFixed(2);
-                document.getElementById('gainMultiplier').value = '×' + multiplier;
-            },
-
-            finishSession: function() {
-                alert('Session terminée ! Bravo.');
-                location.reload();
-            },
-
-            switchView: function(viewId, stepNumber) {
-                document.querySelectorAll('.game-view').forEach(el => {
-                    el.classList.remove('active');
-                    void el.offsetWidth;
-                });
-
-                setTimeout(() => {
-                    const targetView = document.getElementById(viewId);
-                    targetView.classList.add('active');
-                }, 10);
-
-                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-                document.getElementById('step-' + stepNumber).classList.add('active');
-                this.updateStageLabel(stepNumber);
-                window.scrollTo(0, 0);
-            },
-
-            updateSessionHeader: function() {
-                const title = document.getElementById('sessionTitle');
-                if (title) {
-                    title.textContent = this.sessionData.name || 'Nouvelle session';
-                }
-            },
-
-            updateStageLabel: function(stepNumber) {
-                const stageLabel = document.getElementById('sessionStageLabel');
-                const subtitle = document.getElementById('sessionSubtitle');
-                const stageCopy = {
-                    1: 'Étape 1 • Création',
-                    2: 'Étape 2 • Collection',
-                    3: 'Étape 3 • Ouverture'
-                };
-                const subtitleCopy = {
-                    1: 'Définissez votre budget et donnez un nom à votre chasse aux bonus.',
-                    2: 'Ajoutez vos machines favorites et préparez la session.',
-                    3: 'Ouvrez vos bonus et suivez vos gains en direct.'
-                };
-
-                if (stageLabel) {
-                    stageLabel.textContent = stageCopy[stepNumber] || 'Bonus Hunt';
-                }
-                if (subtitle) {
-                    subtitle.textContent = subtitleCopy[stepNumber] || '';
-                }
-            },
-
-            beginBonusEdit: function(bonusId) {
-                const bonus = this.sessionData.bonuses.find(b => b.id === bonusId);
-                if (!bonus) return;
-
-                document.getElementById('bonusName').value = bonus.name || '';
-                document.getElementById('bonusStake').value = bonus.stake || '';
-                this.editingBonusId = bonusId;
-                this.setBonusFormState('edit');
-                document.getElementById('bonusForm').scrollIntoView({ behavior: 'smooth' });
-            },
-
-            cancelBonusEdit: function() {
-                this.editingBonusId = null;
-                document.getElementById('bonusForm').reset();
-                this.setBonusFormState('add');
-            },
-
-            setBonusFormState: function(mode) {
-                const title = document.getElementById('bonusFormTitle');
-                const buttonLabel = document.getElementById('bonusFormSubmitLabel');
-                const cancelBtn = document.getElementById('cancelEditButton');
-                if (mode === 'edit') {
-                    if (title) title.textContent = 'Modifier un bonus';
-                    if (buttonLabel) buttonLabel.textContent = 'Mettre à jour';
-                    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
-                } else {
-                    if (title) title.textContent = 'Ajouter un bonus';
-                    if (buttonLabel) buttonLabel.textContent = 'Ajouter';
-                    if (cancelBtn) cancelBtn.style.display = 'none';
-                }
-            }
-        };
-
-        // Exposer l'objet app à window pour qu'il soit accessible depuis les autres scripts
-        window.app = app;
+            };
+        }
     </script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -499,7 +494,9 @@
         lucide.createIcons();
 
         document.addEventListener('DOMContentLoaded', () => {
-            app.setBonusFormState('add');
+            if (window.app && typeof window.app.setBonusFormState === 'function') {
+                window.app.setBonusFormState('add');
+            }
         });
     </script>
 </body>
