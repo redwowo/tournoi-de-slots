@@ -286,8 +286,8 @@
             
             // If we're on /bonus-hunt/ with a 6-char code
             if (pathParts[1] === 'bonus-hunt' && lastPart && lastPart.length === 6 && /^[A-Z0-9]+$/.test(lastPart)) {
-                // Redirect to spectator mode
-                window.location.href = `/bonus-hunt-spectator.html/${lastPart}`;
+                // Redirect to spectator mode - use the proper route
+                window.location.href = `/bonus-hunt/${lastPart}`;
                 return true;
             }
             

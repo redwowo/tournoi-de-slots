@@ -1,12 +1,24 @@
 node_modules/
-.env
-.env.local
-.DS_Store
 *.log
-
-# Test files
-test-*.html
-
-# Uploaded images
-uploads/
-category-images/
+.env
+.DS_Store
+Thumbs.db
+*.tmp
+*.temp
+/.vscode/
+/dist/
+/build/
+/coverage/
+.nyc_output/
+*.tgz
+.npm
+.eslintcache
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
+.cache/
+.turbo/
+.cloud-functions/emulator/
+firebase-debug.log
+*.local
