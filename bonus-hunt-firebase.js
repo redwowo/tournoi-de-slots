@@ -40,6 +40,33 @@ function generateSessionId() {
     return 'bh_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
+// Generate short shareable code (ABC123)
+function generateShareableCode() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+// Get a unique shareable code (retry if collision)
+async function getUniqueShareableCode() {
+    const MAX_ATTEMPTS = 10;
+    
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        const code = generateShareableCode();
+        const existing = await getSessionByShareableCode(code);
+        
+        if (!existing) {
+            return code;
+        }
+    }
+    
+    // Fallback with timestamp if all attempts fail
+    return generateShareableCode() + Date.now().toString().slice(-2);
+}
+
 // Get current user ID (from localStorage or generate temporary one)
 function getUserId() {
     let userId = localStorage.getItem('bonusHuntUserId');
@@ -58,11 +85,13 @@ async function createBonusHuntSession(sessionData = {}) {
 
     try {
         const sessionId = generateSessionId();
+        const shareableCode = await getUniqueShareableCode();
         const userId = getUserId();
         const timestamp = new Date();
 
         const session = {
             sessionId,
+            shareableCode,
             userId,
             status: 'creation', // creation, collection, opening, completed
             createdAt: timestamp,
@@ -85,7 +114,7 @@ async function createBonusHuntSession(sessionData = {}) {
         };
 
         await db.collection('bonus-hunts').doc(sessionId).set(session);
-        console.log('Bonus Hunt session created:', sessionId);
+        console.log('Bonus Hunt session created:', sessionId, 'with shareable code:', shareableCode);
         return session;
     } catch (error) {
         console.error('Error creating Bonus Hunt session:', error);
@@ -109,6 +138,30 @@ async function getBonusHuntSession(sessionId) {
         return doc.data();
     } catch (error) {
         console.error('Error getting Bonus Hunt session:', error);
+        throw error;
+    }
+}
+
+// Get session by shareable code
+async function getSessionByShareableCode(code) {
+    if (!db) {
+        throw new Error('Firebase not initialized');
+    }
+
+    try {
+        const query = await db.collection('bonus-hunts')
+            .where('shareableCode', '==', code)
+            .limit(1)
+            .get();
+
+        if (query.empty) {
+            return null;
+        }
+
+        const doc = query.docs[0];
+        return doc.data();
+    } catch (error) {
+        console.error('Error getting session by shareable code:', error);
         throw error;
     }
 }
@@ -425,6 +478,7 @@ window.BonusHuntFirebase = {
     // CRUD operations
     createSession: createBonusHuntSession,
     getSession: getBonusHuntSession,
+    getSessionByCode: getSessionByShareableCode,
     updateSession: updateBonusHuntSession,
     updateData: updateBonusHuntData,
     deleteSession: deleteBonusHuntSession,
@@ -451,5 +505,7 @@ window.BonusHuntFirebase = {
     
     // Utilities
     getUserId,
-    generateSessionId
+    generateSessionId,
+    generateShareableCode,
+    getUniqueShareableCode
 };

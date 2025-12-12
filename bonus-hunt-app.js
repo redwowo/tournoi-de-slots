@@ -39,10 +39,108 @@ let currentFirebaseSession = null;
 let sessionListenerUnsubscribe = null;
 let isFirebaseEnabled = false;
 let currentSessionId = null;
+let currentShareableCode = null;
+
+// Share functionality
+function updateShareButton() {
+    const shareBtn = document.getElementById('shareSessionButton');
+    const shareCodeDisplay = document.getElementById('shareCodeDisplay');
+    const shareCodeSpan = document.getElementById('shareCode');
+    
+    // Get shareable code from localStorage or current session
+    const storedCode = localStorage.getItem('bonusHuntShareableCode');
+    if (currentShareableCode || storedCode) {
+        const code = currentShareableCode || storedCode;
+        
+        // Show share button
+        if (shareBtn) {
+            shareBtn.style.display = 'flex';
+        }
+        
+        // Show code display
+        if (shareCodeDisplay && shareCodeSpan) {
+            shareCodeDisplay.style.display = 'flex';
+            shareCodeSpan.textContent = code;
+        }
+    }
+}
+
+function setupShareHandlers() {
+    const copyCodeBtn = document.getElementById('copyCodeButton');
+    if (copyCodeBtn) {
+        copyCodeBtn.addEventListener('click', copyShareCode);
+    }
+    
+    const shareBtn = document.getElementById('shareSessionButton');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', shareSession);
+    }
+}
+
+function copyShareCode() {
+    const code = currentShareableCode || localStorage.getItem('bonusHuntShareableCode');
+    if (!code) {
+        showToast('Aucun code de partage disponible', 'error');
+        return;
+    }
+    
+    const shareUrl = `${window.location.origin}/bonus-hunt/${code}`;
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showToast('Lien copié dans le presse-papier !', 'success');
+        }).catch(() => {
+            fallbackCopyText(shareUrl);
+        });
+    } else {
+        fallbackCopyText(shareUrl);
+    }
+}
+
+function fallbackCopyText(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        showToast('Lien copié dans le presse-papier !', 'success');
+    } catch (err) {
+        showToast('Impossible de copier le lien', 'error');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+function shareSession() {
+    const code = currentShareableCode || localStorage.getItem('bonusHuntShareableCode');
+    if (!code) {
+        showToast('Aucun code de partage disponible', 'error');
+        return;
+    }
+    
+    const shareUrl = `${window.location.origin}/bonus-hunt/${code}`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Bonus Hunt',
+            text: 'Regardez mon Bonus Hunt en cours !',
+            url: shareUrl
+        }).catch(err => console.log('Erreur de partage:', err));
+    } else {
+        copyShareCode();
+    }
+}
 
 function initializeBonusHuntApp() {
     setupFormHandlers();
     setupSidebarToggle();
+    setupShareHandlers();
     
     // Override window.app methods for Firebase sync
     setupAppOverrides();
@@ -1216,7 +1314,9 @@ function setupAppOverrides() {
                           huntPrice: huntPrice
                       });
                       sessionId = session.sessionId;
+                      currentShareableCode = session.shareableCode;
                       localStorage.setItem('bonusHuntCurrentSessionId', sessionId);
+                      localStorage.setItem('bonusHuntShareableCode', session.shareableCode);
                       startSessionListener(sessionId);
                  }
                  updateShareButton();
@@ -1301,6 +1401,12 @@ async function loadActiveSession() {
         const session = await BonusHuntFirebase.getSession(sessionId);
         if (session && session.status !== 'completed') {
             window.app.sessionData = session.data;
+            
+            // Restore shareable code
+            currentShareableCode = session.shareableCode;
+            if (currentShareableCode) {
+                localStorage.setItem('bonusHuntShareableCode', currentShareableCode);
+            }
             
             // Start listening
             startSessionListener(sessionId);

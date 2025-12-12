@@ -5049,6 +5049,87 @@ body.sidebar-open #sidebarOverlay {
   background: var(--success-bg);
 }
 
+/* Share code display */
+.share-code-display {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--item-bg);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.share-code-label {
+  color: var(--muted-text);
+  font-weight: 500;
+}
+
+.share-code {
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  letter-spacing: 0.1em;
+  padding: 0.25rem 0.5rem;
+  background: var(--card-bg);
+  border: 2px solid var(--primary-color);
+  border-radius: 0.25rem;
+  min-width: 4.5rem;
+  text-align: center;
+}
+
+.copy-code-btn {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copy-code-btn:hover {
+  background: var(--slot-result-bg);
+}
+
+.copy-code-btn:active {
+  transform: scale(0.95);
+}
+
+/* Dark theme adjustments */
+.dark .share-code-display {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .share-code {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: var(--primary-color);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .share-code-display {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .share-code-label {
+    flex-basis: 100%;
+    margin-bottom: -0.25rem;
+  }
+  
+  .share-code {
+    font-size: 1rem;
+    min-width: 4rem;
+  }
+}
+
 .summary-net.negative {
   color: var(--eliminated-color);
   background: var(--toast-error-bg);

@@ -5,6 +5,7 @@
 /tournoi/:id /tournoi.html 200
 /tournoi /tournoi.html 200
 /bonus-hunt/:sessionId /bonus-hunt-spectator.html 200
+/bonus-hunt-spectator/:code /bonus-hunt-spectator.html 200
 /bonus-hunt /bonus-hunt.html 200
 /accueil /index.html 200
 /styles.css /styles.css 200

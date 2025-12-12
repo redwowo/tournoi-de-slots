@@ -85,12 +85,31 @@ async function initializeSpectatorMode() {
 
 function getSessionIdFromUrl() {
     const pathParts = window.location.pathname.split('/');
-    return pathParts[pathParts.length - 1] || null;
+    const identifier = pathParts[pathParts.length - 1] || null;
+    
+    if (!identifier) return null;
+    
+    // Check if identifier is a shareable code (6 chars, alphanumeric)
+    if (identifier.length === 6 && /^[A-Z0-9]+$/.test(identifier)) {
+        return identifier; // This is a shareable code
+    }
+    
+    // Otherwise, treat as Firebase session ID
+    return identifier;
 }
 
 async function loadSession(sessionId) {
     try {
-        const session = await BonusHuntFirebase.getSession(sessionId);
+        let session = null;
+        
+        // Check if sessionId is a shareable code (6 chars, alphanumeric)
+        if (sessionId.length === 6 && /^[A-Z0-9]+$/.test(sessionId)) {
+            // Load by shareable code
+            session = await BonusHuntFirebase.getSessionByCode(sessionId);
+        } else {
+            // Load by Firebase session ID
+            session = await BonusHuntFirebase.getSession(sessionId);
+        }
         
         if (!session) {
             showError('Session introuvable');
@@ -100,8 +119,10 @@ async function loadSession(sessionId) {
         currentSession = session;
         updateUI(session);
 
-        // Start real-time listener
-        startRealtimeListener(sessionId);
+        // Start real-time listener with the actual sessionId
+        if (session.sessionId) {
+            startRealtimeListener(session.sessionId);
+        }
         
     } catch (error) {
         console.error('Error loading session:', error);
