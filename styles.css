@@ -3803,6 +3803,7 @@ h1 img {
   color: var(--bonus-text);
   font-family: 'Orbitron', 'Space Grotesk', 'Inter', sans-serif;
   position: relative;
+  isolation: isolate;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -3823,12 +3824,19 @@ h1 img {
       rgba(0, 255, 255, 0.03) 4px
     );
   pointer-events: none;
-  z-index: 1;
+  z-index: -1;
 }
 
-.bonus-hunt-body > * {
-  position: relative;
-  z-index: 2;
+.bonus-hunt-body .toast-container {
+  top: calc(env(safe-area-inset-top) + 5rem);
+  right: 20px;
+  bottom: auto;
+  left: auto;
+  pointer-events: none;
+}
+
+.bonus-hunt-body .toast-container .toast {
+  pointer-events: auto;
 }
 
 .bonus-hunt-body .bonus-hunt-layout {
