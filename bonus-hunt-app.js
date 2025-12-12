@@ -360,12 +360,31 @@ function showFirebaseIntegrationActiveBadge() {
     if (!badge) {
         badge = document.createElement('div');
         badge.id = 'firebaseIntegrationBadge';
-        badge.className = 'firebase-integration-badge';
+        badge.className = 'firebase-integration-badge is-hidden';
         document.body.appendChild(badge);
     }
 
     badge.textContent = 'Firebase integration active';
-    badge.classList.remove('is-hidden');
+    
+    // Start hidden, then show with animation
+    badge.classList.add('is-hidden');
+    
+    // Trigger fade-in animation
+    setTimeout(() => {
+        badge.classList.remove('is-hidden');
+    }, 100);
+    
+    // Auto-dismiss after 4 seconds
+    setTimeout(() => {
+        badge.classList.add('is-hidden');
+        
+        // Remove from DOM after fade-out animation completes
+        setTimeout(() => {
+            if (badge && badge.parentNode) {
+                badge.parentNode.removeChild(badge);
+            }
+        }, 300);
+    }, 4000);
 }
 
 function getBonusArtwork(bonus) {
