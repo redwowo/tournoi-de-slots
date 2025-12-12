@@ -89,24 +89,37 @@ async function createBonusHuntSession(sessionData = {}) {
         const userId = getUserId();
         const timestamp = new Date();
 
+        const bonuses = Array.isArray(sessionData.bonuses) ? sessionData.bonuses : [];
+        const results = Array.isArray(sessionData.results) ? sessionData.results : [];
+        const huntPrice = parseFloat(sessionData.huntPrice) || 0;
+
+        const totalInvested = bonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
+        const totalCollected = results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+
+        const totalBonusValue = totalInvested * 100;
+        const breakevenMultiplier = totalBonusValue > 0 && huntPrice > 0
+            ? (huntPrice / totalBonusValue) * 100
+            : null;
+
         const session = {
             sessionId,
             shareableCode,
             userId,
-            status: 'creation', // creation, collection, opening, completed
+            status: sessionData.status || 'creation', // creation, collection, opening, completed
             createdAt: timestamp,
             updatedAt: timestamp,
             data: {
-                huntPrice: sessionData.huntPrice || 0,
-                bonuses: sessionData.bonuses || [],
-                results: sessionData.results || [],
+                huntPrice,
+                bonuses,
+                results,
                 name: sessionData.name || 'Bonus Hunt',
                 // Additional metadata
                 metadata: {
-                    bonusCount: 0,
-                    totalInvested: 0,
-                    totalCollected: 0,
-                    breakevenMultiplier: null,
+                    bonusCount: bonuses.length,
+                    totalInvested,
+                    totalCollected,
+                    netResult: totalCollected - huntPrice,
+                    breakevenMultiplier,
                     provider: sessionData.provider || null,
                     description: sessionData.description || null
                 }
@@ -192,17 +205,49 @@ async function updateBonusHuntSession(sessionId, updates) {
     }
 }
 
-// Update specific fields in the data object
+// Update specific fields in the data object (merge semantics)
 async function updateBonusHuntData(sessionId, dataUpdates) {
     if (!db) {
         throw new Error('Firebase not initialized');
     }
 
+    const isPlainObject = (value) => {
+        if (!value || typeof value !== 'object') return false;
+        if (Array.isArray(value)) return false;
+        return Object.prototype.toString.call(value) === '[object Object]';
+    };
+
+    const flattenObject = (obj, prefix = '') => {
+        const out = {};
+        if (!isPlainObject(obj)) return out;
+
+        for (const [key, value] of Object.entries(obj)) {
+            const path = prefix ? `${prefix}.${key}` : key;
+
+            if (isPlainObject(value)) {
+                Object.assign(out, flattenObject(value, path));
+            } else {
+                out[path] = value;
+            }
+        }
+
+        return out;
+    };
+
     try {
-        await db.collection('bonus-hunts').doc(sessionId).update({
-            'data': dataUpdates,
-            'updatedAt': new Date()
-        });
+        const updatePayload = {
+            updatedAt: new Date()
+        };
+
+        // Flatten nested objects (e.g. metadata) and prefix them under `data.*`
+        const flattened = flattenObject(dataUpdates);
+        for (const [key, value] of Object.entries(flattened)) {
+            // Allow callers to pass full Firestore paths (data.*) or relative paths
+            const firestorePath = key.startsWith('data.') ? key : `data.${key}`;
+            updatePayload[firestorePath] = value;
+        }
+
+        await db.collection('bonus-hunts').doc(sessionId).update(updatePayload);
         console.log('Bonus Hunt session data updated:', sessionId);
         return true;
     } catch (error) {
@@ -234,7 +279,8 @@ async function getUserBonusHuntSessions(userId = null, options = {}) {
     }
 
     const targetUserId = userId || getUserId();
-    const { limit = 50, status = null } = options;
+    const safeOptions = options || {};
+    const { limit = 50, status = null } = safeOptions;
 
     try {
         let query = db.collection('bonus-hunts')
