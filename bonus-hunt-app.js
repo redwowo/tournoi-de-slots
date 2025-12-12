@@ -1041,8 +1041,8 @@ async function renderSessionHistory() {
 
     if (isFirebaseEnabled) {
          try {
-             // Fetch all sessions (or limited)
-             const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 20 });
+             // Fetch ALL sessions from the database (not filtered by user)
+             const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 100, fetchAll: true });
              
              currentHistoryList = sessions.map(s => {
                   const data = s.data || {};

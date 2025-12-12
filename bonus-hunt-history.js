@@ -169,7 +169,8 @@ async function loadAllSessions() {
 
     if (isFirebaseEnabled) {
         try {
-            const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 500 });
+            // Fetch ALL sessions from the database (not filtered by user)
+            const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 500, fetchAll: true });
             const completedSessions = sessions.filter(s => s.status === 'completed');
 
             return completedSessions.map(session => {

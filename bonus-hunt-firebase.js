@@ -272,15 +272,15 @@ async function deleteBonusHuntSession(sessionId) {
     }
 }
 
-// Get all sessions for current user
+// Get all sessions for current user (or all sessions if fetchAll is true)
 async function getUserBonusHuntSessions(userId = null, options = {}) {
     if (!db) {
         throw new Error('Firebase not initialized');
     }
 
-    const targetUserId = userId || getUserId();
     const safeOptions = options || {};
-    const { limit = 50, status = null } = safeOptions;
+    const { limit = 50, status = null, fetchAll = false } = safeOptions;
+    const targetUserId = fetchAll ? null : (userId || getUserId());
 
     const isMissingIndexError = (err) => {
         const message = String(err?.message || '').toLowerCase();
@@ -317,9 +317,14 @@ async function getUserBonusHuntSessions(userId = null, options = {}) {
     };
 
     try {
-        let query = db.collection('bonus-hunts')
-            .where('userId', '==', targetUserId)
-            .orderBy('updatedAt', 'desc');
+        let query = db.collection('bonus-hunts');
+        
+        // Only filter by userId if not fetching all sessions
+        if (!fetchAll && targetUserId) {
+            query = query.where('userId', '==', targetUserId);
+        }
+        
+        query = query.orderBy('updatedAt', 'desc');
 
         if (status) {
             query = query.where('status', '==', status);
@@ -339,9 +344,14 @@ async function getUserBonusHuntSessions(userId = null, options = {}) {
 
         console.warn('Missing Firestore composite index for bonus-hunts. Falling back to client-side filtering/sorting.');
 
-        const snapshot = await db.collection('bonus-hunts')
-            .where('userId', '==', targetUserId)
-            .get();
+        let query = db.collection('bonus-hunts');
+        
+        // Only filter by userId if not fetching all sessions
+        if (!fetchAll && targetUserId) {
+            query = query.where('userId', '==', targetUserId);
+        }
+        
+        const snapshot = await query.get();
 
         let sessions = toSessions(snapshot);
 
