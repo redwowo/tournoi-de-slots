@@ -228,7 +228,7 @@ async function testFirebaseConnection() {
             await BonusHuntFirebase.deleteSession(session.sessionId);
             console.log('✅ Test session cleaned up successfully');
             
-            showToast('Firebase integration active', 'success');
+            showFirebaseIntegrationActiveBadge();
         }
     } catch (error) {
         console.error('❌ Firebase test failed:', error);
@@ -352,6 +352,20 @@ function showToast(message, type = 'info') {
             toast.parentNode.removeChild(toast);
         }
     }, 3000);
+}
+
+function showFirebaseIntegrationActiveBadge() {
+    let badge = document.getElementById('firebaseIntegrationBadge');
+
+    if (!badge) {
+        badge = document.createElement('div');
+        badge.id = 'firebaseIntegrationBadge';
+        badge.className = 'firebase-integration-badge';
+        document.body.appendChild(badge);
+    }
+
+    badge.textContent = 'Firebase integration active';
+    badge.classList.remove('is-hidden');
 }
 
 function getBonusArtwork(bonus) {

@@ -585,6 +585,29 @@ h1 {
   }
 }
 
+.firebase-integration-badge {
+  position: fixed;
+  left: 20px;
+  bottom: calc(env(safe-area-inset-bottom) + 80px);
+  z-index: 9999;
+  max-width: min(360px, calc(100vw - 40px));
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  background: var(--toast-success-bg);
+  color: var(--success-text);
+  border-left: 4px solid var(--toast-success-border);
+  box-shadow: var(--toast-shadow);
+  font-size: 0.9rem;
+  line-height: 1.2;
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.firebase-integration-badge.is-hidden {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 /* Elimination history modal */
 .modal {
   display: none;
