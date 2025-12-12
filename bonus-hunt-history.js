@@ -155,31 +155,65 @@ async function loadAndDisplayHistory() {
 }
 
 async function loadAllSessions() {
+    const toIsoString = (value) => {
+        if (!value) return '';
+        if (typeof value === 'string') return value;
+        if (value?.toDate) return value.toDate().toISOString();
+        if (value instanceof Date) return value.toISOString();
+        try {
+            return new Date(value).toISOString();
+        } catch (error) {
+            return '';
+        }
+    };
+
     if (isFirebaseEnabled) {
         try {
-            const sessions = await BonusHuntFirebase.getUserSessions(null, null);
+            const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 500 });
             const completedSessions = sessions.filter(s => s.status === 'completed');
-            
-            return completedSessions.map(session => ({
-                id: session.id || session.sessionId,
-                name: session.data?.name || 'Bonus Hunt',
-                date: session.createdAt?.toDate ? session.createdAt.toDate().toISOString() : session.createdAt,
-                updatedAt: session.updatedAt?.toDate ? session.updatedAt.toDate().toISOString() : session.updatedAt,
-                startingBalance: session.data?.huntPrice || 0,
-                totalGain: session.data?.metadata?.totalCollected || 0,
-                netResult: session.data?.metadata?.netResult || 0,
-                bonuses: session.data?.bonuses || [],
-                results: session.data?.results || [],
-                breakeven: session.data?.metadata?.breakevenMultiplier || 0,
-                status: session.status
-            }));
+
+            return completedSessions.map(session => {
+                const data = session.data || {};
+                const bonuses = Array.isArray(data.bonuses) ? data.bonuses : [];
+                const results = Array.isArray(data.results) ? data.results : [];
+
+                const startingBalance = parseFloat(data.huntPrice) || 0;
+
+                const computedTotalGain = results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+                const totalGain = Number.isFinite(data?.metadata?.totalCollected)
+                    ? data.metadata.totalCollected
+                    : computedTotalGain;
+
+                const computedNetResult = totalGain - startingBalance;
+                const netResult = Number.isFinite(data?.metadata?.netResult)
+                    ? data.metadata.netResult
+                    : computedNetResult;
+
+                const breakeven = Number.isFinite(data?.metadata?.breakevenMultiplier)
+                    ? data.metadata.breakevenMultiplier
+                    : calculateBreakevenMultiplier(bonuses, startingBalance);
+
+                return {
+                    id: session.id || session.sessionId,
+                    name: data.name || 'Bonus Hunt',
+                    date: toIsoString(session.createdAt),
+                    updatedAt: toIsoString(session.updatedAt),
+                    startingBalance,
+                    totalGain,
+                    netResult,
+                    bonuses,
+                    results,
+                    breakeven,
+                    status: session.status
+                };
+            });
         } catch (error) {
             console.error('Firebase error, falling back to localStorage:', error);
             return loadFromLocalStorage();
         }
-    } else {
-        return loadFromLocalStorage();
     }
+
+    return loadFromLocalStorage();
 }
 
 function loadFromLocalStorage() {
@@ -369,9 +403,12 @@ function createSessionCard(session, index) {
     const card = document.createElement('div');
     card.className = 'session-card glass-card';
     
-    const winCount = session.bonuses?.filter(b => b.result && b.result.gain > 0).length || 0;
-    const lossCount = session.bonuses?.filter(b => b.result && b.result.gain === 0).length || 0;
-    const pendingCount = session.bonuses?.filter(b => !b.result).length || 0;
+    const bonuses = Array.isArray(session.bonuses) ? session.bonuses : [];
+    const results = Array.isArray(session.results) ? session.results : [];
+
+    const winCount = results.filter(r => (parseFloat(r.gain) || 0) > 0).length;
+    const lossCount = results.filter(r => (parseFloat(r.gain) || 0) === 0).length;
+    const pendingCount = Math.max(0, bonuses.length - results.length);
     
     const netClass = session.netResult > 0 ? 'positive' : session.netResult < 0 ? 'negative' : '';
     

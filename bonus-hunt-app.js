@@ -150,7 +150,7 @@ function initializeBonusHuntApp() {
 
     // Load session and history
     if (isFirebaseEnabled) {
-        loadActiveSession().then(() => {
+        loadRequestedOrActiveSession().then(() => {
             renderBonusCollectionList();
             renderSessionHistory();
             updateKeyStats();
@@ -159,6 +159,13 @@ function initializeBonusHuntApp() {
         renderBonusCollectionList();
         renderSessionHistory();
         updateKeyStats();
+    }
+}
+
+async function loadRequestedOrActiveSession() {
+    const loadedFromUrl = await loadSessionFromUrlParams();
+    if (!loadedFromUrl) {
+        await loadActiveSession();
     }
 }
 
@@ -418,14 +425,7 @@ function handleBonusFormSubmit(event) {
     }
 
     // Sync to Firebase
-    if (isFirebaseEnabled) {
-        const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
-        if (sessionId) {
-            BonusHuntFirebase.updateData(sessionId, {
-                bonuses: existingBonuses
-            }).catch(console.error);
-        }
-    }
+    syncDataToFirebase({ bonuses: existingBonuses });
 
     document.getElementById('bonusForm').reset();
     renderBonusCollectionList();
@@ -535,14 +535,7 @@ function removeBonus(bonusId) {
     }
 
     // Sync to Firebase
-    if (isFirebaseEnabled) {
-        const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
-        if (sessionId) {
-            BonusHuntFirebase.updateData(sessionId, {
-                bonuses: window.app.sessionData.bonuses
-            }).catch(console.error);
-        }
-    }
+    syncDataToFirebase({ bonuses: window.app.sessionData.bonuses });
 
     renderBonusCollectionList();
     updateBonusStats();
@@ -565,6 +558,42 @@ function calculateBreakevenMultiplier(bonuses, startingBalance) {
     }
 
     return (startingBalance / totalBonusValue) * 100;
+}
+
+function computeSessionMetadata({ bonuses = [], results = [], huntPrice = 0 }) {
+    const safeBonuses = Array.isArray(bonuses) ? bonuses : [];
+    const safeResults = Array.isArray(results) ? results : [];
+    const safeHuntPrice = parseFloat(huntPrice) || 0;
+
+    const totalInvested = safeBonuses.reduce((sum, b) => sum + (parseFloat(b.stake) || 0), 0);
+    const totalCollected = safeResults.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+    const netResult = totalCollected - safeHuntPrice;
+
+    return {
+        bonusCount: safeBonuses.length,
+        totalInvested,
+        totalCollected,
+        netResult,
+        breakevenMultiplier: calculateBreakevenMultiplier(safeBonuses, safeHuntPrice)
+    };
+}
+
+function syncDataToFirebase(dataUpdates) {
+    if (!isFirebaseEnabled) return;
+
+    const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
+    if (!sessionId) return;
+
+    const metadata = computeSessionMetadata({
+        bonuses: dataUpdates?.bonuses ?? window.app?.sessionData?.bonuses,
+        results: dataUpdates?.results ?? openingPhaseState.results,
+        huntPrice: window.app?.sessionData?.huntPrice
+    });
+
+    BonusHuntFirebase.updateData(sessionId, {
+        ...dataUpdates,
+        metadata
+    }).catch(console.error);
 }
 
 function updateCompactBreakevenDisplay() {
@@ -656,14 +685,7 @@ function handleOpeningGainSubmit(event) {
     updateKeyStats();
 
     // Sync to Firebase
-    if (isFirebaseEnabled) {
-        const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
-        if (sessionId) {
-            BonusHuntFirebase.updateData(sessionId, {
-                results: openingPhaseState.results
-            }).catch(console.error);
-        }
-    }
+    syncDataToFirebase({ results: openingPhaseState.results });
 
     openingPhaseState.currentBonusIndex++;
 
@@ -862,14 +884,7 @@ function editResult(resultIndex, resultItem) {
         result.multiplier = result.stake > 0 ? (newGain / result.stake).toFixed(2) : '0';
         
         // Sync to Firebase
-        if (isFirebaseEnabled) {
-            const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
-            if (sessionId) {
-                BonusHuntFirebase.updateData(sessionId, {
-                    results: openingPhaseState.results
-                }).catch(console.error);
-            }
-        }
+        syncDataToFirebase({ results: openingPhaseState.results });
         
         reloadResultDisplay(resultIndex, resultItem);
         updateSessionSummaryTotals();
@@ -966,12 +981,8 @@ function showSessionSummary() {
                 results: openingPhaseState.results
             });
         } else {
-             // ensure final state synced
-             if (localStorage.getItem('bonusHuntCurrentSessionId')) {
-                 BonusHuntFirebase.updateData(localStorage.getItem('bonusHuntCurrentSessionId'), {
-                     results: openingPhaseState.results
-                 });
-             }
+            // ensure final state synced
+            syncDataToFirebase({ results: openingPhaseState.results });
         }
         openingPhaseState.summarySaved = true;
         renderSessionHistory();
@@ -1033,17 +1044,34 @@ async function renderSessionHistory() {
              // Fetch all sessions (or limited)
              const sessions = await BonusHuntFirebase.getUserSessions(null, { limit: 20 });
              
-             currentHistoryList = sessions.map(s => ({
-                 id: s.id,
-                 name: s.data.name,
-                 date: s.createdAt?.toDate ? s.createdAt.toDate().toISOString() : s.createdAt,
-                 startingBalance: s.data.huntPrice,
-                 totalGain: s.data.metadata.totalCollected || 0,
-                 netResult: s.data.metadata.netResult || 0,
-                 bonuses: s.data.bonuses || [],
-                 results: s.data.results || [],
-                 status: s.status
-             }));
+             currentHistoryList = sessions.map(s => {
+                  const data = s.data || {};
+                  const bonuses = Array.isArray(data.bonuses) ? data.bonuses : [];
+                  const results = Array.isArray(data.results) ? data.results : [];
+
+                  const startingBalance = parseFloat(data.huntPrice) || 0;
+                  const computedTotalGain = results.reduce((sum, r) => sum + (parseFloat(r.gain) || 0), 0);
+                  const totalGain = Number.isFinite(data?.metadata?.totalCollected)
+                      ? data.metadata.totalCollected
+                      : computedTotalGain;
+
+                  const computedNetResult = totalGain - startingBalance;
+                  const netResult = Number.isFinite(data?.metadata?.netResult)
+                      ? data.metadata.netResult
+                      : computedNetResult;
+
+                  return {
+                      id: s.id,
+                      name: data.name || 'Bonus Hunt',
+                      date: s.createdAt?.toDate ? s.createdAt.toDate().toISOString() : s.createdAt,
+                      startingBalance,
+                      totalGain,
+                      netResult,
+                      bonuses,
+                      results,
+                      status: s.status
+                  };
+              });
          } catch (e) {
              console.error('Error fetching history:', e);
              currentHistoryList = getSessionHistoryLegacy();
@@ -1310,9 +1338,10 @@ function setupAppOverrides() {
                       startSessionListener(sessionId);
                  } else {
                       const session = await BonusHuntFirebase.createSession({
-                          name: huntName,
-                          huntPrice: huntPrice
-                      });
+                           name: huntName,
+                           huntPrice: huntPrice,
+                           status: 'collection'
+                       });
                       sessionId = session.sessionId;
                       currentShareableCode = session.shareableCode;
                       localStorage.setItem('bonusHuntCurrentSessionId', sessionId);
@@ -1357,9 +1386,7 @@ function setupAppOverrides() {
             const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
             if (sessionId) {
                 await BonusHuntFirebase.updatePhase(sessionId, 'opening');
-                BonusHuntFirebase.updateData(sessionId, {
-                     bonuses: this.sessionData.bonuses
-                }).catch(console.error);
+                syncDataToFirebase({ bonuses: this.sessionData.bonuses });
                 // Listener should be active already
             }
         }
@@ -1391,56 +1418,153 @@ function setupAppOverrides() {
     };
 }
 
+function rebuildOpeningResultsList(status) {
+    const container = document.getElementById('openingListContainer');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (status !== 'completed' && (!openingPhaseState.results || openingPhaseState.results.length === 0)) {
+        container.innerHTML = `<div class="empty-state"><i data-lucide="list"></i><p>Aucun résultat enregistré pour le moment.</p></div>`;
+        return;
+    }
+
+    (openingPhaseState.results || []).forEach(r => addResultToOpeningList(r));
+}
+
+function applyFirebaseSessionToApp(session, options = {}) {
+    const { allowListener = true, showToastOnRestore = false } = options;
+
+    if (!session || !session.data || !window.app) return;
+
+    const status = session.status || 'creation';
+    const sessionId = session.sessionId;
+
+    window.app.sessionData = session.data;
+
+    // Restore shareable code
+    currentShareableCode = session.shareableCode;
+    if (currentShareableCode) {
+        localStorage.setItem('bonusHuntShareableCode', currentShareableCode);
+    }
+
+    if (allowListener && sessionId) {
+        startSessionListener(sessionId);
+    }
+
+    if (status === 'collection') {
+        window.app.currentStep = 2;
+        window.app.switchView('view-collection', 2);
+    } else if (status === 'opening' || status === 'completed') {
+        openingPhaseState.bonuses = session.data.bonuses || [];
+        openingPhaseState.results = session.data.results || [];
+        openingPhaseState.currentBonusIndex = openingPhaseState.results.length;
+
+        const openingPanel = document.querySelector('.opening-phase-panel');
+        if (openingPanel) {
+            openingPanel.style.display = '';
+        }
+
+        window.app.currentStep = 3;
+        window.app.switchView('view-opening', 3);
+
+        rebuildOpeningResultsList(status);
+
+        if (status === 'completed') {
+            // Prevent re-saving/re-syncing a completed session just for display
+            openingPhaseState.summarySaved = true;
+            showSessionSummary();
+        } else if (openingPhaseState.currentBonusIndex < openingPhaseState.bonuses.length) {
+            displayCurrentBonus();
+        } else {
+            showSessionSummary();
+        }
+    } else {
+        window.app.currentStep = 1;
+        window.app.switchView('view-creation', 1);
+
+        const huntNameInput = document.getElementById('huntName');
+        const huntPriceInput = document.getElementById('huntPrice');
+        if (huntNameInput && session.data.name) huntNameInput.value = session.data.name;
+        if (huntPriceInput && session.data.huntPrice) huntPriceInput.value = session.data.huntPrice;
+    }
+
+    window.app.updateSessionHeader();
+    updateShareButton();
+
+    if (showToastOnRestore) {
+        showToast('Session restaurée', 'success');
+    }
+
+    refreshLucideIcons();
+}
+
+async function loadSessionFromUrlParams() {
+    if (!isFirebaseEnabled) return false;
+
+    const url = new URL(window.location.href);
+    const idParam = url.searchParams.get('sessionId') || url.searchParams.get('session') || url.searchParams.get('replay');
+    const codeParam = url.searchParams.get('code');
+
+    const identifier = codeParam || idParam;
+    if (!identifier) return false;
+
+    try {
+        let session;
+
+        if (codeParam || (identifier.length === 6 && /^[A-Z0-9]+$/.test(identifier))) {
+            session = await BonusHuntFirebase.getSessionByCode(identifier);
+        } else {
+            session = await BonusHuntFirebase.getSession(identifier);
+        }
+
+        if (!session) {
+            showToast('Session introuvable', 'error');
+            return false;
+        }
+
+        const sessionId = session.sessionId;
+        if (sessionId && session.status !== 'completed') {
+            localStorage.setItem('bonusHuntCurrentSessionId', sessionId);
+        } else if (sessionId) {
+            localStorage.setItem('bonusHuntLastViewedSessionId', sessionId);
+        }
+
+        applyFirebaseSessionToApp(session, {
+            allowListener: session.status !== 'completed',
+            showToastOnRestore: false
+        });
+
+        return true;
+    } catch (error) {
+        console.error('Error loading session from URL params', error);
+        return false;
+    }
+}
+
 async function loadActiveSession() {
     if (!isFirebaseEnabled) return;
-    
+
     const sessionId = localStorage.getItem('bonusHuntCurrentSessionId');
     if (!sessionId) return;
-    
+
     try {
         const session = await BonusHuntFirebase.getSession(sessionId);
-        if (session && session.status !== 'completed') {
-            window.app.sessionData = session.data;
-            
-            // Restore shareable code
-            currentShareableCode = session.shareableCode;
-            if (currentShareableCode) {
-                localStorage.setItem('bonusHuntShareableCode', currentShareableCode);
-            }
-            
-            // Start listening
-            startSessionListener(sessionId);
-            
-            if (session.status === 'opening' || session.status === 'collection') {
-                 if (session.status === 'opening') {
-                     openingPhaseState.bonuses = session.data.bonuses || [];
-                     openingPhaseState.results = session.data.results || [];
-                     openingPhaseState.currentBonusIndex = openingPhaseState.results.length;
-                 }
-                 
-                 // Need to wait for DOM elements to be ready if they are not yet? 
-                 // We are in DOMContentLoaded so it should be fine.
-                 
-                 if (session.status === 'opening') {
-                     window.app.currentStep = 3;
-                     window.app.switchView('view-opening', 3);
-                     if (openingPhaseState.currentBonusIndex < openingPhaseState.bonuses.length) {
-                         displayCurrentBonus();
-                     } else {
-                         showSessionSummary();
-                     }
-                 } else {
-                     window.app.currentStep = 2;
-                     window.app.switchView('view-collection', 2);
-                 }
-                 
-                 window.app.updateSessionHeader();
-                 updateShareButton();
-                 showToast('Session restaurée', 'success');
-            }
-        } else {
+
+        if (!session) {
             localStorage.removeItem('bonusHuntCurrentSessionId');
+            return;
         }
+
+        if (session.status === 'completed') {
+            localStorage.removeItem('bonusHuntCurrentSessionId');
+            return;
+        }
+
+        applyFirebaseSessionToApp(session, {
+            allowListener: true,
+            showToastOnRestore: true
+        });
     } catch (e) {
         console.error('Error loading active session', e);
         if (e.message === 'Session not found') {
