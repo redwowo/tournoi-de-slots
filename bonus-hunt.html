@@ -56,6 +56,13 @@
                     <div>
                         <p class="eyebrow gaming-text">Bonus Hunt</p>
                         <h1 id="sessionTitle" class="gaming-title">Nouvelle session</h1>
+                        <div id="shareCodeDisplay" class="share-code-display" style="display: none;">
+                            <span class="share-code-label">Code de partage:</span>
+                            <span id="shareCode" class="share-code">ABC123</span>
+                            <button class="copy-code-btn" id="copyCodeButton" aria-label="Copier le code">
+                                <i data-lucide="copy"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div class="header-right">
@@ -272,6 +279,26 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <script>
+        // Check for shareable code in URL and redirect if needed
+        function checkShareableCodeRedirect() {
+            const pathParts = window.location.pathname.split('/');
+            const lastPart = pathParts[pathParts.length - 1];
+            
+            // If we're on /bonus-hunt/ with a 6-char code
+            if (pathParts[1] === 'bonus-hunt' && lastPart && lastPart.length === 6 && /^[A-Z0-9]+$/.test(lastPart)) {
+                // Redirect to spectator mode
+                window.location.href = `/bonus-hunt-spectator.html/${lastPart}`;
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Check on page load
+        if (checkShareableCodeRedirect()) {
+            return; // Stop execution if redirect happened
+        }
+
         // Définir l'objet app avant de charger les autres scripts
         const app = {
             currentStep: 1,
