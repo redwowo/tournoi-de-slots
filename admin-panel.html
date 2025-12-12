@@ -30,6 +30,10 @@
                     <span class="admin-nav-icon">🏆</span>
                     <span>Tous les Tournois</span>
                 </div>
+                <div class="admin-nav-item" data-page="bonusHunts">
+                    <span class="admin-nav-icon">🎯</span>
+                    <span>Bonus Hunts</span>
+                </div>
                 <div class="admin-nav-item" data-page="categories">
                     <span class="admin-nav-icon">📂</span>
                     <span>Catégories</span>
@@ -159,6 +163,66 @@
                         </table>
 
                         <div class="admin-pagination" id="tournamentsPagination"></div>
+                    </div>
+                </div>
+
+                <!-- Bonus Hunts Page -->
+                <div id="bonusHuntsPage" class="admin-page" style="display: none;">
+                    <div class="admin-table-container">
+                        <div class="admin-table-header">
+                            <h2 class="admin-table-title">Bonus Hunts</h2>
+                            <div class="admin-table-toolbar">
+                                <input 
+                                    type="text" 
+                                    class="admin-search-input" 
+                                    id="bonusHuntSearch" 
+                                    placeholder="Rechercher par nom, code..."
+                                >
+                                <select class="admin-search-input" id="bonusHuntStatusFilter" style="min-width: 150px;">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="creation">Création</option>
+                                    <option value="collection">Collection</option>
+                                    <option value="opening">Ouverture</option>
+                                    <option value="completed">Terminé</option>
+                                </select>
+                                <button class="admin-btn admin-btn-secondary" onclick="generateTestBonusHunt()">
+                                    🧪 Générer Test
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Actions en masse -->
+                        <div class="admin-bulk-actions" id="bonusHuntBulkActionsContainer" style="display: none;">
+                            <div class="admin-bulk-actions-info">
+                                <span id="bonusHuntSelectedCount">0</span> session(s) sélectionnée(s)
+                            </div>
+                            <div class="admin-bulk-actions-buttons">
+                                <button class="admin-btn admin-btn-danger" id="bonusHuntDeleteSelectedBtn" onclick="confirmDeleteSelectedBonusHunts()" disabled>
+                                    🗑️ Supprimer les sélectionnés
+                                </button>
+                            </div>
+                        </div>
+
+                        <table id="bonusHuntsTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" class="admin-checkbox" id="bonusHuntSelectAllCheckbox" onchange="toggleSelectAllBonusHunts()">
+                                    </th>
+                                    <th>Nom</th>
+                                    <th>Code</th>
+                                    <th>Créé le</th>
+                                    <th>Statut</th>
+                                    <th>Bonus</th>
+                                    <th>Résultat Net</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bonusHuntsTableBody">
+                            </tbody>
+                        </table>
+
+                        <div class="admin-pagination" id="bonusHuntsPagination"></div>
                     </div>
                 </div>
 
@@ -565,6 +629,7 @@
     </script>
     <script src="/admin-auth.js"></script>
     <script src="/admin-manager.js"></script>
+    <script src="/admin-bonushunt-manager.js"></script>
     <script src="/admin-players-manager.js"></script>
     <script src="/admin-panel.js"></script>
 </body>
