@@ -459,7 +459,11 @@ function createSessionCard(session, index) {
                 <i data-lucide="eye"></i>
                 Détails
             </button>
-            <button class="btn btn-primary btn-sm" onclick="replaySession('${session.id}')">
+            <button class="btn btn-primary btn-sm" onclick="openSessionAsSpectator('${session.id}')">
+                <i data-lucide="users"></i>
+                Spectateur
+            </button>
+            <button class="btn btn-success btn-sm" onclick="replaySession('${session.id}')">
                 <i data-lucide="play"></i>
                 Rejouer
             </button>
@@ -531,6 +535,62 @@ function replaySession(sessionId) {
     window.location.href = `/bonus-hunt.html?replay=${sessionId}`;
 }
 
+async function openSessionAsSpectator(sessionId) {
+    const session = allSessions.find(s => s.id === sessionId);
+    if (!session) {
+        showToast('Session introuvable', 'error');
+        return;
+    }
+    
+    // Vérifier si la session a un shareableCode ou un sessionId Firebase
+    let spectatorUrl = '';
+    
+    if (session.shareableCode) {
+        // Utiliser le code de partage existant
+        spectatorUrl = `/bonus-hunt/${session.shareableCode}`;
+    } else if (session.sessionId) {
+        // Utiliser l'ID de session Firebase directement
+        spectatorUrl = `/bonus-hunt/${session.sessionId}`;
+    } else if (session.id && session.id.startsWith('bh_')) {
+        // Utiliser l'ID de session pour Firebase
+        spectatorUrl = `/bonus-hunt/${session.id}`;
+    } else {
+        // Générer un code de partage temporaire pour cette session
+        if (isFirebaseEnabled && typeof BonusHuntFirebase !== 'undefined') {
+            try {
+                // Pour les sessions locales, créer un partage temporaire
+                showToast('Création du lien de partage en cours...', 'info');
+                
+                // Créer une session temporaire avec les données existantes
+                const tempSessionData = {
+                    name: session.name || 'Bonus Hunt',
+                    huntPrice: session.startingBalance || 0,
+                    bonuses: session.bonuses || [],
+                    results: session.results || []
+                };
+                
+                const newSession = await BonusHuntFirebase.createSession(tempSessionData);
+                if (newSession && newSession.shareableCode) {
+                    spectatorUrl = `/bonus-hunt/${newSession.shareableCode}`;
+                    showToast('Lien de partage créé avec succès!', 'success');
+                } else {
+                    throw new Error('Impossible de créer le code de partage');
+                }
+            } catch (error) {
+                console.error('Error creating shareable link:', error);
+                showToast('Impossible de créer le lien de partage', 'error');
+                return;
+            }
+        } else {
+            showToast('Mode spectateur non disponible (Firebase non configuré)', 'warning');
+            return;
+        }
+    }
+    
+    // Ouvrir le lien de partage dans un nouvel onglet
+    window.open(spectatorUrl, '_blank');
+}
+
 async function exportHistory() {
     try {
         const data = {
@@ -588,6 +648,44 @@ function clearOldSessions() {
     showToast('Anciennes sessions supprimées', 'success');
 }
 
+// Initialisation des gestionnaires d'événements
+function initializeEventHandlers() {
+    // Gestion du changement de thème
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            updateThemeIcon();
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+    }
+    
+    // Gestion des filtres
+    const filterDate = document.getElementById('filterDate');
+    const filterResult = document.getElementById('filterResult');
+    const filterMachine = document.getElementById('filterMachine');
+    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
+    
+    if (filterDate) filterDate.addEventListener('change', applyFilters);
+    if (filterResult) filterResult.addEventListener('change', applyFilters);
+    if (filterMachine) filterMachine.addEventListener('input', debounce(applyFilters, 300));
+    if (resetFiltersBtn) resetFiltersBtn.addEventListener('click', resetFilters);
+    
+    // Gestion des boutons d'action
+    const exportBtn = document.getElementById('exportHistoryBtn');
+    const clearBtn = document.getElementById('clearOldSessionsBtn');
+    
+    if (exportBtn) exportBtn.addEventListener('click', exportHistory);
+    if (clearBtn) clearBtn.addEventListener('click', clearOldSessions);
+    
+    // Gestion de la pagination
+    const prevPageBtn = document.getElementById('prevPage');
+    const nextPageBtn = document.getElementById('nextPage');
+    
+    if (prevPageBtn) prevPageBtn.addEventListener('click', () => changePage(-1));
+    if (nextPageBtn) nextPageBtn.addEventListener('click', () => changePage(1));
+}
+
 // États d'affichage
 function showLoadingState() {
     const grid = document.getElementById('sessionsGrid');
@@ -623,18 +721,52 @@ function refreshLucideIcons() {
 function showToast(message, type = 'info') {
     const toastContainer = document.getElementById('toastContainer');
     if (!toastContainer) {
-        console.log(`[${type}] ${message}`);
-        return;
+        // Créer le conteneur si n'existe pas
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        container.style.cssText = `
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 1000;
+            pointer-events: none;
+        `;
+        document.body.appendChild(container);
     }
-
+    
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
     toast.textContent = message;
-    toastContainer.appendChild(toast);
+    toast.style.cssText = `
+        background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+        color: white;
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.5rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        pointer-events: auto;
+        font-weight: 500;
+    `;
+    
+    document.getElementById('toastContainer').appendChild(toast);
 
     setTimeout(() => {
         if (toast.parentNode) {
             toast.parentNode.removeChild(toast);
         }
     }, 3000);
+}
+
+// Utilitaire debounce pour les filtres
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
 }
