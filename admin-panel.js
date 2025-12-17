@@ -29,6 +29,113 @@ function refreshSlotAdminViews() {
   }
 }
 
+const ADMIN_SLOTS_SORT_STORAGE_KEY = 'adminSlotsSort';
+const DEFAULT_ADMIN_SLOTS_SORT = 'name_asc';
+const slotNameCollator = new Intl.Collator('fr', { sensitivity: 'base', numeric: true });
+
+let slotPopularityCache = {
+  key: null,
+  map: new Map()
+};
+
+function normalizeSlotName(value) {
+  return (value || '').trim().toLowerCase();
+}
+
+function getAdminSlotsSortOrder() {
+  const stored = localStorage.getItem(ADMIN_SLOTS_SORT_STORAGE_KEY);
+  if (stored) return stored;
+
+  const selectValue = document.getElementById('playersSort')?.value
+    || document.getElementById('categoriesSort')?.value;
+
+  return selectValue || DEFAULT_ADMIN_SLOTS_SORT;
+}
+
+function setAdminSlotsSortOrder(sortOrder) {
+  const nextValue = sortOrder || DEFAULT_ADMIN_SLOTS_SORT;
+  localStorage.setItem(ADMIN_SLOTS_SORT_STORAGE_KEY, nextValue);
+
+  ['playersSort', 'categoriesSort'].forEach(selectId => {
+    const select = document.getElementById(selectId);
+    if (select && select.value !== nextValue) {
+      select.value = nextValue;
+    }
+  });
+}
+
+function getSlotPopularityMap() {
+  const tournaments = adminManager?.tournaments || [];
+  const cacheKey = Array.isArray(tournaments) ? tournaments.length : 0;
+
+  if (slotPopularityCache.key === cacheKey) {
+    return slotPopularityCache.map;
+  }
+
+  const map = new Map();
+
+  tournaments.forEach(tournament => {
+    const players = tournament?.state?.players;
+    if (!Array.isArray(players)) return;
+
+    players.forEach(entry => {
+      const name = typeof entry === 'string' ? entry : entry?.name;
+      const key = normalizeSlotName(name);
+      if (!key) return;
+      map.set(key, (map.get(key) || 0) + 1);
+    });
+  });
+
+  slotPopularityCache = { key: cacheKey, map };
+  return map;
+}
+
+function compareSlotEntries(a, b, sortOrder, popularityMap) {
+  const nameA = normalizeSlotName(a?.name);
+  const nameB = normalizeSlotName(b?.name);
+  const idA = Number.isFinite(Number(a?.id)) ? Number(a.id) : 0;
+  const idB = Number.isFinite(Number(b?.id)) ? Number(b.id) : 0;
+
+  const nameCompare = slotNameCollator.compare(nameA, nameB);
+
+  switch (sortOrder) {
+    case 'name_desc':
+      return -nameCompare;
+    case 'id_asc': {
+      const diff = idA - idB;
+      return diff !== 0 ? diff : nameCompare;
+    }
+    case 'id_desc': {
+      const diff = idB - idA;
+      return diff !== 0 ? diff : nameCompare;
+    }
+    case 'popularity_desc': {
+      const countA = popularityMap?.get(nameA) || 0;
+      const countB = popularityMap?.get(nameB) || 0;
+      if (countA !== countB) {
+        return countB - countA;
+      }
+      if (idA !== idB) {
+        return idA - idB;
+      }
+      return nameCompare;
+    }
+    case 'name_asc':
+    default:
+      return nameCompare;
+  }
+}
+
+function sortSlotPlayers(players, sortOrder) {
+  const list = Array.isArray(players) ? [...players] : [];
+  if (list.length <= 1) return list;
+
+  const order = sortOrder || DEFAULT_ADMIN_SLOTS_SORT;
+  const popularityMap = order === 'popularity_desc' ? getSlotPopularityMap() : null;
+
+  return list.sort((a, b) => compareSlotEntries(a, b, order, popularityMap));
+}
+
 let slotSearchControlsInitialized = false;
 
 function ensureSlotSearchControlsInitialized() {
@@ -40,16 +147,48 @@ function ensureSlotSearchControlsInitialized() {
     playersSearch.addEventListener('input', debounce(() => renderPlayers(1), 120));
   }
 
+  const sortSelectIds = ['playersSort', 'categoriesSort'];
+  const storedSort = localStorage.getItem(ADMIN_SLOTS_SORT_STORAGE_KEY) || '';
+
+  const referenceSelect = document.getElementById('playersSort') || document.getElementById('categoriesSort');
+  let initialSort = storedSort || referenceSelect?.value || DEFAULT_ADMIN_SLOTS_SORT;
+
+  if (referenceSelect && !Array.from(referenceSelect.options).some(option => option.value === initialSort)) {
+    initialSort = DEFAULT_ADMIN_SLOTS_SORT;
+  }
+
+  setAdminSlotsSortOrder(initialSort);
+
+  sortSelectIds.forEach(selectId => {
+    const select = document.getElementById(selectId);
+    if (!select) return;
+
+    if (select.value !== initialSort) {
+      select.value = initialSort;
+    }
+
+    select.addEventListener('change', () => {
+      setAdminSlotsSortOrder(select.value);
+      refreshSlotAdminViews();
+    });
+  });
+
   const categoriesSearch = document.getElementById('categoriesSearch');
   if (categoriesSearch) {
     categoriesSearch.addEventListener('input', debounce(() => renderCategories(), 120));
   }
 
   window.addEventListener('storage', (event) => {
-    if (event.key !== 'adminPlayersLastUpdate') return;
+    if (event.key === 'adminPlayersLastUpdate') {
+      if (isAdminPageVisible('players')) {
+        renderPlayers(1);
+      }
+      return;
+    }
 
-    if (isAdminPageVisible('players')) {
-      renderPlayers(1);
+    if (event.key === ADMIN_SLOTS_SORT_STORAGE_KEY) {
+      setAdminSlotsSortOrder(event.newValue);
+      refreshSlotAdminViews();
     }
   });
 
@@ -176,7 +315,17 @@ function initializeAdminPanel() {
   
   // Initialize managers
   if (adminManager && adminManager.init) {
-    adminManager.init().catch(err => console.error('Error initializing admin manager:', err));
+    adminManager.init()
+      .then(() => {
+        slotPopularityCache.key = null;
+
+        updateDashboard();
+
+        if (getAdminSlotsSortOrder() === 'popularity_desc') {
+          refreshSlotAdminViews();
+        }
+      })
+      .catch(err => console.error('Error initializing admin manager:', err));
   }
   if (adminBonusHuntManager && adminBonusHuntManager.init) {
     adminBonusHuntManager.init().catch(err => console.error('Error initializing bonus hunt manager:', err));
@@ -762,6 +911,7 @@ async function renderCategories() {
   if (!categoriesContainer) return;
 
   const searchQuery = getNormalizedSearchValue('categoriesSearch');
+  const sortOrder = getAdminSlotsSortOrder();
 
   categoriesContainer.innerHTML = `
     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -831,6 +981,8 @@ async function renderCategories() {
           const list = document.createElement('div');
           list.className = 'admin-accordion-list';
 
+          const matchedSlots = [];
+
           categoryNames.forEach(categoryName => {
             const matches = matchingPlayersByCategory.get(categoryName);
             if (!matches || matches.length === 0) return;
@@ -839,13 +991,24 @@ async function renderCategories() {
             const color = metadata.color || '#4b5563';
 
             matches.forEach(player => {
-              list.appendChild(createSlotAccordionElement({
+              matchedSlots.push({
                 categoryName,
                 categoryColor: color,
-                player,
-                showCategoryInSummary: true
-              }));
+                player
+              });
             });
+          });
+
+          const popularityMap = sortOrder === 'popularity_desc' ? getSlotPopularityMap() : null;
+          matchedSlots.sort((a, b) => compareSlotEntries(a.player, b.player, sortOrder, popularityMap));
+
+          matchedSlots.forEach(({ categoryName, categoryColor, player }) => {
+            list.appendChild(createSlotAccordionElement({
+              categoryName,
+              categoryColor,
+              player,
+              showCategoryInSummary: true
+            }));
           });
 
           resultsContainer.appendChild(list);
@@ -1233,6 +1396,7 @@ async function renderPlayers(page = 1) {
   if (!playersContainer) return;
 
   const searchQuery = getNormalizedSearchValue('playersSearch');
+  const sortOrder = getAdminSlotsSortOrder();
 
   playersContainer.innerHTML = `
     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -1266,14 +1430,16 @@ async function renderPlayers(page = 1) {
         ? players.filter(player => (player?.name || '').toLowerCase().includes(searchQuery))
         : players;
 
-      if (searchQuery && filteredPlayers.length === 0) {
+      const sortedFilteredPlayers = sortSlotPlayers(filteredPlayers, sortOrder);
+
+      if (searchQuery && sortedFilteredPlayers.length === 0) {
         return;
       }
 
       categoriesToRender.push({
         categoryName,
         players,
-        filteredPlayers,
+        filteredPlayers: sortedFilteredPlayers,
         color: metadata.color || '#4b5563'
       });
     });
