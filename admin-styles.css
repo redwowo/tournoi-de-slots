@@ -1141,6 +1141,21 @@ tbody tr.selected:hover {
   font-weight: 500;
 }
 
+/* Categories Grid */
+.admin-categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  padding: 20px 24px;
+}
+
+@media (max-width: 768px) {
+  .admin-categories-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+}
+
 /* Category Card with Color Header */
 .admin-category-card-with-branding {
   background: var(--card-bg);

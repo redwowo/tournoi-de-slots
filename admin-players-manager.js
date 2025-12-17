@@ -11,7 +11,14 @@ class AdminPlayersManager {
       'Pragmatic Play': { color: '#ff6f00', imagePath: '/pragmaticplaylogo.png' }
     };
 
-    this.loadPlayers();
+    this.loadPromise = this.loadPlayers();
+  }
+
+  async init() {
+    if (!this.loadPromise) {
+      this.loadPromise = this.loadPlayers();
+    }
+    await this.loadPromise;
   }
 
   getDefaultColor(categoryName) {
