@@ -1,5 +1,8 @@
 /api/upload-category-image /.netlify/functions/upload-category-image 200
 /api/delete-category-image /.netlify/functions/delete-category-image 200
+/api/admin/login /.netlify/functions/admin-login 200
+/api/admin/verify /.netlify/functions/admin-verify 200
+/api/admin/logout /.netlify/functions/admin-logout 200
 /tournois /tournois.html 200
 /spectate-tournoi /spectate-tournoi.html 200
 /tournoi/:id /tournoi.html 200

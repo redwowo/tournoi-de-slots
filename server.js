@@ -4,6 +4,15 @@ const fs = require('fs');
 const multer = require('multer');
 const crypto = require('crypto');
 
+const {
+  DEFAULT_ADMIN_SESSION_SECONDS,
+  getAdminPanelCode,
+  createAdminToken,
+  verifyAdminToken,
+  parseCookies,
+  serializeCookie
+} = require('./admin-token');
+
 const app = express();
 const apiRouter = express.Router();
 const jsonParser = express.json();
@@ -217,6 +226,91 @@ apiRouter.post('/delete-category-image', (req, res) => {
   });
 });
 
+function shouldUseSecureCookies(req) {
+  return Boolean(
+    req?.secure
+      || req?.headers?.['x-forwarded-proto'] === 'https'
+      || process.env.NODE_ENV === 'production'
+  );
+}
+
+function setAdminAuthCookie(req, res, token, { maxAgeSeconds = DEFAULT_ADMIN_SESSION_SECONDS } = {}) {
+  const cookie = serializeCookie('admin_token', token, {
+    httpOnly: true,
+    secure: shouldUseSecureCookies(req),
+    sameSite: 'Strict',
+    path: '/',
+    maxAge: maxAgeSeconds
+  });
+
+  res.setHeader('Set-Cookie', cookie);
+}
+
+function clearAdminAuthCookie(req, res) {
+  const cookie = serializeCookie('admin_token', '', {
+    httpOnly: true,
+    secure: shouldUseSecureCookies(req),
+    sameSite: 'Strict',
+    path: '/',
+    expires: new Date(0),
+    maxAge: 0
+  });
+
+  res.setHeader('Set-Cookie', cookie);
+}
+
+function getAdminTokenFromRequest(req) {
+  const cookies = parseCookies(req.headers.cookie);
+  return cookies.admin_token;
+}
+
+apiRouter.post('/admin/login', (req, res) => {
+  const code = String(req.body?.code || '').trim();
+
+  if (!code || code !== getAdminPanelCode()) {
+    return res.status(401).json({
+      success: false,
+      error: 'Code incorrect'
+    });
+  }
+
+  const { token, expiresAt, expiresInSeconds } = createAdminToken({
+    expiresInSeconds: DEFAULT_ADMIN_SESSION_SECONDS
+  });
+
+  setAdminAuthCookie(req, res, token, { maxAgeSeconds: expiresInSeconds });
+
+  return res.json({
+    success: true,
+    expiresAt
+  });
+});
+
+apiRouter.post('/admin/verify', (req, res) => {
+  const token = req.body?.token || getAdminTokenFromRequest(req);
+  const result = verifyAdminToken(token);
+
+  if (!result.valid) {
+    return res.status(401).json({
+      valid: false,
+      reason: result.reason
+    });
+  }
+
+  return res.json({
+    valid: true,
+    expiresAt: result.expiresAt
+  });
+});
+
+apiRouter.post('/admin/logout', (req, res) => {
+  clearAdminAuthCookie(req, res);
+
+  return res.json({
+    success: true
+  });
+});
+
 app.use('/api', apiRouter);
 
 // Redirige /tournois vers tournois.html (AVANT express.static)
@@ -237,6 +331,18 @@ app.get('/tournoi/:id', (req, res) => {
 // Route pour les bonus hunts spectateurs (ex: /bonus-hunt/bh_123456)
 app.get('/bonus-hunt/:sessionId', (req, res) => {
   res.sendFile(path.join(__dirname, 'bonus-hunt-spectator.html'));
+});
+
+// Protège l'accès au panel admin côté serveur (utile si JS est désactivé)
+app.get('/admin-panel.html', (req, res) => {
+  const token = getAdminTokenFromRequest(req);
+  const result = verifyAdminToken(token);
+
+  if (!result.valid) {
+    return res.redirect('/admin-login.html?next=/admin-panel.html');
+  }
+
+  return res.sendFile(path.join(__dirname, 'admin-panel.html'));
 });
 
 // Sert tous les fichiers statiques du dossier courant (APRÈS les routes spécifiques)
