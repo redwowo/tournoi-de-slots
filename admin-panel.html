@@ -231,10 +231,24 @@
                     <div class="admin-table-container">
                         <div class="admin-table-header">
                             <h2 class="admin-table-title">Gestion des Catégories</h2>
-                            <button class="admin-btn admin-btn-primary" onclick="showAddCategoryModal()">
-                                ➕ Ajouter une Catégorie
-                            </button>
+                            <div class="admin-table-toolbar">
+                                <div class="admin-search-wrapper">
+                                    <span class="admin-search-icon" aria-hidden="true">🔍</span>
+                                    <input 
+                                        type="text" 
+                                        class="admin-search-input admin-search-input-with-icon" 
+                                        id="categoriesSearch" 
+                                        placeholder="Rechercher une machine à sous..."
+                                        autocomplete="off"
+                                    >
+                                </div>
+                                <button class="admin-btn admin-btn-primary" onclick="showAddCategoryModal()">
+                                    ➕ Ajouter une Catégorie
+                                </button>
+                            </div>
                         </div>
+
+                        <div id="categoriesSearchResults" style="display: none;"></div>
 
                         <div id="categoriesListContainer">
                             <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
@@ -249,6 +263,18 @@
                     <div class="admin-table-container">
                         <div class="admin-table-header">
                             <h2 class="admin-table-title">Gestion des Joueurs</h2>
+                            <div class="admin-table-toolbar">
+                                <div class="admin-search-wrapper">
+                                    <span class="admin-search-icon" aria-hidden="true">🔍</span>
+                                    <input 
+                                        type="text" 
+                                        class="admin-search-input admin-search-input-with-icon" 
+                                        id="playersSearch" 
+                                        placeholder="Rechercher une machine à sous..."
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
                         </div>
 
                         <div id="playersListContainer">

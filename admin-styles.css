@@ -400,6 +400,25 @@ html.light .admin-button {
   border-color: var(--primary-color);
 }
 
+.admin-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.admin-search-input-with-icon {
+  padding-left: 38px;
+}
+
+.admin-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--text-secondary);
+  pointer-events: none;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1286,4 +1305,106 @@ html.dark {
   --btn-hover-bg: #323232;
   --secondary-btn-bg: #252525;
   --primary-color: #667eea;
+}
+
+/* Accordion / panels */
+.admin-accordion {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--hover-bg);
+}
+
+.admin-accordion > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+}
+
+.admin-accordion > summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-accordion > summary:hover {
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.admin-accordion-content {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.admin-accordion-chevron {
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+  flex: 0 0 auto;
+}
+
+.admin-accordion[open] > summary .admin-accordion-chevron {
+  transform: rotate(90deg);
+}
+
+.admin-accordion-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-accordion-title {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-color);
+  font-size: 1rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-accordion-badge {
+  background: var(--primary-color)20;
+  color: var(--primary-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.admin-category-accordion {
+  background: var(--hover-bg);
+}
+
+.admin-slot-accordion {
+  background: var(--card-bg);
+}
+
+.admin-accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#categoriesSearchResults {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--hover-bg);
+}
+
+.admin-search-results-title {
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.admin-search-results-empty {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  padding: 8px 0;
 }
