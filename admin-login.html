@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accès Admin</title>
+  <link rel="icon" type="image/png" href="/fly.png">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/admin-styles.css">
+  <script src="/admin-guard.js"></script>
+  <style>
+    body {
+      padding: 0;
+    }
+
+    .admin-login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .admin-login-wrapper .admin-auth-container {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .admin-login-description {
+      margin: 0 0 12px;
+      color: var(--muted-text);
+      line-height: 1.4;
+    }
+
+    .admin-login-wrapper .admin-auth-footer {
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .admin-login-back {
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-login-wrapper">
+    <div class="admin-auth-container">
+      <div class="admin-auth-header">
+        <h2>Accès Admin</h2>
+      </div>
+
+      <div class="admin-auth-body">
+        <p class="admin-login-description">Entrez le code d'accès pour ouvrir le panel administrateur.</p>
+        <input
+          type="password"
+          id="adminLoginCode"
+          class="admin-code-input"
+          placeholder="Code d'accès"
+          autocomplete="off"
+        >
+        <div class="admin-auth-error" id="adminLoginError"></div>
+      </div>
+
+      <div class="admin-auth-footer">
+        <a class="btn-outline admin-login-back" href="/">Retour</a>
+        <button class="btn-primary" id="adminLoginSubmit">Accéder</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/admin-login.js"></script>
+</body>
+</html>

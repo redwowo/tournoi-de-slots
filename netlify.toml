@@ -12,6 +12,21 @@
   status = 200
 
 [[redirects]]
+  from = "/api/admin/login"
+  to = "/.netlify/functions/admin-login"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/verify"
+  to = "/.netlify/functions/admin-verify"
+  status = 200
+
+[[redirects]]
+  from = "/api/admin/logout"
+  to = "/.netlify/functions/admin-logout"
+  status = 200
+
+[[redirects]]
   from = "/tournois"
   to = "/tournois.html"
   status = 200

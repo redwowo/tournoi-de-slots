@@ -2,23 +2,19 @@
 class AdminAuth {
   constructor() {
     this.isAuthenticated = false;
-    this.adminCode = 'golopodie';
     this.sessionTimeout = 30 * 60 * 1000; // 30 minutes
     this.inactivityTimeout = null;
-    this.sessionStartTime = null;
-    this.restoreSession();
+    this.sessionExpiresAt = null;
+    this.sessionVerifyPromise = null;
+
+    this.sessionVerifyPromise = this.verifySession();
   }
 
-  // Initialize authentication
   init() {
     this.createAdminButton();
     this.setupEventListeners();
-    if (this.isAuthenticated) {
-      this.resetInactivityTimer();
-    }
   }
 
-  // Create the discrete admin button
   createAdminButton() {
     const existingBtn = document.getElementById('adminModeBtn');
     if (existingBtn) return;
@@ -28,37 +24,90 @@ class AdminAuth {
     adminBtn.className = 'admin-button';
     adminBtn.innerHTML = '⚙️';
     adminBtn.title = 'Mode Admin';
-    
+
     document.body.appendChild(adminBtn);
   }
 
-  // Setup event listeners
   setupEventListeners() {
     const adminBtn = document.getElementById('adminModeBtn');
     if (adminBtn) {
-      adminBtn.addEventListener('click', () => this.showAuthModal());
+      adminBtn.addEventListener('click', () => {
+        this.handleAdminButtonClick();
+      });
     }
 
-    document.addEventListener('keydown', () => {
+    const activityHandler = () => {
       if (this.isAuthenticated) {
         this.resetInactivityTimer();
       }
-    });
-    
-    document.addEventListener('click', () => {
-      if (this.isAuthenticated) {
-        this.resetInactivityTimer();
-      }
-    });
+    };
+
+    document.addEventListener('keydown', activityHandler);
+    document.addEventListener('click', activityHandler);
   }
 
-  // Show authentication modal
-  showAuthModal() {
-    if (this.isAuthenticated) {
-      // If already authenticated, open admin panel
+  async handleAdminButtonClick() {
+    const authed = await this.ensureAuthenticated();
+    if (authed) {
       window.location.href = '/admin-panel.html';
       return;
     }
+
+    this.showAuthModal();
+  }
+
+  async ensureAuthenticated() {
+    if (this.sessionVerifyPromise) {
+      await this.sessionVerifyPromise;
+      this.sessionVerifyPromise = null;
+    }
+
+    if (this.isAuthenticated && this.sessionExpiresAt && Date.now() < this.sessionExpiresAt) {
+      return true;
+    }
+
+    await this.verifySession();
+    return Boolean(this.isAuthenticated && this.sessionExpiresAt && Date.now() < this.sessionExpiresAt);
+  }
+
+  async verifySession() {
+    try {
+      const response = await fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        this.isAuthenticated = false;
+        this.sessionExpiresAt = null;
+        return false;
+      }
+
+      const data = await response.json().catch(() => null);
+      if (!data?.valid || !data?.expiresAt) {
+        this.isAuthenticated = false;
+        this.sessionExpiresAt = null;
+        return false;
+      }
+
+      this.isAuthenticated = true;
+      this.sessionExpiresAt = Number(data.expiresAt);
+      this.resetInactivityTimer();
+      return true;
+    } catch (error) {
+      this.isAuthenticated = false;
+      this.sessionExpiresAt = null;
+      return false;
+    }
+  }
+
+  showAuthModal() {
+    const existingModal = document.getElementById('adminAuthModal');
+    if (existingModal) return;
 
     const modal = document.createElement('div');
     modal.className = 'admin-auth-modal';
@@ -88,46 +137,70 @@ class AdminAuth {
     `;
 
     document.body.appendChild(modal);
+
     const input = document.getElementById('adminCodeInput');
-    input.focus();
+    if (input) {
+      input.focus();
+      input.addEventListener('keypress', (event) => {
+        if (event.key === 'Enter') {
+          this.authenticate();
+        }
+      });
+    }
 
-    input.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        this.authenticate();
-      }
-    });
-
-    // Close on overlay click
     const overlay = modal.querySelector('.admin-auth-overlay');
-    overlay.addEventListener('click', () => {
+    overlay?.addEventListener('click', () => {
       modal.remove();
     });
   }
 
-  // Authenticate with code
-  authenticate() {
+  async authenticate() {
     const input = document.getElementById('adminCodeInput');
-    const code = input.value.trim();
     const errorDiv = document.getElementById('adminAuthError');
 
-    if (code === this.adminCode) {
-      this.isAuthenticated = true;
-      this.sessionStartTime = Date.now();
-      this.saveSession();
-      this.resetInactivityTimer();
-      
-      const modal = document.getElementById('adminAuthModal');
-      if (modal) modal.remove();
-      
-      window.location.href = '/admin-panel.html';
-    } else {
-      errorDiv.textContent = 'Code incorrect. Veuillez réessayer.';
-      input.value = '';
+    if (!input || !errorDiv) return;
+
+    const code = String(input.value || '').trim();
+    errorDiv.textContent = '';
+
+    if (!code) {
+      errorDiv.textContent = 'Veuillez entrer le code.';
       input.focus();
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ code })
+      });
+
+      if (!response.ok) {
+        const data = await response.json().catch(() => null);
+        errorDiv.textContent = data?.error || 'Code incorrect. Veuillez réessayer.';
+        input.value = '';
+        input.focus();
+        return;
+      }
+
+      const data = await response.json().catch(() => ({}));
+      this.isAuthenticated = true;
+      this.sessionExpiresAt = Number(data?.expiresAt) || null;
+      this.resetInactivityTimer();
+
+      const modal = document.getElementById('adminAuthModal');
+      modal?.remove();
+
+      window.location.href = '/admin-panel.html';
+    } catch (error) {
+      errorDiv.textContent = "Impossible de vérifier le code. Réessayez.";
     }
   }
 
-  // Reset inactivity timer
   resetInactivityTimer() {
     if (this.inactivityTimeout) {
       clearTimeout(this.inactivityTimeout);
@@ -138,40 +211,28 @@ class AdminAuth {
     }, this.sessionTimeout);
   }
 
-  // Save session to localStorage
-  saveSession() {
-    localStorage.setItem('adminAuthenticated', 'true');
-    localStorage.setItem('adminSessionStartTime', this.sessionStartTime);
-  }
-
-  // Restore session from localStorage
-  restoreSession() {
-    const isAuth = localStorage.getItem('adminAuthenticated');
-    const startTime = localStorage.getItem('adminSessionStartTime');
-
-    if (isAuth === 'true' && startTime) {
-      const elapsed = Date.now() - parseInt(startTime);
-      if (elapsed < this.sessionTimeout) {
-        this.isAuthenticated = true;
-        this.sessionStartTime = parseInt(startTime);
-        this.resetInactivityTimer();
-      } else {
-        this.logout();
-      }
-    }
-  }
-
-  // Logout
-  logout(message = 'Vous avez été déconnecté.') {
+  async logout(message = 'Vous avez été déconnecté.') {
     this.isAuthenticated = false;
-    localStorage.removeItem('adminAuthenticated');
-    localStorage.removeItem('adminSessionStartTime');
-    
+    this.sessionExpiresAt = null;
+
     if (this.inactivityTimeout) {
       clearTimeout(this.inactivityTimeout);
+      this.inactivityTimeout = null;
     }
 
-    // Show notification
+    try {
+      await fetch('/api/admin/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({})
+      });
+    } catch (error) {
+      // Best effort
+    }
+
     const toast = document.createElement('div');
     toast.className = 'admin-logout-toast';
     toast.textContent = message;
@@ -181,32 +242,26 @@ class AdminAuth {
       toast.remove();
     }, 4000);
 
-    // Redirect if on admin panel
     if (window.location.pathname.includes('admin-panel')) {
       setTimeout(() => {
         window.location.href = '/';
-      }, 1500);
+      }, 800);
     }
   }
 
-  // Check if authenticated
   isAdminAuthenticated() {
     return this.isAuthenticated;
   }
 
-  // Get session remaining time in seconds
   getSessionRemainingTime() {
-    if (!this.isAuthenticated || !this.sessionStartTime) return 0;
-    const elapsed = Date.now() - this.sessionStartTime;
-    const remaining = Math.max(0, this.sessionTimeout - elapsed);
+    if (!this.isAuthenticated || !this.sessionExpiresAt) return 0;
+    const remaining = Math.max(0, this.sessionExpiresAt - Date.now());
     return Math.ceil(remaining / 1000);
   }
 }
 
-// Global instance
 const adminAuthManager = new AdminAuth();
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
   adminAuthManager.init();
 });
