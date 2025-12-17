@@ -1,7 +1,166 @@
 
 // ============ PANEL INITIALIZATION ============
 
+function debounce(fn, delay = 150) {
+  let timer;
+  return (...args) => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(() => fn(...args), delay);
+  };
+}
+
+function getNormalizedSearchValue(inputId) {
+  return (document.getElementById(inputId)?.value || '').trim().toLowerCase();
+}
+
+function isAdminPageVisible(pageName) {
+  const pageElement = document.getElementById(`${pageName}Page`);
+  return !!pageElement && pageElement.style.display !== 'none';
+}
+
+function refreshSlotAdminViews() {
+  if (isAdminPageVisible('players')) {
+    renderPlayers(1);
+  }
+  if (isAdminPageVisible('categories')) {
+    renderCategories();
+  }
+}
+
+let slotSearchControlsInitialized = false;
+
+function ensureSlotSearchControlsInitialized() {
+  if (slotSearchControlsInitialized) return;
+  slotSearchControlsInitialized = true;
+
+  const playersSearch = document.getElementById('playersSearch');
+  if (playersSearch) {
+    playersSearch.addEventListener('input', debounce(() => renderPlayers(1), 120));
+  }
+
+  const categoriesSearch = document.getElementById('categoriesSearch');
+  if (categoriesSearch) {
+    categoriesSearch.addEventListener('input', debounce(() => renderCategories(), 120));
+  }
+
+  window.addEventListener('storage', (event) => {
+    if (event.key !== 'adminPlayersLastUpdate') return;
+
+    if (isAdminPageVisible('players')) {
+      renderPlayers(1);
+    }
+  });
+
+  window.addEventListener('adminPlayersUpdated', () => {
+    if (isAdminPageVisible('players')) {
+      renderPlayers(1);
+    }
+  });
+}
+
+function createSlotAccordionElement({ categoryName, categoryColor, player, showCategoryInSummary = false } = {}) {
+  const slotDetails = document.createElement('details');
+  slotDetails.className = 'admin-accordion admin-slot-accordion';
+
+  const summary = document.createElement('summary');
+
+  const left = document.createElement('div');
+  left.className = 'admin-accordion-title-group';
+
+  const title = document.createElement('div');
+  title.className = 'admin-accordion-title';
+  title.textContent = player?.name || '';
+  left.appendChild(title);
+
+  if (showCategoryInSummary) {
+    const categoryBadge = document.createElement('span');
+    categoryBadge.className = 'admin-accordion-badge';
+    categoryBadge.textContent = categoryName;
+    if (categoryColor) {
+      categoryBadge.style.backgroundColor = `${categoryColor}20`;
+      categoryBadge.style.color = categoryColor;
+    }
+    left.appendChild(categoryBadge);
+  }
+
+  const chevron = document.createElement('span');
+  chevron.className = 'admin-accordion-chevron';
+  chevron.textContent = '▸';
+
+  summary.appendChild(left);
+  summary.appendChild(chevron);
+  slotDetails.appendChild(summary);
+
+  const content = document.createElement('div');
+  content.className = 'admin-accordion-content';
+
+  const layout = document.createElement('div');
+  layout.style.display = 'flex';
+  layout.style.justifyContent = 'space-between';
+  layout.style.alignItems = 'flex-start';
+  layout.style.gap = '12px';
+  layout.style.flexWrap = 'wrap';
+
+  const info = document.createElement('div');
+  info.style.display = 'flex';
+  info.style.flexDirection = 'column';
+  info.style.gap = '6px';
+
+  const categoryLine = document.createElement('div');
+  const categoryLabel = document.createElement('span');
+  categoryLabel.style.color = 'var(--text-secondary)';
+  categoryLabel.textContent = 'Catégorie: ';
+  const categoryValue = document.createElement('strong');
+  categoryValue.textContent = categoryName;
+  categoryLine.appendChild(categoryLabel);
+  categoryLine.appendChild(categoryValue);
+
+  const idLine = document.createElement('div');
+  const idLabel = document.createElement('span');
+  idLabel.style.color = 'var(--text-secondary)';
+  idLabel.textContent = 'ID: ';
+  const idValue = document.createElement('code');
+  idValue.textContent = String(player?.id ?? '');
+  idValue.style.fontFamily = 'monospace';
+  idValue.style.padding = '2px 6px';
+  idValue.style.background = 'var(--hover-bg)';
+  idValue.style.borderRadius = '4px';
+  idLine.appendChild(idLabel);
+  idLine.appendChild(idValue);
+
+  info.appendChild(categoryLine);
+  info.appendChild(idLine);
+
+  const actions = document.createElement('div');
+  actions.className = 'admin-btn-group';
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'admin-btn admin-btn-secondary admin-btn-sm';
+  editBtn.textContent = '✏️ Éditer';
+  editBtn.addEventListener('click', () => showEditPlayerModal(categoryName, player));
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'admin-btn admin-btn-danger admin-btn-sm';
+  deleteBtn.textContent = '🗑️ Supprimer';
+  deleteBtn.addEventListener('click', () => confirmDeletePlayer(categoryName, player.id, player.name));
+
+  actions.appendChild(editBtn);
+  actions.appendChild(deleteBtn);
+
+  layout.appendChild(info);
+  layout.appendChild(actions);
+
+  content.appendChild(layout);
+  slotDetails.appendChild(content);
+
+  return slotDetails;
+}
+
 function initializeAdminPanel() {
+  ensureSlotSearchControlsInitialized();
+
   // Attach event listeners to navigation items
   const navItems = document.querySelectorAll('.admin-nav-item');
   
@@ -599,13 +758,28 @@ async function renderCategories() {
   ensureCategoryControlsInitialized();
 
   const categoriesContainer = document.getElementById('categoriesListContainer');
+  const resultsContainer = document.getElementById('categoriesSearchResults');
   if (!categoriesContainer) return;
+
+  const searchQuery = getNormalizedSearchValue('categoriesSearch');
 
   categoriesContainer.innerHTML = `
     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
       Chargement des catégories...
     </div>
   `;
+
+  if (resultsContainer) {
+    resultsContainer.innerHTML = '';
+    resultsContainer.style.display = searchQuery ? 'block' : 'none';
+
+    if (searchQuery) {
+      const loading = document.createElement('div');
+      loading.className = 'admin-search-results-empty';
+      loading.textContent = 'Recherche...';
+      resultsContainer.appendChild(loading);
+    }
+  }
 
   try {
     if (adminPlayersManager?.init) {
@@ -620,13 +794,86 @@ async function renderCategories() {
           Aucune catégorie.
         </div>
       `;
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '';
+        resultsContainer.style.display = 'none';
+      }
+      return;
+    }
+
+    const matchingPlayersByCategory = new Map();
+
+    if (searchQuery) {
+      categoryNames.forEach(categoryName => {
+        const players = adminPlayersManager.getPlayersInCategory(categoryName);
+        const matches = players.filter(player => (player?.name || '').toLowerCase().includes(searchQuery));
+        if (matches.length > 0) {
+          matchingPlayersByCategory.set(categoryName, matches);
+        }
+      });
+
+      if (resultsContainer) {
+        resultsContainer.innerHTML = '';
+
+        const title = document.createElement('h3');
+        title.className = 'admin-search-results-title';
+
+        const totalMatches = Array.from(matchingPlayersByCategory.values()).reduce((sum, players) => sum + players.length, 0);
+        title.textContent = `Machines trouvées (${totalMatches})`;
+        resultsContainer.appendChild(title);
+
+        if (totalMatches === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'admin-search-results-empty';
+          empty.textContent = 'Aucune machine à sous trouvée.';
+          resultsContainer.appendChild(empty);
+        } else {
+          const list = document.createElement('div');
+          list.className = 'admin-accordion-list';
+
+          categoryNames.forEach(categoryName => {
+            const matches = matchingPlayersByCategory.get(categoryName);
+            if (!matches || matches.length === 0) return;
+
+            const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
+            const color = metadata.color || '#4b5563';
+
+            matches.forEach(player => {
+              list.appendChild(createSlotAccordionElement({
+                categoryName,
+                categoryColor: color,
+                player,
+                showCategoryInSummary: true
+              }));
+            });
+          });
+
+          resultsContainer.appendChild(list);
+        }
+
+        resultsContainer.style.display = 'block';
+      }
+    }
+
+    const filteredCategoryNames = searchQuery
+      ? categoryNames.filter(categoryName => {
+          return categoryName.toLowerCase().includes(searchQuery) || matchingPlayersByCategory.has(categoryName);
+        })
+      : categoryNames;
+
+    if (filteredCategoryNames.length === 0) {
+      categoriesContainer.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          Aucune catégorie trouvée.
+        </div>
+      `;
       return;
     }
 
     const grid = document.createElement('div');
     grid.className = 'admin-categories-grid';
 
-    categoryNames.forEach(categoryName => {
+    filteredCategoryNames.forEach(categoryName => {
       const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
       const playersCount = adminPlayersManager.getPlayersInCategory(categoryName).length;
       const color = metadata.color || '#4b5563';
@@ -708,6 +955,10 @@ async function renderCategories() {
         Impossible de charger les catégories.
       </div>
     `;
+    if (resultsContainer) {
+      resultsContainer.innerHTML = '';
+      resultsContainer.style.display = 'none';
+    }
   }
 }
 
@@ -981,6 +1232,8 @@ async function renderPlayers(page = 1) {
   const playersContainer = document.getElementById('playersListContainer');
   if (!playersContainer) return;
 
+  const searchQuery = getNormalizedSearchValue('playersSearch');
+
   playersContainer.innerHTML = `
     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
       Chargement des joueurs...
@@ -1003,34 +1256,49 @@ async function renderPlayers(page = 1) {
       return;
     }
 
-    const container = document.createElement('div');
-    container.style.display = 'flex';
-    container.style.flexDirection = 'column';
-    container.style.gap = '24px';
+    const categoriesToRender = [];
 
     categoryNames.forEach(categoryName => {
       const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
       const players = adminPlayersManager.getPlayersInCategory(categoryName);
-      const color = metadata.color || '#4b5563';
 
-      const categorySection = document.createElement('div');
-      categorySection.style.border = '1px solid var(--border-color)';
-      categorySection.style.borderRadius = '8px';
-      categorySection.style.padding = '16px';
-      categorySection.style.backgroundColor = 'var(--hover-bg)';
+      const filteredPlayers = searchQuery
+        ? players.filter(player => (player?.name || '').toLowerCase().includes(searchQuery))
+        : players;
 
-      const categoryHeader = document.createElement('div');
-      categoryHeader.style.display = 'flex';
-      categoryHeader.style.justifyContent = 'space-between';
-      categoryHeader.style.alignItems = 'center';
-      categoryHeader.style.marginBottom = '16px';
-      categoryHeader.style.paddingBottom = '12px';
-      categoryHeader.style.borderBottom = `2px solid ${color}`;
+      if (searchQuery && filteredPlayers.length === 0) {
+        return;
+      }
 
-      const titleGroup = document.createElement('div');
-      titleGroup.style.display = 'flex';
-      titleGroup.style.alignItems = 'center';
-      titleGroup.style.gap = '12px';
+      categoriesToRender.push({
+        categoryName,
+        players,
+        filteredPlayers,
+        color: metadata.color || '#4b5563'
+      });
+    });
+
+    if (categoriesToRender.length === 0) {
+      playersContainer.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          Aucune machine à sous trouvée.
+        </div>
+      `;
+      return;
+    }
+
+    const container = document.createElement('div');
+    container.className = 'admin-accordion-list';
+
+    categoriesToRender.forEach(({ categoryName, players, filteredPlayers, color }) => {
+      const categoryDetails = document.createElement('details');
+      categoryDetails.className = 'admin-accordion admin-category-accordion';
+      categoryDetails.open = !!searchQuery;
+
+      const summary = document.createElement('summary');
+
+      const left = document.createElement('div');
+      left.className = 'admin-accordion-title-group';
 
       const colorDot = document.createElement('div');
       colorDot.style.width = '12px';
@@ -1038,107 +1306,89 @@ async function renderPlayers(page = 1) {
       colorDot.style.borderRadius = '50%';
       colorDot.style.backgroundColor = color;
 
-      const categoryTitle = document.createElement('h3');
-      categoryTitle.style.margin = '0';
-      categoryTitle.style.color = 'var(--text-color)';
-      categoryTitle.textContent = categoryName;
+      const title = document.createElement('h3');
+      title.className = 'admin-accordion-title';
+      title.textContent = categoryName;
 
-      const playerCount = document.createElement('span');
-      playerCount.style.backgroundColor = `${color}20`;
-      playerCount.style.color = color;
-      playerCount.style.padding = '4px 8px';
-      playerCount.style.borderRadius = '4px';
-      playerCount.style.fontSize = '0.85rem';
-      playerCount.style.fontWeight = '500';
-      playerCount.textContent = `${players.length} joueur(s)`;
+      const badge = document.createElement('span');
+      badge.className = 'admin-accordion-badge';
+      badge.style.backgroundColor = `${color}20`;
+      badge.style.color = color;
+      badge.textContent = searchQuery
+        ? `${filteredPlayers.length}/${players.length} slot(s)`
+        : `${players.length} slot(s)`;
 
-      titleGroup.appendChild(colorDot);
-      titleGroup.appendChild(categoryTitle);
-      titleGroup.appendChild(playerCount);
+      left.appendChild(colorDot);
+      left.appendChild(title);
+      left.appendChild(badge);
+
+      const right = document.createElement('div');
+      right.style.display = 'flex';
+      right.style.alignItems = 'center';
+      right.style.gap = '10px';
 
       const addBtn = document.createElement('button');
       addBtn.className = 'admin-btn admin-btn-primary admin-btn-sm';
-      addBtn.textContent = '➕ Ajouter un Joueur';
-      addBtn.addEventListener('click', () => showAddPlayerModal(categoryName));
+      addBtn.textContent = '➕ Ajouter une machine';
+      addBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        showAddPlayerModal(categoryName);
+      });
 
-      categoryHeader.appendChild(titleGroup);
-      categoryHeader.appendChild(addBtn);
+      const chevron = document.createElement('span');
+      chevron.className = 'admin-accordion-chevron';
+      chevron.textContent = '▸';
 
-      categorySection.appendChild(categoryHeader);
+      right.appendChild(addBtn);
+      right.appendChild(chevron);
 
-      if (players.length === 0) {
-        const emptyMessage = document.createElement('div');
-        emptyMessage.style.textAlign = 'center';
-        emptyMessage.style.padding = '20px';
-        emptyMessage.style.color = 'var(--text-secondary)';
-        emptyMessage.textContent = 'Aucun joueur dans cette catégorie';
-        categorySection.appendChild(emptyMessage);
+      summary.appendChild(left);
+      summary.appendChild(right);
+
+      const content = document.createElement('div');
+      content.className = 'admin-accordion-content';
+
+      const populateContent = () => {
+        content.innerHTML = '';
+
+        if (filteredPlayers.length === 0) {
+          const empty = document.createElement('div');
+          empty.style.textAlign = 'center';
+          empty.style.padding = '12px 0';
+          empty.style.color = 'var(--text-secondary)';
+          empty.textContent = 'Aucune machine dans cette catégorie.';
+          content.appendChild(empty);
+          return;
+        }
+
+        const list = document.createElement('div');
+        list.className = 'admin-accordion-list';
+
+        filteredPlayers.forEach(player => {
+          list.appendChild(createSlotAccordionElement({ categoryName, player }));
+        });
+
+        content.appendChild(list);
+      };
+
+      categoryDetails.addEventListener('toggle', () => {
+        if (categoryDetails.open) {
+          populateContent();
+        } else if (!searchQuery) {
+          content.innerHTML = '';
+        }
+      });
+
+      if (categoryDetails.open) {
+        populateContent();
       } else {
-        const table = document.createElement('table');
-        table.style.width = '100%';
-        table.style.borderCollapse = 'collapse';
-
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        headerRow.style.borderBottom = '1px solid var(--border-color)';
-
-        const headers = ['Nom', 'Actions'];
-        headers.forEach(headerText => {
-          const th = document.createElement('th');
-          th.style.textAlign = 'left';
-          th.style.padding = '12px 8px';
-          th.style.fontWeight = '600';
-          th.style.color = 'var(--text-color)';
-          th.style.fontSize = '0.9rem';
-          th.textContent = headerText;
-          headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        players.forEach((player, index) => {
-          const row = document.createElement('tr');
-          if (index % 2 === 1) {
-            row.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
-          }
-          row.style.borderBottom = '1px solid var(--border-color)';
-
-          const nameCell = document.createElement('td');
-          nameCell.style.padding = '12px 8px';
-          nameCell.style.color = 'var(--text-color)';
-          nameCell.textContent = player.name;
-
-          const actionsCell = document.createElement('td');
-          actionsCell.style.padding = '12px 8px';
-
-          const actionGroup = document.createElement('div');
-          actionGroup.style.display = 'flex';
-          actionGroup.style.gap = '8px';
-
-          const editBtn = document.createElement('button');
-          editBtn.className = 'admin-btn admin-btn-secondary admin-btn-sm';
-          editBtn.textContent = '✏️ Éditer';
-          editBtn.addEventListener('click', () => showEditPlayerModal(categoryName, player));
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'admin-btn admin-btn-danger admin-btn-sm';
-          deleteBtn.textContent = '🗑️ Supprimer';
-          deleteBtn.addEventListener('click', () => confirmDeletePlayer(categoryName, player.id, player.name));
-
-          actionGroup.appendChild(editBtn);
-          actionGroup.appendChild(deleteBtn);
-          actionsCell.appendChild(actionGroup);
-
-          row.appendChild(nameCell);
-          row.appendChild(actionsCell);
-          tbody.appendChild(row);
-        });
-        table.appendChild(tbody);
-        categorySection.appendChild(table);
+        content.innerHTML = '';
       }
 
-      container.appendChild(categorySection);
+      categoryDetails.appendChild(summary);
+      categoryDetails.appendChild(content);
+      container.appendChild(categoryDetails);
     });
 
     playersContainer.innerHTML = '';
@@ -1209,7 +1459,7 @@ function saveNewPlayer() {
     }
     
     closeAddPlayerModal();
-    renderPlayers(1);
+    refreshSlotAdminViews();
     showAdminToast('Succès', `Joueur "${name}" ajouté`, 'success');
   } catch (error) {
     console.error('Error saving new player:', error);
@@ -1271,7 +1521,7 @@ function saveEditedPlayer() {
     }
     
     closeEditPlayerModal();
-    renderPlayers(1);
+    refreshSlotAdminViews();
     showAdminToast('Succès', `Joueur modifié`, 'success');
   } catch (error) {
     console.error('Error saving edited player:', error);
@@ -1285,7 +1535,7 @@ function confirmDeletePlayer(categoryName, playerId, playerName) {
       const result = adminPlayersManager.deletePlayer(categoryName, playerId);
       
       if (result.success) {
-        renderPlayers(1);
+        refreshSlotAdminViews();
         showAdminToast('Succès', `Joueur supprimé`, 'success');
       } else {
         showAdminToast('Erreur', result.error || 'Erreur lors de la suppression', 'error');
