@@ -977,15 +977,198 @@ function clearEditCategoryImage() {
 
 // ============ PLAYERS MANAGEMENT ============
 
-function renderPlayers(page = 1) {
-  // Placeholder - to be implemented
-  if (window.renderPlayersGrid) {
-    renderPlayersGrid();
+async function renderPlayers(page = 1) {
+  const playersContainer = document.getElementById('playersListContainer');
+  if (!playersContainer) return;
+
+  playersContainer.innerHTML = `
+    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+      Chargement des joueurs...
+    </div>
+  `;
+
+  try {
+    if (adminPlayersManager?.init) {
+      await adminPlayersManager.init();
+    }
+
+    const categoryNames = adminPlayersManager?.getCategories ? adminPlayersManager.getCategories() : [];
+
+    if (!categoryNames || categoryNames.length === 0) {
+      playersContainer.innerHTML = `
+        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+          Aucune catégorie.
+        </div>
+      `;
+      return;
+    }
+
+    const container = document.createElement('div');
+    container.style.display = 'flex';
+    container.style.flexDirection = 'column';
+    container.style.gap = '24px';
+
+    categoryNames.forEach(categoryName => {
+      const metadata = adminPlayersManager.getCategoryMetadata(categoryName);
+      const players = adminPlayersManager.getPlayersInCategory(categoryName);
+      const color = metadata.color || '#4b5563';
+
+      const categorySection = document.createElement('div');
+      categorySection.style.border = '1px solid var(--border-color)';
+      categorySection.style.borderRadius = '8px';
+      categorySection.style.padding = '16px';
+      categorySection.style.backgroundColor = 'var(--hover-bg)';
+
+      const categoryHeader = document.createElement('div');
+      categoryHeader.style.display = 'flex';
+      categoryHeader.style.justifyContent = 'space-between';
+      categoryHeader.style.alignItems = 'center';
+      categoryHeader.style.marginBottom = '16px';
+      categoryHeader.style.paddingBottom = '12px';
+      categoryHeader.style.borderBottom = `2px solid ${color}`;
+
+      const titleGroup = document.createElement('div');
+      titleGroup.style.display = 'flex';
+      titleGroup.style.alignItems = 'center';
+      titleGroup.style.gap = '12px';
+
+      const colorDot = document.createElement('div');
+      colorDot.style.width = '12px';
+      colorDot.style.height = '12px';
+      colorDot.style.borderRadius = '50%';
+      colorDot.style.backgroundColor = color;
+
+      const categoryTitle = document.createElement('h3');
+      categoryTitle.style.margin = '0';
+      categoryTitle.style.color = 'var(--text-color)';
+      categoryTitle.textContent = categoryName;
+
+      const playerCount = document.createElement('span');
+      playerCount.style.backgroundColor = `${color}20`;
+      playerCount.style.color = color;
+      playerCount.style.padding = '4px 8px';
+      playerCount.style.borderRadius = '4px';
+      playerCount.style.fontSize = '0.85rem';
+      playerCount.style.fontWeight = '500';
+      playerCount.textContent = `${players.length} joueur(s)`;
+
+      titleGroup.appendChild(colorDot);
+      titleGroup.appendChild(categoryTitle);
+      titleGroup.appendChild(playerCount);
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'admin-btn admin-btn-primary admin-btn-sm';
+      addBtn.textContent = '➕ Ajouter un Joueur';
+      addBtn.addEventListener('click', () => showAddPlayerModal(categoryName));
+
+      categoryHeader.appendChild(titleGroup);
+      categoryHeader.appendChild(addBtn);
+
+      categorySection.appendChild(categoryHeader);
+
+      if (players.length === 0) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.style.textAlign = 'center';
+        emptyMessage.style.padding = '20px';
+        emptyMessage.style.color = 'var(--text-secondary)';
+        emptyMessage.textContent = 'Aucun joueur dans cette catégorie';
+        categorySection.appendChild(emptyMessage);
+      } else {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        headerRow.style.borderBottom = '1px solid var(--border-color)';
+
+        const headers = ['Nom', 'Actions'];
+        headers.forEach(headerText => {
+          const th = document.createElement('th');
+          th.style.textAlign = 'left';
+          th.style.padding = '12px 8px';
+          th.style.fontWeight = '600';
+          th.style.color = 'var(--text-color)';
+          th.style.fontSize = '0.9rem';
+          th.textContent = headerText;
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        players.forEach((player, index) => {
+          const row = document.createElement('tr');
+          if (index % 2 === 1) {
+            row.style.backgroundColor = 'rgba(0, 0, 0, 0.05)';
+          }
+          row.style.borderBottom = '1px solid var(--border-color)';
+
+          const nameCell = document.createElement('td');
+          nameCell.style.padding = '12px 8px';
+          nameCell.style.color = 'var(--text-color)';
+          nameCell.textContent = player.name;
+
+          const actionsCell = document.createElement('td');
+          actionsCell.style.padding = '12px 8px';
+
+          const actionGroup = document.createElement('div');
+          actionGroup.style.display = 'flex';
+          actionGroup.style.gap = '8px';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'admin-btn admin-btn-secondary admin-btn-sm';
+          editBtn.textContent = '✏️ Éditer';
+          editBtn.addEventListener('click', () => showEditPlayerModal(categoryName, player));
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'admin-btn admin-btn-danger admin-btn-sm';
+          deleteBtn.textContent = '🗑️ Supprimer';
+          deleteBtn.addEventListener('click', () => confirmDeletePlayer(categoryName, player.id, player.name));
+
+          actionGroup.appendChild(editBtn);
+          actionGroup.appendChild(deleteBtn);
+          actionsCell.appendChild(actionGroup);
+
+          row.appendChild(nameCell);
+          row.appendChild(actionsCell);
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        categorySection.appendChild(table);
+      }
+
+      container.appendChild(categorySection);
+    });
+
+    playersContainer.innerHTML = '';
+    playersContainer.appendChild(container);
+  } catch (error) {
+    console.error('Error rendering players:', error);
+    playersContainer.innerHTML = `
+      <div style="text-align: center; padding: 40px; color: var(--error-color, #ef4444);">
+        Impossible de charger les joueurs.
+      </div>
+    `;
   }
 }
 
-function showAddPlayerModal() {
+let currentAddPlayerCategory = null;
+let currentEditingPlayer = null;
+let currentEditPlayerCategory = null;
+
+function showAddPlayerModal(categoryName) {
+  currentAddPlayerCategory = categoryName;
+  
   const modal = document.getElementById('addPlayerModal');
+  const categoryDisplay = document.getElementById('addPlayerCategoryDisplay');
+  const nameInput = document.getElementById('playerNameInput');
+  const errorEl = document.getElementById('addPlayerError');
+  
+  if (categoryDisplay) categoryDisplay.textContent = categoryName;
+  if (nameInput) nameInput.value = '';
+  if (errorEl) errorEl.textContent = '';
+  
   if (modal) {
     modal.style.display = 'flex';
   }
@@ -993,24 +1176,125 @@ function showAddPlayerModal() {
 
 function closeAddPlayerModal() {
   const modal = document.getElementById('addPlayerModal');
+  currentAddPlayerCategory = null;
   if (modal) {
     modal.style.display = 'none';
   }
 }
 
 function saveNewPlayer() {
-  showAdminToast('Info', 'Ajout de joueur à implémenter', 'info');
+  const nameInput = document.getElementById('playerNameInput');
+  const errorEl = document.getElementById('addPlayerError');
+  
+  const name = nameInput?.value?.trim() || '';
+  
+  if (errorEl) errorEl.textContent = '';
+  
+  if (!name) {
+    if (errorEl) errorEl.textContent = 'Le nom du joueur est requis.';
+    return;
+  }
+  
+  if (!currentAddPlayerCategory) {
+    if (errorEl) errorEl.textContent = 'Catégorie non sélectionnée.';
+    return;
+  }
+  
+  try {
+    const result = adminPlayersManager.addPlayer(currentAddPlayerCategory, name);
+    
+    if (!result.success) {
+      if (errorEl) errorEl.textContent = result.error || 'Erreur lors de l\'ajout.';
+      return;
+    }
+    
+    closeAddPlayerModal();
+    renderPlayers(1);
+    showAdminToast('Succès', `Joueur "${name}" ajouté`, 'success');
+  } catch (error) {
+    console.error('Error saving new player:', error);
+    if (errorEl) errorEl.textContent = error.message || 'Erreur lors de l\'ajout.';
+  }
+}
+
+function showEditPlayerModal(categoryName, player) {
+  currentEditPlayerCategory = categoryName;
+  currentEditingPlayer = player;
+  
+  const modal = document.getElementById('editPlayerModal');
+  const categoryDisplay = document.getElementById('editPlayerCategoryDisplay');
+  const nameInput = document.getElementById('editPlayerNameInput');
+  const errorEl = document.getElementById('editPlayerError');
+  
+  if (categoryDisplay) categoryDisplay.textContent = categoryName;
+  if (nameInput) nameInput.value = player.name;
+  if (errorEl) errorEl.textContent = '';
+  
+  if (modal) {
+    modal.style.display = 'flex';
+  }
 }
 
 function closeEditPlayerModal() {
   const modal = document.getElementById('editPlayerModal');
+  currentEditingPlayer = null;
+  currentEditPlayerCategory = null;
   if (modal) {
     modal.style.display = 'none';
   }
 }
 
 function saveEditedPlayer() {
-  showAdminToast('Info', 'Édition de joueur à implémenter', 'info');
+  const nameInput = document.getElementById('editPlayerNameInput');
+  const errorEl = document.getElementById('editPlayerError');
+  
+  const name = nameInput?.value?.trim() || '';
+  
+  if (errorEl) errorEl.textContent = '';
+  
+  if (!name) {
+    if (errorEl) errorEl.textContent = 'Le nom du joueur est requis.';
+    return;
+  }
+  
+  if (!currentEditPlayerCategory || !currentEditingPlayer) {
+    if (errorEl) errorEl.textContent = 'Données manquantes.';
+    return;
+  }
+  
+  try {
+    const result = adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, name);
+    
+    if (!result.success) {
+      if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la modification.';
+      return;
+    }
+    
+    closeEditPlayerModal();
+    renderPlayers(1);
+    showAdminToast('Succès', `Joueur modifié`, 'success');
+  } catch (error) {
+    console.error('Error saving edited player:', error);
+    if (errorEl) errorEl.textContent = error.message || 'Erreur lors de la modification.';
+  }
+}
+
+function confirmDeletePlayer(categoryName, playerId, playerName) {
+  if (confirm(`Supprimer le joueur "${playerName}" ?`)) {
+    try {
+      const result = adminPlayersManager.deletePlayer(categoryName, playerId);
+      
+      if (result.success) {
+        renderPlayers(1);
+        showAdminToast('Succès', `Joueur supprimé`, 'success');
+      } else {
+        showAdminToast('Erreur', result.error || 'Erreur lors de la suppression', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting player:', error);
+      showAdminToast('Erreur', error.message || 'Erreur lors de la suppression', 'error');
+    }
+  }
 }
 
 // ============ PURGE MANAGEMENT ============
