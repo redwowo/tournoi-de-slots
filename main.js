@@ -31,9 +31,7 @@ function closeRandomSlotDialog() {
   console.warn("closeRandomSlotDialog() is not implemented")
 }
 
-function toggleTheme() {
-  console.warn("toggleTheme() is not implemented")
-}
+// toggleTheme is handled by tournament-navigation.js
 
 function showSuggestions(input) {
   console.warn("showSuggestions() is not implemented")
@@ -56,53 +54,81 @@ function updateWinnersDisplay() {
   console.warn("updateWinnersDisplay() is not implemented")
 }
 
+// Note: These functions are implemented in tournament-app.js for tournament page
+// This main.js file appears to be a fallback/stub file
+
 // Gérer l'appui sur Entrée dans le champ de saisie
-document.getElementById("playerName").addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    addPlayer()
+document.addEventListener("DOMContentLoaded", () => {
+  const playerNameInput = document.getElementById("playerName");
+  if (playerNameInput) {
+    playerNameInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        if (typeof addPlayer === 'function') {
+          addPlayer();
+        }
+      }
+    });
   }
-})
 
-// Gérer le clic sur l'overlay pour fermer le message de victoire
-document.getElementById("overlay").addEventListener("click", (e) => {
-  // Fermer uniquement si on clique directement sur l'overlay
-  if (e.target === document.getElementById("overlay")) {
-    closeVictoryMessage()
-    closeConfirmDialog()
-    closeResetDialog()
-    closeEliminationHistory()
-    toggleWinnersPanel()
-    closeUndoConfirmDialog()
-    closeRandomSlotDialog()
+  // Gérer le clic sur l'overlay pour fermer le message de victoire
+  const overlay = document.getElementById("overlay");
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      // Fermer uniquement si on clique directement sur l'overlay
+      if (e.target === overlay) {
+        if (typeof closeVictoryMessage === 'function') closeVictoryMessage();
+        if (typeof closeConfirmDialog === 'function') closeConfirmDialog();
+        if (typeof closeResetDialog === 'function') closeResetDialog();
+        if (typeof closeEliminationHistory === 'function') closeEliminationHistory();
+        if (typeof toggleWinnersPanel === 'function') toggleWinnersPanel();
+        if (typeof closeUndoConfirmDialog === 'function') closeUndoConfirmDialog();
+        if (typeof closeRandomSlotDialog === 'function') closeRandomSlotDialog();
+      }
+    });
   }
-})
 
-// Ajouter l'événement de clic pour le bouton de thème
-document.getElementById("themeToggle").addEventListener("click", toggleTheme)
+  // Note: themeToggle is handled by tournament-navigation.js for tournament pages
+  // Don't add duplicate handlers here
 
-// Ajouter un événement d'entrée au champ de saisie
-document.getElementById("playerName").addEventListener("input", function () {
-  showSuggestions(this)
-})
-
-// Fermer les suggestions lorsqu'on clique ailleurs
-document.addEventListener("click", (e) => {
-  const suggestionsContainer = document.getElementById("suggestionsList")
-  const playerNameInput = document.getElementById("playerName")
-
-  if (e.target !== playerNameInput && e.target !== suggestionsContainer && !suggestionsContainer.contains(e.target)) {
-    suggestionsContainer.style.display = "none"
+  // Ajouter un événement d'entrée au champ de saisie
+  if (playerNameInput) {
+    playerNameInput.addEventListener("input", function () {
+      if (typeof showSuggestions === 'function') {
+        showSuggestions(this);
+      }
+    });
   }
-})
 
-// Fermer les suggestions avec la touche Échap
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    document.getElementById("suggestionsList").style.display = "none"
+  // Fermer les suggestions lorsqu'on clique ailleurs
+  document.addEventListener("click", (e) => {
+    const suggestionsContainer = document.getElementById("suggestionsList");
+    const playerNameInput = document.getElementById("playerName");
+
+    if (suggestionsContainer && 
+        e.target !== playerNameInput && 
+        e.target !== suggestionsContainer && 
+        !suggestionsContainer.contains(e.target)) {
+      suggestionsContainer.style.display = "none";
+    }
+  });
+
+  // Fermer les suggestions avec la touche Échap
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      const suggestionsContainer = document.getElementById("suggestionsList");
+      if (suggestionsContainer) {
+        suggestionsContainer.style.display = "none";
+      }
+    }
+  });
+
+  // Initialiser le thème si la fonction existe (avoid conflicts)
+  if (typeof initTheme === 'function') {
+    initTheme();
   }
-})
-
-// Initialiser le thème immédiatement pour éviter un flash de thème incorrect
-initTheme()
-// Initialiser le bracket au chargement
-initBracket()
+  
+  // Initialiser le bracket au chargement
+  if (typeof initBracket === 'function') {
+    initBracket();
+  }
+});

@@ -398,7 +398,7 @@ function loadDataFromLocalStorage() {
   }
 }
 
-// Initialiser le thème
+// Initialiser le thème (Note: Main theme handling is done by tournament-navigation.js)
 function initTheme() {
   // Vérifier si un thème est enregistré dans localStorage
   const savedTheme = localStorage.getItem("theme")
@@ -413,37 +413,10 @@ function initTheme() {
       document.documentElement.className = "light"
     }
   }
-
-  // Mettre à jour l'icône du bouton
-  updateThemeToggleIcon()
+  // Note: Theme icon update and toggle handling is done by tournament-navigation.js
 }
 
-// Basculer entre les thèmes
-function toggleTheme() {
-  if (document.documentElement.className === "light") {
-    document.documentElement.className = "dark"
-    localStorage.setItem("theme", "dark")
-  } else {
-    document.documentElement.className = "light"
-    localStorage.setItem("theme", "light")
-    localStorage.setItem("theme", "light")
-  }
-
-  // Mettre à jour l'icône du bouton
-  updateThemeToggleIcon()
-}
-
-// Mettre à jour l'icône du bouton de thème
-function updateThemeToggleIcon() {
-  const themeToggle = document.getElementById("themeToggle")
-  if (document.documentElement.className === "dark") {
-    themeToggle.innerHTML = '<img src="/soleil.png" alt="Soleil" width="20" height="20">'
-    themeToggle.setAttribute("aria-label", "Passer au thème clair")
-  } else {
-    themeToggle.innerHTML = '<img src="/lune.png" alt="Lune" width="20" height="20">'
-    themeToggle.setAttribute("aria-label", "Passer au thème sombre")
-  }
-}
+// Theme functions moved to tournament-navigation.js
 
 // Modifier la fonction addPlayer pour s'assurer que le bouton de tirage apparaît correctement
 function addPlayer() {
@@ -2190,8 +2163,7 @@ window.initializeTournamentApp = async () => {
     overlay.style.display = "none"
   }
 
-  // 7. Ajouter les événements UI
-  document.getElementById("themeToggle").addEventListener("click", toggleTheme)
+  // 7. Note: Theme toggle is handled by tournament-navigation.js
 
   // Ajouter l'événement pour les suggestions
   const playerNameInput = document.getElementById("playerName")
