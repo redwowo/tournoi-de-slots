@@ -9,6 +9,7 @@
   <script src="/theme-init.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="/theme-manager.js" defer></script>
 </head>
 <body class="light">
   <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">
@@ -25,33 +26,6 @@
   <script>
     function redirectToHome() {
       window.location.href = '/';
-    }
-
-    // Theme management
-    function initializeThemeToggle() {
-      const themeToggle = document.getElementById('themeToggle');
-      if (themeToggle) {
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        updateThemeToggleIcon(themeToggle, savedTheme);
-        themeToggle.addEventListener('click', () => {
-          const currentTheme = document.documentElement.className;
-          const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-          document.documentElement.className = newTheme;
-          localStorage.setItem('theme', newTheme);
-          updateThemeToggleIcon(themeToggle, newTheme);
-        });
-      }
-    }
-
-    function updateThemeToggleIcon(toggle, theme) {
-      if (!toggle) return;
-      if (theme === 'dark') {
-        toggle.innerHTML = '<img src="/soleil.png" alt="Soleil" class="theme-icon">';
-        toggle.setAttribute('aria-label', 'Passer au thème clair');
-      } else {
-        toggle.innerHTML = '<img src="/lune.png" alt="Lune" class="theme-icon">';
-        toggle.setAttribute('aria-label', 'Passer au thème sombre');
-      }
     }
 
     // Fonction pour rejoindre un tournoi en mode spectateur (copiée depuis tournament-app.js)
@@ -151,7 +125,6 @@
     }
 
     window.onload = () => {
-      initializeThemeToggle();
       loadActiveTournaments();
     };
     </script>
