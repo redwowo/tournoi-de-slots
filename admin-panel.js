@@ -2001,6 +2001,49 @@ function confirmDeleteBonusHunt(sessionId, sessionName) {
      }
 }
 
+async function importPlayersJson() {
+  if (!confirm('Importer tous les joueurs/catégories de players.json ?\nCela peut prendre quelques secondes.')) return;
+  
+  try {
+    const btn = document.activeElement;
+    let originalText = '';
+    if (btn && btn.tagName === 'BUTTON') {
+        originalText = btn.innerText;
+        btn.innerText = '⏳ Import...';
+        btn.disabled = true;
+    }
+
+    const response = await fetch('/api/import-players', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    
+    const data = await response.json();
+    
+    if (btn && btn.tagName === 'BUTTON') {
+        btn.innerText = originalText;
+        btn.disabled = false;
+    }
+
+    if (data.success) {
+      const msg = `✅ Import réussi!\n${data.categoriesImported} catégories\n${data.playersImported} joueurs` + 
+                  (data.errors && data.errors.length ? `\n\n⚠️ Des erreurs mineures sont survenues (voir console)` : '');
+      alert(msg);
+      // Rafraîchir l'interface
+      location.reload();
+    } else {
+      alert(`❌ Erreur: ${data.error}`);
+    }
+  } catch (error) {
+    alert(`❌ Erreur technique: ${error.message}`);
+    const btn = document.activeElement; // Might have lost focus
+    if (btn && btn.tagName === 'BUTTON' && btn.innerText === '⏳ Import...') {
+         btn.disabled = false;
+         btn.innerText = '📥 Importer players.json';
+    }
+  }
+}
+
 // Initialize admin panel when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initializeAdminPanel();

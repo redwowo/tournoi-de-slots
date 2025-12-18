@@ -9,6 +9,7 @@
 /api/add-player /.netlify/functions/add-player 200
 /api/delete-category /.netlify/functions/delete-category 200
 /api/delete-player /.netlify/functions/delete-player 200
+/api/import-players /.netlify/functions/import-players 200
 /tournois /tournois.html 200
 /spectate-tournoi /spectate-tournoi.html 200
 /tournoi/:id /tournoi.html 200
