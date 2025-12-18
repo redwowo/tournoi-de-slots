@@ -1650,15 +1650,8 @@ async function saveNewPlayer() {
       await adminPlayersManager.init();
     }
 
-    const apiResult = await adminPlayersManager.addPlayerToServer(currentAddPlayerCategory, name);
-
-    if (!apiResult.success) {
-      if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
-      return;
-    }
-
-    const forcedId = apiResult?.player?.id;
-    const result = await adminPlayersManager.addPlayer(currentAddPlayerCategory, name, { forcedId });
+    // Utiliser directement Firestore via addPlayer()
+    const result = await adminPlayersManager.addPlayer(currentAddPlayerCategory, name);
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de l\'ajout.';
@@ -1719,21 +1712,12 @@ async function saveEditedPlayer() {
     return;
   }
 
-  const previousName = currentEditingPlayer.name;
-
   try {
+    // Utiliser directement Firestore via editPlayer()
     const result = await adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, name);
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la modification.';
-      return;
-    }
-
-    const apiResult = await adminPlayersManager.saveCategoriesToServer();
-
-    if (!apiResult.success) {
-      await adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, previousName);
-      if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
       return;
     }
 
@@ -1752,13 +1736,7 @@ async function confirmDeletePlayer(categoryName, playerId, playerName) {
   }
 
   try {
-    const apiResult = await adminPlayersManager.deletePlayerFromServer(categoryName, playerName);
-
-    if (!apiResult.success) {
-      showAdminToast('Erreur', apiResult.error || 'Erreur lors de la suppression côté serveur', 'error');
-      return;
-    }
-
+    // Utiliser directement Firestore via deletePlayer()
     const result = await adminPlayersManager.deletePlayer(categoryName, playerId);
 
     if (result.success) {
