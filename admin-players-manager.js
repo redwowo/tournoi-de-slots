@@ -48,10 +48,15 @@ class AdminPlayersManager {
       .map(player => {
         const parsedId = Number(player.id);
         const trimmedName = player.name.trim();
-        return {
+        const sanitized = {
           id: Number.isFinite(parsedId) ? parsedId : 0,
           name: trimmedName
         };
+        // Preserve firestoreId if it exists
+        if (player.firestoreId) {
+          sanitized.firestoreId = player.firestoreId;
+        }
+        return sanitized;
       })
       .filter(player => player.name.length > 0);
   }
@@ -127,7 +132,68 @@ class AdminPlayersManager {
     this.nextPlayerId = 1;
   }
 
-  // Load players from Firebase Firestore
+  // Load categories from Firestore categories collection
+  async loadCategoriesFromFirestore() {
+    try {
+      if (!window.db) {
+        console.warn('Firestore not initialized');
+        return {};
+      }
+
+      const snapshot = await db.collection('categories').get();
+      const categories = {};
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const categoryName = data.name || doc.id;
+        categories[categoryName] = {
+          color: data.color || this.getDefaultColor(categoryName),
+          imagePath: data.imagePath || this.getDefaultImagePath(categoryName),
+          players: [],
+          firestoreId: doc.id
+        };
+      });
+
+      console.log('Loaded categories from Firestore:', Object.keys(categories).length);
+      return categories;
+    } catch (error) {
+      console.error('Error loading categories from Firestore:', error);
+      return {};
+    }
+  }
+
+  // Load players from Firestore players collection
+  async loadPlayersFromFirestore() {
+    try {
+      if (!window.db) {
+        console.warn('Firestore not initialized');
+        return [];
+      }
+
+      const snapshot = await db.collection('players').get();
+      const players = [];
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        // Ensure id is a number
+        const playerId = typeof data.id === 'number' ? data.id : parseInt(data.id, 10) || 0;
+        players.push({
+          id: playerId,
+          name: data.name,
+          category: data.category,
+          firestoreId: doc.id
+        });
+      });
+
+      console.log('Loaded players from Firestore:', players.length);
+      return players;
+    } catch (error) {
+      console.error('Error loading players from Firestore:', error);
+      return [];
+    }
+  }
+
+  // Load all data from Firestore
   async loadFromFirestore() {
     try {
       if (!window.db) {
@@ -135,39 +201,131 @@ class AdminPlayersManager {
         return null;
       }
 
-      const doc = await db.collection('admin-settings').doc('categories-players').get();
-      if (doc.exists) {
-        const data = doc.data();
-        if (data && typeof data === 'object' && data.categories) {
-          console.log('Loaded categories from Firestore:', Object.keys(data.categories).length);
-          return data.categories;
+      // Load categories
+      const categories = await this.loadCategoriesFromFirestore();
+      
+      // Load players
+      const players = await this.loadPlayersFromFirestore();
+      
+      // Organize players by category
+      players.forEach(player => {
+        if (categories[player.category]) {
+          categories[player.category].players.push({
+            id: player.id,
+            name: player.name,
+            firestoreId: player.firestoreId
+          });
         }
-      }
+      });
+
+      console.log('Loaded complete data from Firestore');
+      return categories;
     } catch (error) {
       console.error('Error loading from Firestore:', error);
+      return null;
     }
-    return null;
   }
 
-  // Save all categories to Firestore
-  async saveToFirestore() {
+  // Save a category to Firestore
+  async saveCategoryToFirestore(categoryName, categoryData) {
     try {
       if (!window.db) {
-        console.warn('Firestore not initialized, skipping Firestore save');
+        console.warn('Firestore not initialized');
         return false;
       }
 
-      await db.collection('admin-settings').doc('categories-players').set({
-        categories: this.categories,
-        lastUpdated: new Date(),
-        version: 1
-      });
-      console.log('Categories saved to Firestore successfully');
+      const docData = {
+        name: categoryName,
+        color: categoryData.color,
+        imagePath: categoryData.imagePath,
+        lastUpdated: new Date()
+      };
+
+      // If we have a firestoreId, update existing document
+      if (categoryData.firestoreId) {
+        await db.collection('categories').doc(categoryData.firestoreId).update(docData);
+      } else {
+        // Create new document
+        const docRef = await db.collection('categories').add(docData);
+        categoryData.firestoreId = docRef.id;
+      }
+
+      console.log('Category saved to Firestore:', categoryName);
       return true;
     } catch (error) {
-      console.error('Error saving to Firestore:', error);
+      console.error('Error saving category to Firestore:', error);
       return false;
     }
+  }
+
+  // Save a player to Firestore
+  async savePlayerToFirestore(categoryName, player) {
+    try {
+      if (!window.db) {
+        console.warn('Firestore not initialized');
+        return false;
+      }
+
+      const docData = {
+        id: player.id,
+        name: player.name,
+        category: categoryName,
+        lastUpdated: new Date()
+      };
+
+      // If we have a firestoreId, update existing document
+      if (player.firestoreId) {
+        await db.collection('players').doc(player.firestoreId).update(docData);
+      } else {
+        // Create new document
+        const docRef = await db.collection('players').add(docData);
+        player.firestoreId = docRef.id;
+      }
+
+      console.log('Player saved to Firestore:', player.name);
+      return true;
+    } catch (error) {
+      console.error('Error saving player to Firestore:', error);
+      return false;
+    }
+  }
+
+  // Delete a category from Firestore
+  async deleteCategoryFromFirestore(categoryData) {
+    try {
+      if (!window.db || !categoryData.firestoreId) {
+        return false;
+      }
+
+      await db.collection('categories').doc(categoryData.firestoreId).delete();
+      console.log('Category deleted from Firestore');
+      return true;
+    } catch (error) {
+      console.error('Error deleting category from Firestore:', error);
+      return false;
+    }
+  }
+
+  // Delete a player from Firestore
+  async deletePlayerFromFirestore(player) {
+    try {
+      if (!window.db || !player.firestoreId) {
+        return false;
+      }
+
+      await db.collection('players').doc(player.firestoreId).delete();
+      console.log('Player deleted from Firestore');
+      return true;
+    } catch (error) {
+      console.error('Error deleting player from Firestore:', error);
+      return false;
+    }
+  }
+
+  // Deprecated: kept for backward compatibility
+  async saveToFirestore() {
+    console.warn('saveToFirestore() is deprecated. Data is now saved per-entity.');
+    return true;
   }
 
   // Load players from localStorage or file
@@ -228,17 +386,14 @@ class AdminPlayersManager {
     this.nextPlayerId = maxId + 1;
   }
 
-  // Save players to localStorage and Firebase
+  // Save players to localStorage (for caching)
   savePlayers() {
     localStorage.setItem('adminPlayers', JSON.stringify(this.categories));
     // Mark that user has made modifications
     localStorage.setItem('adminPlayersModified', 'true');
     // Broadcast change to other tabs/windows
     this.broadcastUpdate();
-    // Save to Firebase asynchronously
-    this.saveToFirestore().catch(error => {
-      console.error('Failed to save to Firebase:', error);
-    });
+    // Note: Individual entities are saved to Firestore via specific methods
   }
 
   async postPlayersApi(endpoint, payload) {
@@ -319,7 +474,7 @@ class AdminPlayersManager {
   }
 
   // Add a new category
-  addCategory(categoryName, metadata = {}) {
+  async addCategory(categoryName, metadata = {}) {
     const trimmed = categoryName.trim();
 
     if (!trimmed) {
@@ -337,6 +492,10 @@ class AdminPlayersManager {
     };
 
     this.categories[trimmed] = this.createCategoryEntry(trimmed, overrides);
+    
+    // Save to Firestore
+    await this.saveCategoryToFirestore(trimmed, this.categories[trimmed]);
+    
     this.savePlayers();
 
     // Log action
@@ -350,12 +509,22 @@ class AdminPlayersManager {
   }
 
   // Delete a category
-  deleteCategory(categoryName) {
+  async deleteCategory(categoryName) {
     if (!this.categories.hasOwnProperty(categoryName)) {
       return { success: false, error: 'Catégorie non trouvée' };
     }
 
-    const playerCount = this.categories[categoryName].players.length;
+    const category = this.categories[categoryName];
+    const playerCount = category.players.length;
+    
+    // Delete all players in this category from Firestore
+    for (const player of category.players) {
+      await this.deletePlayerFromFirestore(player);
+    }
+    
+    // Delete category from Firestore
+    await this.deleteCategoryFromFirestore(category);
+    
     delete this.categories[categoryName];
     this.savePlayers();
 
@@ -379,7 +548,7 @@ class AdminPlayersManager {
   }
 
   // Add a player to a category
-  addPlayer(categoryName, playerName, options = {}) {
+  async addPlayer(categoryName, playerName, options = {}) {
     const trimmed = playerName.trim();
     const forcedId = Number(options?.forcedId);
 
@@ -411,6 +580,10 @@ class AdminPlayersManager {
     }
 
     category.players.push(newPlayer);
+    
+    // Save to Firestore
+    await this.savePlayerToFirestore(categoryName, newPlayer);
+    
     this.savePlayers();
 
     // Log action
@@ -426,7 +599,7 @@ class AdminPlayersManager {
   }
 
   // Edit a player
-  editPlayer(categoryName, playerId, newName) {
+  async editPlayer(categoryName, playerId, newName) {
     const trimmed = newName.trim();
 
     if (!this.categories.hasOwnProperty(categoryName)) {
@@ -450,6 +623,10 @@ class AdminPlayersManager {
 
     const oldName = player.name;
     player.name = trimmed;
+    
+    // Update in Firestore
+    await this.savePlayerToFirestore(categoryName, player);
+    
     this.savePlayers();
 
     // Log action
@@ -465,7 +642,7 @@ class AdminPlayersManager {
   }
 
   // Delete a player
-  deletePlayer(categoryName, playerId) {
+  async deletePlayer(categoryName, playerId) {
     if (!this.categories.hasOwnProperty(categoryName)) {
       return { success: false, error: 'Catégorie non trouvée' };
     }
@@ -477,6 +654,10 @@ class AdminPlayersManager {
     }
 
     const player = category.players[playerIndex];
+    
+    // Delete from Firestore
+    await this.deletePlayerFromFirestore(player);
+    
     category.players.splice(playerIndex, 1);
     this.savePlayers();
 
@@ -525,7 +706,7 @@ class AdminPlayersManager {
   }
 
   // Update category metadata (color, imagePath)
-  updateCategoryMetadata(categoryName, updates) {
+  async updateCategoryMetadata(categoryName, updates) {
     if (!this.categories.hasOwnProperty(categoryName)) {
       return { success: false, error: 'Catégorie non trouvée' };
     }
@@ -544,6 +725,9 @@ class AdminPlayersManager {
       category.imagePath = updates.imagePath;
     }
 
+    // Update in Firestore
+    await this.saveCategoryToFirestore(categoryName, category);
+    
     this.savePlayers();
 
     // Log action
