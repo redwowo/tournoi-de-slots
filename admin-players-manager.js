@@ -300,13 +300,17 @@ class AdminPlayersManager {
   }
 
   // Delete a category from Firestore
-  async deleteCategoryFromFirestore(categoryData) {
+  async deleteCategoryFromFirestore(categoryOrId) {
     try {
-      if (!window.db || !categoryData.firestoreId) {
+      const firestoreId = typeof categoryOrId === 'string'
+        ? categoryOrId
+        : categoryOrId?.firestoreId;
+
+      if (!window.db || !firestoreId) {
         return false;
       }
 
-      await window.db.collection('categories').doc(categoryData.firestoreId).delete();
+      await window.db.collection('categories').doc(firestoreId).delete();
       console.log('✅ Category deleted from Firestore');
       return true;
     } catch (error) {
@@ -316,17 +320,45 @@ class AdminPlayersManager {
   }
 
   // Delete a player from Firestore
-  async deletePlayerFromFirestore(player) {
+  async deletePlayerFromFirestore(playerOrId) {
     try {
-      if (!window.db || !player.firestoreId) {
+      const firestoreId = typeof playerOrId === 'string'
+        ? playerOrId
+        : playerOrId?.firestoreId;
+
+      if (!window.db || !firestoreId) {
         return false;
       }
 
-      await window.db.collection('players').doc(player.firestoreId).delete();
+      await window.db.collection('players').doc(firestoreId).delete();
       console.log('✅ Player deleted from Firestore');
       return true;
     } catch (error) {
       console.error('❌ Error deleting player from Firestore:', error);
+      return false;
+    }
+  }
+
+  async deleteFirestoreDocs(docRefs = [], batchSize = 450) {
+    try {
+      if (!window.db) {
+        return false;
+      }
+
+      const refs = Array.isArray(docRefs) ? docRefs.filter(Boolean) : [];
+      if (refs.length === 0) {
+        return true;
+      }
+
+      for (let i = 0; i < refs.length; i += batchSize) {
+        const batch = window.db.batch();
+        refs.slice(i, i + batchSize).forEach(ref => batch.delete(ref));
+        await batch.commit();
+      }
+
+      return true;
+    } catch (error) {
+      console.error('❌ Error deleting docs from Firestore:', error);
       return false;
     }
   }
@@ -535,28 +567,52 @@ class AdminPlayersManager {
     }
 
     const category = this.categories[categoryName];
-    const playerCount = category.players.length;
-    
-    // Delete all players in this category from Firestore
-    for (const player of category.players) {
-      await this.deletePlayerFromFirestore(player);
+
+    try {
+      let deletedPlayersCount = Array.isArray(category.players) ? category.players.length : 0;
+
+      if (window.db) {
+        const deleteRefs = [];
+
+        const playersSnapshot = await window.db
+          .collection('players')
+          .where('category', '==', categoryName)
+          .get();
+
+        deletedPlayersCount = playersSnapshot.size;
+        playersSnapshot.forEach(docSnap => deleteRefs.push(docSnap.ref));
+
+        if (category.firestoreId) {
+          deleteRefs.push(window.db.collection('categories').doc(category.firestoreId));
+        } else {
+          const categorySnapshot = await window.db
+            .collection('categories')
+            .where('name', '==', categoryName)
+            .get();
+          categorySnapshot.forEach(docSnap => deleteRefs.push(docSnap.ref));
+        }
+
+        const deleted = await this.deleteFirestoreDocs(deleteRefs);
+        if (!deleted) {
+          return { success: false, error: 'Erreur lors de la suppression dans Firestore' };
+        }
+      }
+
+      delete this.categories[categoryName];
+      this.savePlayers();
+
+      adminManager.logAction({
+        type: 'delete_category',
+        details: `Catégorie "${categoryName}" supprimée (${deletedPlayersCount} joueur(s))`,
+        categoryName: categoryName,
+        playerCount: deletedPlayersCount
+      });
+
+      return { success: true, playerCount: deletedPlayersCount };
+    } catch (error) {
+      console.error('❌ Error deleting category:', error);
+      return { success: false, error: error.message || 'Erreur lors de la suppression de la catégorie' };
     }
-    
-    // Delete category from Firestore
-    await this.deleteCategoryFromFirestore(category);
-    
-    delete this.categories[categoryName];
-    this.savePlayers();
-
-    // Log action
-    adminManager.logAction({
-      type: 'delete_category',
-      details: `Catégorie "${categoryName}" supprimée (${playerCount} joueur(s))`,
-      categoryName: categoryName,
-      playerCount: playerCount
-    });
-
-    return { success: true, playerCount: playerCount };
   }
 
   // Get players in a category
@@ -662,32 +718,66 @@ class AdminPlayersManager {
   }
 
   // Delete a player
-  async deletePlayer(categoryName, playerId) {
+  async deletePlayer(categoryName, playerIdOrFirestoreId) {
     if (!this.categories.hasOwnProperty(categoryName)) {
       return { success: false, error: 'Catégorie non trouvée' };
     }
 
     const category = this.categories[categoryName];
-    const playerIndex = category.players.findIndex(p => p.id === playerId);
+    const isFirestoreId = typeof playerIdOrFirestoreId === 'string';
+
+    const playerIndex = isFirestoreId
+      ? category.players.findIndex(p => p.firestoreId === playerIdOrFirestoreId)
+      : category.players.findIndex(p => p.id === playerIdOrFirestoreId);
+
     if (playerIndex === -1) {
+      if (isFirestoreId && window.db) {
+        const deleted = await this.deletePlayerFromFirestore(playerIdOrFirestoreId);
+        if (!deleted) {
+          return { success: false, error: 'Erreur lors de la suppression dans Firestore' };
+        }
+        return { success: true };
+      }
+
       return { success: false, error: 'Joueur non trouvé' };
     }
 
     const player = category.players[playerIndex];
-    
-    // Delete from Firestore
-    await this.deletePlayerFromFirestore(player);
-    
+    const firestoreId = isFirestoreId ? playerIdOrFirestoreId : player.firestoreId;
+
+    if (window.db) {
+      if (firestoreId) {
+        const deleted = await this.deletePlayerFromFirestore(firestoreId);
+        if (!deleted) {
+          return { success: false, error: 'Erreur lors de la suppression dans Firestore' };
+        }
+      } else if (Number.isFinite(Number(player.id))) {
+        const snapshot = await window.db
+          .collection('players')
+          .where('id', '==', player.id)
+          .get();
+
+        const deleteRefs = [];
+        snapshot.forEach(docSnap => deleteRefs.push(docSnap.ref));
+
+        const deleted = await this.deleteFirestoreDocs(deleteRefs);
+        if (!deleted) {
+          return { success: false, error: 'Erreur lors de la suppression dans Firestore' };
+        }
+      } else {
+        console.warn('⚠️ Unable to delete player from Firestore: missing firestoreId and numeric id');
+      }
+    }
+
     category.players.splice(playerIndex, 1);
     this.savePlayers();
 
-    // Log action
     adminManager.logAction({
       type: 'delete_player',
       details: `Joueur "${player.name}" supprimé de la catégorie "${categoryName}"`,
       categoryName: categoryName,
       playerName: player.name,
-      playerId: playerId
+      playerId: player.id
     });
 
     return { success: true, playerName: player.name };
