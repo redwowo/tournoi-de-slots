@@ -16,7 +16,7 @@ class BonusHuntNavigation {
 
     initializeTheme() {
         // Initialiser le thème depuis localStorage
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.className = savedTheme;
         
         // Mettre à jour le bouton toggle
@@ -35,10 +35,14 @@ class BonusHuntNavigation {
 
     updateThemeToggleIcon(toggle, theme) {
         if (!toggle) return;
-        const icon = theme === 'dark' ? 'sun' : 'moon';
-        toggle.innerHTML = `<i data-lucide="${icon}"></i>`;
-        if (typeof lucide !== 'undefined') {
-            lucide.createIcons();
+        // En mode light : afficher lune.png (pour passer au dark)
+        // En mode dark : afficher soleil.png (pour passer au light)
+        if (theme === 'dark') {
+            toggle.innerHTML = '<img src="/soleil.png" alt="Soleil" class="theme-icon">';
+            toggle.setAttribute('aria-label', 'Passer au thème clair');
+        } else {
+            toggle.innerHTML = '<img src="/lune.png" alt="Lune" class="theme-icon">';
+            toggle.setAttribute('aria-label', 'Passer au thème sombre');
         }
     }
 }

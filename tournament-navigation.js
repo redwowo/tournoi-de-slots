@@ -19,18 +19,29 @@ class TournamentNavigation {
         // Initialiser le thème depuis localStorage
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.className = savedTheme;
-        
+
         // Mettre à jour le bouton toggle
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
-            themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌓';
+            this.updateThemeToggleIcon(themeToggle, savedTheme);
             themeToggle.addEventListener('click', () => {
                 const currentTheme = document.documentElement.className;
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
                 document.documentElement.className = newTheme;
                 localStorage.setItem('theme', newTheme);
-                themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
+                this.updateThemeToggleIcon(themeToggle, newTheme);
             });
+        }
+    }
+
+    updateThemeToggleIcon(toggle, theme) {
+        if (!toggle) return;
+        if (theme === 'dark') {
+            toggle.innerHTML = '<img src="/soleil.png" alt="Soleil" class="theme-icon">';
+            toggle.setAttribute('aria-label', 'Passer au thème clair');
+        } else {
+            toggle.innerHTML = '<img src="/lune.png" alt="Lune" class="theme-icon">';
+            toggle.setAttribute('aria-label', 'Passer au thème sombre');
         }
     }
 
