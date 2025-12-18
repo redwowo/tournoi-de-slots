@@ -15,7 +15,7 @@ class AdminBonusHuntManager {
   // Load all sessions from Firestore
   async loadAllSessions() {
     try {
-      const snapshot = await db.collection('bonus-hunts').get();
+      const snapshot = await window.db.collection('bonus-hunts').get();
       this.sessions = [];
       
       snapshot.forEach(doc => {
@@ -70,7 +70,7 @@ class AdminBonusHuntManager {
       if (!session) throw new Error('Session non trouvée');
 
       // Delete from Firestore
-      await db.collection('bonus-hunts').doc(sessionId).delete();
+      await window.db.collection('bonus-hunts').doc(sessionId).delete();
 
       // Remove from local array
       this.sessions = this.sessions.filter(s => s.id !== sessionId);
@@ -122,7 +122,7 @@ class AdminBonusHuntManager {
               }
           };
 
-          await db.collection('bonus-hunts').doc(sessionId).set(session);
+          await window.db.collection('bonus-hunts').doc(sessionId).set(session);
           showAdminToast('Succès', 'Session de test générée', 'success');
           await this.loadAllSessions();
           return true;
