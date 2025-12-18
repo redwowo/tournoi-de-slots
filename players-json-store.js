@@ -94,20 +94,53 @@ function getGlobalMaxPlayerId(categories) {
 }
 
 function readPlayersJson(filePath) {
-  const content = fs.readFileSync(filePath, 'utf8');
-  const parsed = JSON.parse(content);
-  return normalizeCategories(parsed);
+  console.log('[readPlayersJson] Reading from:', filePath);
+  try {
+    const exists = fs.existsSync(filePath);
+    console.log('[readPlayersJson] File exists:', exists);
+    if (!exists) {
+      console.error('[readPlayersJson] ERROR: File does not exist!');
+      throw new Error(`File not found: ${filePath}`);
+    }
+    const content = fs.readFileSync(filePath, 'utf8');
+    console.log('[readPlayersJson] File size:', content.length, 'characters');
+    const parsed = JSON.parse(content);
+    console.log('[readPlayersJson] Parsed categories:', Object.keys(parsed));
+    return normalizeCategories(parsed);
+  } catch (error) {
+    console.error('[readPlayersJson] ERROR:', error.message);
+    throw error;
+  }
 }
 
 function writePlayersJson(filePath, categories) {
-  const normalized = normalizeCategories(categories);
-  const dir = path.dirname(filePath);
-  const tempPath = path.join(dir, `${path.basename(filePath)}.tmp`);
+  console.log('[writePlayersJson] Writing to:', filePath);
+  console.log('[writePlayersJson] Categories to write:', Object.keys(categories || {}));
+  try {
+    const normalized = normalizeCategories(categories);
+    console.log('[writePlayersJson] Normalized categories:', Object.keys(normalized));
+    
+    const dir = path.dirname(filePath);
+    console.log('[writePlayersJson] Directory:', dir);
+    
+    const tempPath = path.join(dir, `${path.basename(filePath)}.tmp`);
+    console.log('[writePlayersJson] Temp path:', tempPath);
 
-  fs.writeFileSync(tempPath, `${JSON.stringify(normalized, null, 2)}\n`, 'utf8');
-  fs.renameSync(tempPath, filePath);
+    const jsonString = JSON.stringify(normalized, null, 2);
+    console.log('[writePlayersJson] JSON size:', jsonString.length, 'characters');
+    
+    fs.writeFileSync(tempPath, `${jsonString}\n`, 'utf8');
+    console.log('[writePlayersJson] Temp file written');
+    
+    fs.renameSync(tempPath, filePath);
+    console.log('[writePlayersJson] ✓ File renamed to final path');
 
-  return normalized;
+    return normalized;
+  } catch (error) {
+    console.error('[writePlayersJson] ERROR:', error.message);
+    console.error('[writePlayersJson] Stack:', error.stack);
+    throw error;
+  }
 }
 
 function saveCategories(filePath, categories) {
@@ -154,16 +187,27 @@ function savePlayers(filePath, playersByCategory) {
 }
 
 function addCategory(filePath, { categoryName, color, imagePath } = {}) {
+  console.log('[addCategory] Starting...');
+  console.log('[addCategory] filePath:', filePath);
+  console.log('[addCategory] categoryName:', categoryName);
+  console.log('[addCategory] color:', color);
+  console.log('[addCategory] imagePath:', imagePath);
+  
   const categories = readPlayersJson(filePath);
+  console.log('[addCategory] Current categories:', Object.keys(categories));
+  
   const trimmed = String(categoryName || '').trim();
+  console.log('[addCategory] Trimmed name:', trimmed);
 
   if (!trimmed) {
+    console.error('[addCategory] ERROR: Category name is empty');
     const error = new Error('Le nom de la catégorie est requis');
     error.statusCode = 400;
     throw error;
   }
 
   if (Object.prototype.hasOwnProperty.call(categories, trimmed)) {
+    console.error('[addCategory] ERROR: Category already exists');
     const error = new Error('Cette catégorie existe déjà');
     error.statusCode = 400;
     throw error;
@@ -174,8 +218,10 @@ function addCategory(filePath, { categoryName, color, imagePath } = {}) {
     imagePath: imagePath || getDefaultImagePath(trimmed),
     players: []
   };
+  console.log('[addCategory] Category created:', trimmed);
 
   writePlayersJson(filePath, categories);
+  console.log('[addCategory] ✓ Category saved');
   return { categoryName: trimmed };
 }
 
