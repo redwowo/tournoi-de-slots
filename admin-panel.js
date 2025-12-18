@@ -283,7 +283,7 @@ function createSlotAccordionElement({ categoryName, categoryColor, player, showC
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'admin-btn admin-btn-danger admin-btn-sm';
   deleteBtn.textContent = '🗑️ Supprimer';
-  deleteBtn.addEventListener('click', () => confirmDeletePlayer(categoryName, player.id, player.name));
+  deleteBtn.addEventListener('click', () => confirmDeletePlayer(categoryName, player.firestoreId || player.id, player.name));
 
   actions.appendChild(editBtn);
   actions.appendChild(deleteBtn);
@@ -1362,12 +1362,6 @@ async function confirmDeleteCategory(categoryName) {
 
   const previousImagePath = adminPlayersManager.getCategoryMetadata(categoryName).imagePath || '';
 
-  const apiResult = await adminPlayersManager.deleteCategoryFromServer(categoryName);
-  if (!apiResult.success) {
-    showAdminToast('Erreur', apiResult.error || 'Impossible de supprimer la catégorie côté serveur', 'error');
-    return;
-  }
-
   const result = await adminPlayersManager.deleteCategory(categoryName);
 
   if (!result.success) {
@@ -1376,7 +1370,7 @@ async function confirmDeleteCategory(categoryName) {
   }
 
   await deleteCategoryImage(previousImagePath);
-  renderCategories();
+  refreshSlotAdminViews();
   showAdminToast('Succès', `Catégorie "${categoryName}" supprimée`, 'success');
 }
 
@@ -1730,14 +1724,13 @@ async function saveEditedPlayer() {
   }
 }
 
-async function confirmDeletePlayer(categoryName, playerId, playerName) {
+async function confirmDeletePlayer(categoryName, playerFirestoreId, playerName) {
   if (!confirm(`Supprimer le joueur "${playerName}" ?`)) {
     return;
   }
 
   try {
-    // Utiliser directement Firestore via deletePlayer()
-    const result = await adminPlayersManager.deletePlayer(categoryName, playerId);
+    const result = await adminPlayersManager.deletePlayer(categoryName, playerFirestoreId);
 
     if (result.success) {
       refreshSlotAdminViews();
