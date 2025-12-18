@@ -1,6 +1,10 @@
 [build]
   functions = "netlify/functions"
 
+[functions]
+  # Include players.json in function bundle so it can be copied to /tmp
+  included_files = ["players.json"]
+
 [[redirects]]
   from = "/api/upload-category-image"
   to = "/.netlify/functions/upload-category-image"
