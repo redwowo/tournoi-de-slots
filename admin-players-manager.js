@@ -127,9 +127,65 @@ class AdminPlayersManager {
     this.nextPlayerId = 1;
   }
 
+  // Load players from Firebase Firestore
+  async loadFromFirestore() {
+    try {
+      if (!window.db) {
+        console.warn('Firestore not initialized');
+        return null;
+      }
+
+      const doc = await db.collection('admin-settings').doc('categories-players').get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (data && typeof data === 'object' && data.categories) {
+          console.log('Loaded categories from Firestore:', Object.keys(data.categories).length);
+          return data.categories;
+        }
+      }
+    } catch (error) {
+      console.error('Error loading from Firestore:', error);
+    }
+    return null;
+  }
+
+  // Save all categories to Firestore
+  async saveToFirestore() {
+    try {
+      if (!window.db) {
+        console.warn('Firestore not initialized, skipping Firestore save');
+        return false;
+      }
+
+      await db.collection('admin-settings').doc('categories-players').set({
+        categories: this.categories,
+        lastUpdated: new Date(),
+        version: 1
+      });
+      console.log('Categories saved to Firestore successfully');
+      return true;
+    } catch (error) {
+      console.error('Error saving to Firestore:', error);
+      return false;
+    }
+  }
+
   // Load players from localStorage or file
   async loadPlayers() {
     try {
+      // Try to load from Firebase first
+      let firebaseData = null;
+      if (window.db) {
+        firebaseData = await this.loadFromFirestore();
+      }
+
+      // If we have Firebase data, use it
+      if (firebaseData) {
+        this.applyNormalizedData(firebaseData);
+        return;
+      }
+
+      // Fall back to players.json
       const response = await fetch('/players.json');
       if (response.ok) {
         const baseData = await response.json();
@@ -140,6 +196,8 @@ class AdminPlayersManager {
         if (stored && hasModifications) {
           const parsedStored = JSON.parse(stored);
           this.applyNormalizedData(parsedStored, { resave: true });
+          // Sync the local modifications to Firebase
+          await this.saveToFirestore();
         } else {
           this.applyNormalizedData(baseData);
           localStorage.removeItem('adminPlayers');
@@ -170,13 +228,17 @@ class AdminPlayersManager {
     this.nextPlayerId = maxId + 1;
   }
 
-  // Save players to localStorage
+  // Save players to localStorage and Firebase
   savePlayers() {
     localStorage.setItem('adminPlayers', JSON.stringify(this.categories));
     // Mark that user has made modifications
     localStorage.setItem('adminPlayersModified', 'true');
     // Broadcast change to other tabs/windows
     this.broadcastUpdate();
+    // Save to Firebase asynchronously
+    this.saveToFirestore().catch(error => {
+      console.error('Failed to save to Firebase:', error);
+    });
   }
 
   // Broadcast update to tournament-app instances
