@@ -1,7 +1,7 @@
 {
   "Hacksaw Gaming": {
-    "color": "#101820",
-    "imagePath": "/hacksawlogo.png",
+    "color": "#123456",
+    "imagePath": "/newhacksawlogo.png",
     "players": [
       {
         "id": 1,
@@ -466,6 +466,10 @@
       {
         "id": 116,
         "name": "Stick'Em"
+      },
+      {
+        "id": 117,
+        "name": "Updated Test Player"
       }
     ]
   },
