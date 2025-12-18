@@ -1,8 +1,21 @@
 const path = require('path');
+const fs = require('fs');
 
 const playersJsonStore = require('../../players-json-store');
 
 const playersJsonPath = path.resolve(__dirname, '../../players.json');
+
+function ensurePlayersJsonExists() {
+  if (!fs.existsSync(playersJsonPath)) {
+    const defaultData = {
+      'Hacksaw Gaming': { color: '#101820', imagePath: '/hacksawlogo.png', players: [] },
+      'Nolimit City': { color: '#ffd100', imagePath: '/nolimitcitylogo.png', players: [] },
+      'Pragmatic Play': { color: '#ff6f00', imagePath: '/pragmaticplaylogo.png', players: [] }
+    };
+    fs.writeFileSync(playersJsonPath, JSON.stringify(defaultData, null, 2));
+    console.log('[Netlify] Created default players.json');
+  }
+}
 
 function getCommonHeaders(extra = {}) {
   return {
@@ -50,6 +63,7 @@ async function handlePlayersJsonRequest(event, action, { successMessage } = {}) 
   }
 
   try {
+    ensurePlayersJsonExists();
     const payload = parseBody(event);
     const result = await action(payload);
 
@@ -70,5 +84,6 @@ async function handlePlayersJsonRequest(event, action, { successMessage } = {}) 
 module.exports = {
   playersJsonStore,
   playersJsonPath,
-  handlePlayersJsonRequest
+  handlePlayersJsonRequest,
+  ensurePlayersJsonExists
 };
