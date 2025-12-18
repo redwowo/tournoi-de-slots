@@ -125,17 +125,36 @@ function getCategoryPlayers(categoryName) {
 async function loadMachinesFromPlayersJson() {
   try {
     let data;
-    
-    // Vérifier d'abord si l'admin a fait des modifications dans localStorage
-    const stored = localStorage.getItem('adminPlayers');
-    const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
-    
-    if (stored && hasModifications) {
-      // Utiliser les données modifiées de l'admin
-      data = JSON.parse(stored);
-      console.log('Utilisation des données modifiées depuis localStorage admin');
-    } else {
-      // Charger depuis players.json
+
+    // 1) Essayer Firestore (source partagée entre appareils)
+    if (typeof db !== 'undefined' && db?.collection) {
+      try {
+        const doc = await db.collection('admin-settings').doc('categories-players').get();
+        if (doc.exists) {
+          const firestoreData = doc.data();
+          if (firestoreData && typeof firestoreData === 'object' && firestoreData.categories) {
+            data = firestoreData.categories;
+            console.log('Chargement des machines depuis Firestore');
+          }
+        }
+      } catch (error) {
+        console.warn('Impossible de charger les machines depuis Firestore:', error);
+      }
+    }
+
+    // 2) Fallback localStorage admin
+    if (!data) {
+      const stored = localStorage.getItem('adminPlayers');
+      const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
+
+      if (stored && hasModifications) {
+        data = JSON.parse(stored);
+        console.log('Utilisation des données modifiées depuis localStorage admin');
+      }
+    }
+
+    // 3) Fallback players.json
+    if (!data) {
       const response = await fetch('/players.json');
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -143,7 +162,7 @@ async function loadMachinesFromPlayersJson() {
       data = await response.json();
       console.log('Chargement des machines depuis players.json');
     }
-    
+
     // Réinitialiser machinesData avec la nouvelle structure (metadata + joueurs)
     machinesData = normalizeMachinesDataset(data);
     

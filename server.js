@@ -4,6 +4,8 @@ const fs = require('fs');
 const multer = require('multer');
 const crypto = require('crypto');
 
+const playersJsonStore = require('./players-json-store');
+
 const {
   DEFAULT_ADMIN_SESSION_SECONDS,
   getAdminPanelCode,
@@ -309,6 +311,153 @@ apiRouter.post('/admin/logout', (req, res) => {
   return res.json({
     success: true
   });
+});
+
+// ============ PLAYERS.JSON PERSISTENCE ENDPOINTS ============
+
+const playersJsonPath = path.join(__dirname, 'players.json');
+let playersJsonLock = Promise.resolve();
+
+function withPlayersJsonLock(task) {
+  const run = playersJsonLock.then(task);
+  playersJsonLock = run.catch(() => undefined);
+  return run;
+}
+
+function sendPlayersJsonError(res, error, fallbackMessage) {
+  const statusCode = Number(error?.statusCode) || 500;
+  const message = error?.message || fallbackMessage || 'Erreur serveur';
+
+  console.error('[players.json] Error:', error);
+
+  return res.status(statusCode).json({
+    success: false,
+    error: message
+  });
+}
+
+apiRouter.post('/save-categories', async (req, res) => {
+  const categories = req.body?.categories;
+
+  if (!categories || typeof categories !== 'object') {
+    return res.status(400).json({
+      success: false,
+      error: 'Body invalide: "categories" est requis'
+    });
+  }
+
+  try {
+    await withPlayersJsonLock(async () => {
+      playersJsonStore.saveCategories(playersJsonPath, categories);
+    });
+
+    return res.json({
+      success: true,
+      message: 'Catégories sauvegardées'
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de sauvegarder les catégories');
+  }
+});
+
+apiRouter.post('/save-players', async (req, res) => {
+  const players = req.body?.players;
+
+  if (!players || typeof players !== 'object') {
+    return res.status(400).json({
+      success: false,
+      error: 'Body invalide: "players" est requis'
+    });
+  }
+
+  try {
+    await withPlayersJsonLock(async () => {
+      playersJsonStore.savePlayers(playersJsonPath, players);
+    });
+
+    return res.json({
+      success: true,
+      message: 'Joueurs sauvegardés'
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de sauvegarder les joueurs');
+  }
+});
+
+apiRouter.post('/add-category', async (req, res) => {
+  try {
+    const result = await withPlayersJsonLock(async () => {
+      return playersJsonStore.addCategory(playersJsonPath, {
+        categoryName: req.body?.categoryName,
+        color: req.body?.color,
+        imagePath: req.body?.imagePath
+      });
+    });
+
+    return res.json({
+      success: true,
+      message: 'Catégorie ajoutée',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible d\'ajouter la catégorie');
+  }
+});
+
+apiRouter.post('/delete-category', async (req, res) => {
+  try {
+    const result = await withPlayersJsonLock(async () => {
+      return playersJsonStore.deleteCategory(playersJsonPath, {
+        categoryName: req.body?.categoryName
+      });
+    });
+
+    return res.json({
+      success: true,
+      message: 'Catégorie supprimée',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de supprimer la catégorie');
+  }
+});
+
+apiRouter.post('/add-player', async (req, res) => {
+  try {
+    const result = await withPlayersJsonLock(async () => {
+      return playersJsonStore.addPlayer(playersJsonPath, {
+        category: req.body?.category,
+        playerName: req.body?.playerName
+      });
+    });
+
+    return res.json({
+      success: true,
+      message: 'Joueur ajouté',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible d\'ajouter le joueur');
+  }
+});
+
+apiRouter.post('/delete-player', async (req, res) => {
+  try {
+    const result = await withPlayersJsonLock(async () => {
+      return playersJsonStore.deletePlayer(playersJsonPath, {
+        category: req.body?.category,
+        playerName: req.body?.playerName
+      });
+    });
+
+    return res.json({
+      success: true,
+      message: 'Joueur supprimé',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de supprimer le joueur');
+  }
 });
 
 app.use('/api', apiRouter);
