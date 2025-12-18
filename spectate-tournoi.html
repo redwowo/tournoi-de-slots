@@ -1,16 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Spectate Tournoi - Tournois en cours</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="/admin-styles.css">
+  <script src="/theme-init.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
-<body class="dark">
-  <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">🌓</button>
+<body class="light">
+  <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">
+    <img id="themeIcon" src="/lune.png" alt="Lune" class="theme-icon">
+  </button>
 
   <!-- Bouton retour vers la page des tournois -->
   <a href="/tournoi" class="back-button-standalone" title="Retour à la page des tournois">
@@ -130,19 +133,30 @@
 
     // Theme management
     function initializeTheme() {
-      const savedTheme = localStorage.getItem('theme') || 'dark';
+      const savedTheme = localStorage.getItem('theme') || 'light';
       document.documentElement.className = savedTheme;
       
       const themeToggle = document.getElementById('themeToggle');
       if (themeToggle) {
-        themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌓';
+        updateThemeToggleIcon(themeToggle, savedTheme);
         themeToggle.addEventListener('click', () => {
           const currentTheme = document.documentElement.className;
           const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
           document.documentElement.className = newTheme;
           localStorage.setItem('theme', newTheme);
-          themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌓';
+          updateThemeToggleIcon(themeToggle, newTheme);
         });
+      }
+    }
+
+    function updateThemeToggleIcon(toggle, theme) {
+      if (!toggle) return;
+      if (theme === 'dark') {
+        toggle.innerHTML = '<img src="/soleil.png" alt="Soleil" class="theme-icon">';
+        toggle.setAttribute('aria-label', 'Passer au thème clair');
+      } else {
+        toggle.innerHTML = '<img src="/lune.png" alt="Lune" class="theme-icon">';
+        toggle.setAttribute('aria-label', 'Passer au thème sombre');
       }
     }
 

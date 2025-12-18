@@ -48,6 +48,14 @@
   --scrollbar-thumb: #b0b0b0;
   --scrollbar-thumb-hover: #888;
   --scrollbar-track: #e2e8f0;
+
+  /* Bonus Hunt Gaming Colors - Light Mode */
+  --bonus-cyan: #06b6d4;
+  --bonus-purple: #a855f7;
+  --bonus-pink: #ec4899;
+  --bonus-orange: #f97316;
+  --bonus-border: #d1d5db;
+  --bonus-glow: rgba(6, 182, 212, 0.3);
 }
 
 .dark {
@@ -91,6 +99,14 @@
   --scrollbar-thumb: #888;
   --scrollbar-thumb-hover: #b0b0b0;
   --scrollbar-track: #232323;
+
+  /* Bonus Hunt Gaming Colors - Dark Mode */
+  --bonus-cyan: #22d3ee;
+  --bonus-purple: #d946ef;
+  --bonus-pink: #ec4899;
+  --bonus-orange: #fb923c;
+  --bonus-border: #444;
+  --bonus-glow: rgba(34, 211, 238, 0.2);
 }
 
 body {
@@ -468,6 +484,7 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   cursor: pointer;
   z-index: 100;
   box-shadow: 0 2px 5px var(--shadow-color);
@@ -478,9 +495,14 @@ h1 {
   background: var(--btn-hover);
 }
 
-.theme-toggle img {
-  width: 20px;
-  height: 20px;
+.theme-toggle img,
+.theme-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  max-width: 24px;
+  max-height: 24px;
+  padding: 2px;
 }
 
 /* Toast notifications */
