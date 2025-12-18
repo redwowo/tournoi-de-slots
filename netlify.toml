@@ -12,6 +12,36 @@
   status = 200
 
 [[redirects]]
+  from = "/api/add-category"
+  to = "/.netlify/functions/add-category"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete-category"
+  to = "/.netlify/functions/delete-category"
+  status = 200
+
+[[redirects]]
+  from = "/api/add-player"
+  to = "/.netlify/functions/add-player"
+  status = 200
+
+[[redirects]]
+  from = "/api/delete-player"
+  to = "/.netlify/functions/delete-player"
+  status = 200
+
+[[redirects]]
+  from = "/api/save-categories"
+  to = "/.netlify/functions/save-categories"
+  status = 200
+
+[[redirects]]
+  from = "/api/save-players"
+  to = "/.netlify/functions/save-players"
+  status = 200
+
+[[redirects]]
   from = "/api/admin/login"
   to = "/.netlify/functions/admin-login"
   status = 200

@@ -316,6 +316,23 @@ apiRouter.post('/admin/logout', (req, res) => {
 // ============ PLAYERS.JSON PERSISTENCE ENDPOINTS ============
 
 const playersJsonPath = path.join(__dirname, 'players.json');
+
+// Ensure players.json exists and is initialized with default data if needed
+function ensurePlayersJsonInitialized() {
+  if (!fs.existsSync(playersJsonPath)) {
+    const defaultData = {
+      'Hacksaw Gaming': { color: '#101820', imagePath: '/hacksawlogo.png', players: [] },
+      'Nolimit City': { color: '#ffd100', imagePath: '/nolimitcitylogo.png', players: [] },
+      'Pragmatic Play': { color: '#ff6f00', imagePath: '/pragmaticplaylogo.png', players: [] }
+    };
+    fs.writeFileSync(playersJsonPath, JSON.stringify(defaultData, null, 2));
+    console.log('[Server] Created default players.json');
+  }
+}
+
+// Initialize on startup
+ensurePlayersJsonInitialized();
+
 let playersJsonLock = Promise.resolve();
 
 function withPlayersJsonLock(task) {
