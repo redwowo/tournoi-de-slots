@@ -477,6 +477,188 @@ apiRouter.post('/delete-player', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/players
+ * 
+ * Returns the complete content of players.json
+ * 
+ * Success response (200):
+ * {
+ *   "categories": {
+ *     "Hacksaw Gaming": { "color": "#101820", "imagePath": "/hacksawlogo.png", "players": [...] },
+ *     "Nolimit City": { ... },
+ *     "Pragmatic Play": { ... }
+ *   },
+ *   "players": {
+ *     "Hacksaw Gaming": [...],
+ *     "Nolimit City": [...],
+ *     "Pragmatic Play": [...]
+ *   }
+ * }
+ */
+apiRouter.get('/players', (req, res) => {
+  try {
+    const categories = playersJsonStore.readPlayersJson(playersJsonPath);
+    
+    // Transform to match expected format
+    const response = {
+      categories,
+      players: {}
+    };
+    
+    // Build players object with just the names
+    Object.entries(categories).forEach(([categoryName, category]) => {
+      response.players[categoryName] = category.players.map(player => player.name);
+    });
+    
+    return res.json(response);
+  } catch (error) {
+    console.error('[GET /api/players] Error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Impossible de récupérer les données des joueurs'
+    });
+  }
+});
+
+/**
+ * POST /api/update-category
+ * 
+ * Updates category properties (color and/or imagePath)
+ * 
+ * Expected request body:
+ * {
+ *   "category": "Hacksaw Gaming",
+ *   "color": "#101820",
+ *   "imagePath": "/newhacksawlogo.png"
+ * }
+ * 
+ * Success response (200):
+ * {
+ *   "success": true,
+ *   "message": "Catégorie mise à jour"
+ * }
+ */
+apiRouter.post('/update-category', async (req, res) => {
+  try {
+    const { category, color, imagePath } = req.body;
+    
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        error: 'Le nom de la catégorie est requis'
+      });
+    }
+    
+    const result = await withPlayersJsonLock(async () => {
+      // Read current data
+      const categories = playersJsonStore.readPlayersJson(playersJsonPath);
+      
+      if (!categories[category]) {
+        throw Object.assign(new Error('Catégorie non trouvée'), { statusCode: 404 });
+      }
+      
+      // Update properties
+      if (color !== undefined) {
+        categories[category].color = color;
+      }
+      if (imagePath !== undefined) {
+        categories[category].imagePath = imagePath;
+      }
+      
+      // Save changes
+      return playersJsonStore.writePlayersJson(playersJsonPath, categories);
+    });
+
+    return res.json({
+      success: true,
+      message: 'Catégorie mise à jour',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de mettre à jour la catégorie');
+  }
+});
+
+/**
+ * POST /api/update-player
+ * 
+ * Renames a player within a category
+ * 
+ * Expected request body:
+ * {
+ *   "category": "Hacksaw Gaming",
+ *   "oldName": "John Doe",
+ *   "newName": "Jane Doe"
+ * }
+ * 
+ * Success response (200):
+ * {
+ *   "success": true,
+ *   "message": "Joueur mis à jour"
+ * }
+ */
+apiRouter.post('/update-player', async (req, res) => {
+  try {
+    const { category, oldName, newName } = req.body;
+    
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        error: 'Le nom de la catégorie est requis'
+      });
+    }
+    
+    if (!oldName || !newName) {
+      return res.status(400).json({
+        success: false,
+        error: 'Ancien et nouveau nom du joueur sont requis'
+      });
+    }
+    
+    const result = await withPlayersJsonLock(async () => {
+      // Read current data
+      const categories = playersJsonStore.readPlayersJson(playersJsonPath);
+      
+      if (!categories[category]) {
+        throw Object.assign(new Error('Catégorie non trouvée'), { statusCode: 404 });
+      }
+      
+      // Find the player to update
+      const playerIndex = categories[category].players.findIndex(
+        player => player.name === oldName
+      );
+      
+      if (playerIndex === -1) {
+        throw Object.assign(new Error('Joueur non trouvé'), { statusCode: 404 });
+      }
+      
+      // Check if new name already exists in this category
+      const nameExists = categories[category].players.some(
+        player => player.name === newName
+      );
+      
+      if (nameExists) {
+        throw Object.assign(new Error('Un joueur avec ce nom existe déjà'), { statusCode: 400 });
+      }
+      
+      // Update the player name
+      categories[category].players[playerIndex].name = newName;
+      
+      // Save changes
+      return playersJsonStore.writePlayersJson(playersJsonPath, categories);
+    });
+
+    return res.json({
+      success: true,
+      message: 'Joueur mis à jour',
+      ...result
+    });
+  } catch (error) {
+    return sendPlayersJsonError(res, error, 'Impossible de mettre à jour le joueur');
+  }
+});
+
 app.use('/api', apiRouter);
 
 // Redirige /tournois vers tournois.html (AVANT express.static)
