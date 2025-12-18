@@ -140,7 +140,7 @@ class AdminPlayersManager {
         return {};
       }
 
-      const snapshot = await db.collection('categories').get();
+      const snapshot = await window.db.collection('categories').get();
       const categories = {};
       
       snapshot.forEach(doc => {
@@ -154,10 +154,10 @@ class AdminPlayersManager {
         };
       });
 
-      console.log('Loaded categories from Firestore:', Object.keys(categories).length);
+      console.log('✅ Loaded categories from Firestore:', Object.keys(categories).length);
       return categories;
     } catch (error) {
-      console.error('Error loading categories from Firestore:', error);
+      console.error('❌ Error loading categories from Firestore:', error);
       return {};
     }
   }
@@ -170,7 +170,7 @@ class AdminPlayersManager {
         return [];
       }
 
-      const snapshot = await db.collection('players').get();
+      const snapshot = await window.db.collection('players').get();
       const players = [];
       
       snapshot.forEach(doc => {
@@ -185,10 +185,10 @@ class AdminPlayersManager {
         });
       });
 
-      console.log('Loaded players from Firestore:', players.length);
+      console.log('✅ Loaded players from Firestore:', players.length);
       return players;
     } catch (error) {
-      console.error('Error loading players from Firestore:', error);
+      console.error('❌ Error loading players from Firestore:', error);
       return [];
     }
   }
@@ -197,9 +197,11 @@ class AdminPlayersManager {
   async loadFromFirestore() {
     try {
       if (!window.db) {
-        console.warn('Firestore not initialized');
+        console.warn('⚠️ Firestore not initialized - window.db is undefined');
         return null;
       }
+
+      console.log('🔄 Loading data from Firestore...');
 
       // Load categories
       const categories = await this.loadCategoriesFromFirestore();
@@ -215,13 +217,18 @@ class AdminPlayersManager {
             name: player.name,
             firestoreId: player.firestoreId
           });
+        } else {
+          console.warn(`⚠️ Player "${player.name}" references non-existent category "${player.category}"`);
         }
       });
 
-      console.log('Loaded complete data from Firestore');
+      console.log('✅ Loaded complete data from Firestore:', {
+        categories: Object.keys(categories).length,
+        totalPlayers: players.length
+      });
       return categories;
     } catch (error) {
-      console.error('Error loading from Firestore:', error);
+      console.error('❌ Error loading from Firestore:', error);
       return null;
     }
   }
@@ -243,17 +250,18 @@ class AdminPlayersManager {
 
       // If we have a firestoreId, update existing document
       if (categoryData.firestoreId) {
-        await db.collection('categories').doc(categoryData.firestoreId).update(docData);
+        await window.db.collection('categories').doc(categoryData.firestoreId).update(docData);
+        console.log('✅ Category updated in Firestore:', categoryName);
       } else {
         // Create new document
-        const docRef = await db.collection('categories').add(docData);
+        const docRef = await window.db.collection('categories').add(docData);
         categoryData.firestoreId = docRef.id;
+        console.log('✅ Category saved to Firestore:', categoryName, 'ID:', docRef.id);
       }
 
-      console.log('Category saved to Firestore:', categoryName);
       return true;
     } catch (error) {
-      console.error('Error saving category to Firestore:', error);
+      console.error('❌ Error saving category to Firestore:', error);
       return false;
     }
   }
@@ -275,17 +283,18 @@ class AdminPlayersManager {
 
       // If we have a firestoreId, update existing document
       if (player.firestoreId) {
-        await db.collection('players').doc(player.firestoreId).update(docData);
+        await window.db.collection('players').doc(player.firestoreId).update(docData);
+        console.log('✅ Player updated in Firestore:', player.name);
       } else {
         // Create new document
-        const docRef = await db.collection('players').add(docData);
+        const docRef = await window.db.collection('players').add(docData);
         player.firestoreId = docRef.id;
+        console.log('✅ Player saved to Firestore:', player.name, 'ID:', docRef.id);
       }
 
-      console.log('Player saved to Firestore:', player.name);
       return true;
     } catch (error) {
-      console.error('Error saving player to Firestore:', error);
+      console.error('❌ Error saving player to Firestore:', error);
       return false;
     }
   }
@@ -297,11 +306,11 @@ class AdminPlayersManager {
         return false;
       }
 
-      await db.collection('categories').doc(categoryData.firestoreId).delete();
-      console.log('Category deleted from Firestore');
+      await window.db.collection('categories').doc(categoryData.firestoreId).delete();
+      console.log('✅ Category deleted from Firestore');
       return true;
     } catch (error) {
-      console.error('Error deleting category from Firestore:', error);
+      console.error('❌ Error deleting category from Firestore:', error);
       return false;
     }
   }
@@ -313,11 +322,11 @@ class AdminPlayersManager {
         return false;
       }
 
-      await db.collection('players').doc(player.firestoreId).delete();
-      console.log('Player deleted from Firestore');
+      await window.db.collection('players').doc(player.firestoreId).delete();
+      console.log('✅ Player deleted from Firestore');
       return true;
     } catch (error) {
-      console.error('Error deleting player from Firestore:', error);
+      console.error('❌ Error deleting player from Firestore:', error);
       return false;
     }
   }
@@ -331,17 +340,25 @@ class AdminPlayersManager {
   // Load players from localStorage or file
   async loadPlayers() {
     try {
+      console.log('🔄 AdminPlayersManager: Starting data load...');
+      
       // Try to load from Firebase first
       let firebaseData = null;
       if (window.db) {
+        console.log('✅ window.db is available, loading from Firestore...');
         firebaseData = await this.loadFromFirestore();
+      } else {
+        console.warn('⚠️ window.db is NOT available yet, skipping Firestore');
       }
 
       // If we have Firebase data, use it
       if (firebaseData) {
+        console.log('✅ Using Firestore data as source of truth');
         this.applyNormalizedData(firebaseData);
         return;
       }
+
+      console.log('⚠️ No Firestore data found, falling back to players.json');
 
       // Fall back to players.json
       const response = await fetch('/players.json');
@@ -352,20 +369,23 @@ class AdminPlayersManager {
         const hasModifications = localStorage.getItem('adminPlayersModified') === 'true';
 
         if (stored && hasModifications) {
+          console.log('📦 Using modified localStorage data');
           const parsedStored = JSON.parse(stored);
           this.applyNormalizedData(parsedStored, { resave: true });
           // Sync the local modifications to Firebase
           await this.saveToFirestore();
         } else {
+          console.log('📄 Using base players.json data');
           this.applyNormalizedData(baseData);
           localStorage.removeItem('adminPlayers');
           localStorage.removeItem('adminPlayersModified');
         }
       } else {
+        console.warn('⚠️ players.json not found, using localStorage fallback');
         this.loadFromLocalStorageFallback();
       }
     } catch (error) {
-      console.error('Error loading players:', error);
+      console.error('❌ Error loading players:', error);
       this.loadFromLocalStorageFallback();
     }
   }

@@ -17,7 +17,7 @@ class AdminManager {
   // Load all tournaments from Firestore
   async loadAllTournaments() {
     try {
-      const snapshot = await db.collection('tournois').get();
+      const snapshot = await window.db.collection('tournois').get();
       this.tournaments = [];
       
       snapshot.forEach(doc => {
@@ -104,7 +104,7 @@ class AdminManager {
       this.saveExportedData(exportData);
 
       // Delete from Firestore
-      await db.collection('tournois').doc(tournamentId).delete();
+      await window.db.collection('tournois').doc(tournamentId).delete();
 
       // Remove from local array
       this.tournaments = this.tournaments.filter(t => t.id !== tournamentId);
@@ -135,7 +135,7 @@ class AdminManager {
       const oldName = tournament.name;
       const updatedState = { ...tournament.state, ...updates };
 
-      await db.collection('tournois').doc(tournamentId).update({
+      await window.db.collection('tournois').doc(tournamentId).update({
         state: updatedState
       });
 
@@ -204,7 +204,7 @@ class AdminManager {
           this.saveExportedData(exportData);
 
           // Delete from Firestore
-          await db.collection('tournois').doc(tournament.id).delete();
+          await window.db.collection('tournois').doc(tournament.id).delete();
           deleted++;
         } catch (error) {
           console.error(`Error deleting tournament ${tournament.id}:`, error);
@@ -463,7 +463,7 @@ class AdminManager {
         this.saveExportedData(exportData);
 
         // Supprimer de Firestore
-        await db.collection('tournois').doc(tournament.id).delete();
+        await window.db.collection('tournois').doc(tournament.id).delete();
         deleted++;
       } catch (error) {
         console.error(`Error deleting tournament ${tournament.id}:`, error);
