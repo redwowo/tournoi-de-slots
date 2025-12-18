@@ -1205,7 +1205,7 @@ async function saveNewCategory() {
       return;
     }
 
-    const result = adminPlayersManager.addCategory(name, { color, imagePath });
+    const result = await adminPlayersManager.addCategory(name, { color, imagePath });
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la création.';
@@ -1308,7 +1308,7 @@ async function saveEditedCategory() {
       updates.imagePath = await uploadCategoryImage(pendingEditCategoryImageFile);
     }
 
-    const result = adminPlayersManager.updateCategoryMetadata(categoryName, updates);
+    const result = await adminPlayersManager.updateCategoryMetadata(categoryName, updates);
 
     if (!result.success) {
       if (uploadStatus) {
@@ -1324,7 +1324,7 @@ async function saveEditedCategory() {
     const apiResult = await adminPlayersManager.saveCategoriesToServer();
 
     if (!apiResult.success) {
-      adminPlayersManager.updateCategoryMetadata(categoryName, { color: previousColor, imagePath: previousImagePath });
+      await adminPlayersManager.updateCategoryMetadata(categoryName, { color: previousColor, imagePath: previousImagePath });
       if (updates.imagePath && pendingEditCategoryImageFile) {
         await deleteCategoryImage(updates.imagePath);
       }
@@ -1368,7 +1368,7 @@ async function confirmDeleteCategory(categoryName) {
     return;
   }
 
-  const result = adminPlayersManager.deleteCategory(categoryName);
+  const result = await adminPlayersManager.deleteCategory(categoryName);
 
   if (!result.success) {
     showAdminToast('Erreur', result.error || 'Impossible de supprimer la catégorie', 'error');
@@ -1658,7 +1658,7 @@ async function saveNewPlayer() {
     }
 
     const forcedId = apiResult?.player?.id;
-    const result = adminPlayersManager.addPlayer(currentAddPlayerCategory, name, { forcedId });
+    const result = await adminPlayersManager.addPlayer(currentAddPlayerCategory, name, { forcedId });
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de l\'ajout.';
@@ -1722,7 +1722,7 @@ async function saveEditedPlayer() {
   const previousName = currentEditingPlayer.name;
 
   try {
-    const result = adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, name);
+    const result = await adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, name);
 
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la modification.';
@@ -1732,7 +1732,7 @@ async function saveEditedPlayer() {
     const apiResult = await adminPlayersManager.saveCategoriesToServer();
 
     if (!apiResult.success) {
-      adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, previousName);
+      await adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, previousName);
       if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
       return;
     }
@@ -1759,7 +1759,7 @@ async function confirmDeletePlayer(categoryName, playerId, playerName) {
       return;
     }
 
-    const result = adminPlayersManager.deletePlayer(categoryName, playerId);
+    const result = await adminPlayersManager.deletePlayer(categoryName, playerId);
 
     if (result.success) {
       refreshSlotAdminViews();
