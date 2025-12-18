@@ -1195,12 +1195,19 @@ async function saveNewCategory() {
       imagePath = await uploadCategoryImage(pendingAddCategoryImageFile);
     }
 
-    const result = adminPlayersManager.addCategory(name, { color, imagePath });
+    const apiResult = await adminPlayersManager.addCategoryToServer(name, { color, imagePath });
 
-    if (!result.success) {
+    if (!apiResult.success) {
       if (imagePath) {
         await deleteCategoryImage(imagePath);
       }
+      if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
+      return;
+    }
+
+    const result = adminPlayersManager.addCategory(name, { color, imagePath });
+
+    if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la création.';
       return;
     }
@@ -1283,7 +1290,9 @@ async function saveEditedCategory() {
   try {
     submitBtn && (submitBtn.disabled = true);
 
-    const previousImagePath = adminPlayersManager.getCategoryMetadata(categoryName).imagePath || '';
+    const previousMetadata = adminPlayersManager.getCategoryMetadata(categoryName);
+    const previousImagePath = previousMetadata.imagePath || '';
+    const previousColor = previousMetadata.color || '#667eea';
 
     const updates = { color: newColor };
 
@@ -1312,6 +1321,20 @@ async function saveEditedCategory() {
       return;
     }
 
+    const apiResult = await adminPlayersManager.saveCategoriesToServer();
+
+    if (!apiResult.success) {
+      adminPlayersManager.updateCategoryMetadata(categoryName, { color: previousColor, imagePath: previousImagePath });
+      if (updates.imagePath && pendingEditCategoryImageFile) {
+        await deleteCategoryImage(updates.imagePath);
+      }
+      if (uploadStatus) {
+        uploadStatus.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
+        uploadStatus.className = 'admin-upload-status error';
+      }
+      return;
+    }
+
     if ((pendingEditCategoryImageFile || pendingEditCategoryImageClear) && previousImagePath !== updates.imagePath) {
       await deleteCategoryImage(previousImagePath);
     }
@@ -1330,7 +1353,7 @@ async function saveEditedCategory() {
   }
 }
 
-function confirmDeleteCategory(categoryName) {
+async function confirmDeleteCategory(categoryName) {
   const playersCount = adminPlayersManager.getPlayersInCategory(categoryName).length;
 
   if (!confirm(`Supprimer la catégorie "${categoryName}" ? (${playersCount} slot(s) seront supprimé(s))`)) {
@@ -1339,6 +1362,12 @@ function confirmDeleteCategory(categoryName) {
 
   const previousImagePath = adminPlayersManager.getCategoryMetadata(categoryName).imagePath || '';
 
+  const apiResult = await adminPlayersManager.deleteCategoryFromServer(categoryName);
+  if (!apiResult.success) {
+    showAdminToast('Erreur', apiResult.error || 'Impossible de supprimer la catégorie côté serveur', 'error');
+    return;
+  }
+
   const result = adminPlayersManager.deleteCategory(categoryName);
 
   if (!result.success) {
@@ -1346,7 +1375,7 @@ function confirmDeleteCategory(categoryName) {
     return;
   }
 
-  deleteCategoryImage(previousImagePath);
+  await deleteCategoryImage(previousImagePath);
   renderCategories();
   showAdminToast('Succès', `Catégorie "${categoryName}" supprimée`, 'success');
 }
@@ -1598,32 +1627,44 @@ function closeAddPlayerModal() {
   }
 }
 
-function saveNewPlayer() {
+async function saveNewPlayer() {
   const nameInput = document.getElementById('playerNameInput');
   const errorEl = document.getElementById('addPlayerError');
-  
+
   const name = nameInput?.value?.trim() || '';
-  
+
   if (errorEl) errorEl.textContent = '';
-  
+
   if (!name) {
     if (errorEl) errorEl.textContent = 'Le nom du joueur est requis.';
     return;
   }
-  
+
   if (!currentAddPlayerCategory) {
     if (errorEl) errorEl.textContent = 'Catégorie non sélectionnée.';
     return;
   }
-  
+
   try {
-    const result = adminPlayersManager.addPlayer(currentAddPlayerCategory, name);
-    
+    if (adminPlayersManager?.init) {
+      await adminPlayersManager.init();
+    }
+
+    const apiResult = await adminPlayersManager.addPlayerToServer(currentAddPlayerCategory, name);
+
+    if (!apiResult.success) {
+      if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
+      return;
+    }
+
+    const forcedId = apiResult?.player?.id;
+    const result = adminPlayersManager.addPlayer(currentAddPlayerCategory, name, { forcedId });
+
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de l\'ajout.';
       return;
     }
-    
+
     closeAddPlayerModal();
     refreshSlotAdminViews();
     showAdminToast('Succès', `Joueur "${name}" ajouté`, 'success');
@@ -1660,56 +1701,75 @@ function closeEditPlayerModal() {
   }
 }
 
-function saveEditedPlayer() {
+async function saveEditedPlayer() {
   const nameInput = document.getElementById('editPlayerNameInput');
   const errorEl = document.getElementById('editPlayerError');
-  
+
   const name = nameInput?.value?.trim() || '';
-  
+
   if (errorEl) errorEl.textContent = '';
-  
+
   if (!name) {
     if (errorEl) errorEl.textContent = 'Le nom du joueur est requis.';
     return;
   }
-  
+
   if (!currentEditPlayerCategory || !currentEditingPlayer) {
     if (errorEl) errorEl.textContent = 'Données manquantes.';
     return;
   }
-  
+
+  const previousName = currentEditingPlayer.name;
+
   try {
     const result = adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, name);
-    
+
     if (!result.success) {
       if (errorEl) errorEl.textContent = result.error || 'Erreur lors de la modification.';
       return;
     }
-    
+
+    const apiResult = await adminPlayersManager.saveCategoriesToServer();
+
+    if (!apiResult.success) {
+      adminPlayersManager.editPlayer(currentEditPlayerCategory, currentEditingPlayer.id, previousName);
+      if (errorEl) errorEl.textContent = apiResult.error || 'Erreur lors de la sauvegarde serveur.';
+      return;
+    }
+
     closeEditPlayerModal();
     refreshSlotAdminViews();
-    showAdminToast('Succès', `Joueur modifié`, 'success');
+    showAdminToast('Succès', 'Joueur modifié', 'success');
   } catch (error) {
     console.error('Error saving edited player:', error);
     if (errorEl) errorEl.textContent = error.message || 'Erreur lors de la modification.';
   }
 }
 
-function confirmDeletePlayer(categoryName, playerId, playerName) {
-  if (confirm(`Supprimer le joueur "${playerName}" ?`)) {
-    try {
-      const result = adminPlayersManager.deletePlayer(categoryName, playerId);
-      
-      if (result.success) {
-        refreshSlotAdminViews();
-        showAdminToast('Succès', `Joueur supprimé`, 'success');
-      } else {
-        showAdminToast('Erreur', result.error || 'Erreur lors de la suppression', 'error');
-      }
-    } catch (error) {
-      console.error('Error deleting player:', error);
-      showAdminToast('Erreur', error.message || 'Erreur lors de la suppression', 'error');
+async function confirmDeletePlayer(categoryName, playerId, playerName) {
+  if (!confirm(`Supprimer le joueur "${playerName}" ?`)) {
+    return;
+  }
+
+  try {
+    const apiResult = await adminPlayersManager.deletePlayerFromServer(categoryName, playerName);
+
+    if (!apiResult.success) {
+      showAdminToast('Erreur', apiResult.error || 'Erreur lors de la suppression côté serveur', 'error');
+      return;
     }
+
+    const result = adminPlayersManager.deletePlayer(categoryName, playerId);
+
+    if (result.success) {
+      refreshSlotAdminViews();
+      showAdminToast('Succès', 'Joueur supprimé', 'success');
+    } else {
+      showAdminToast('Erreur', result.error || 'Erreur lors de la suppression', 'error');
+    }
+  } catch (error) {
+    console.error('Error deleting player:', error);
+    showAdminToast('Erreur', error.message || 'Erreur lors de la suppression', 'error');
   }
 }
 

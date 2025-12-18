@@ -241,6 +241,57 @@ class AdminPlayersManager {
     });
   }
 
+  async postPlayersApi(endpoint, payload) {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload || {})
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok || !data?.success) {
+        return {
+          success: false,
+          error: data?.error || data?.message || `HTTP ${response.status}`
+        };
+      }
+
+      return data;
+    } catch (error) {
+      console.error(`Error calling ${endpoint}:`, error);
+      return { success: false, error: error.message || 'Erreur réseau' };
+    }
+  }
+
+  // Persist the entire dataset to players.json via API (used for edits)
+  async saveCategoriesToServer(categories = this.categories) {
+    return this.postPlayersApi('/api/save-categories', { categories });
+  }
+
+  async addCategoryToServer(categoryName, metadata = {}) {
+    return this.postPlayersApi('/api/add-category', {
+      categoryName,
+      color: metadata.color,
+      imagePath: metadata.imagePath
+    });
+  }
+
+  async deleteCategoryFromServer(categoryName) {
+    return this.postPlayersApi('/api/delete-category', { categoryName });
+  }
+
+  async addPlayerToServer(categoryName, playerName) {
+    return this.postPlayersApi('/api/add-player', { category: categoryName, playerName });
+  }
+
+  async deletePlayerFromServer(categoryName, playerName) {
+    return this.postPlayersApi('/api/delete-player', { category: categoryName, playerName });
+  }
+
   // Broadcast update to tournament-app instances
   broadcastUpdate() {
     const timestamp = Date.now();
@@ -328,8 +379,9 @@ class AdminPlayersManager {
   }
 
   // Add a player to a category
-  addPlayer(categoryName, playerName) {
+  addPlayer(categoryName, playerName, options = {}) {
     const trimmed = playerName.trim();
+    const forcedId = Number(options?.forcedId);
 
     if (!this.categories.hasOwnProperty(categoryName)) {
       return { success: false, error: 'Catégorie non trouvée' };
@@ -346,10 +398,17 @@ class AdminPlayersManager {
       return { success: false, error: 'Ce joueur existe déjà dans cette catégorie' };
     }
 
+    const id = Number.isFinite(forcedId) && forcedId > 0 ? forcedId : this.nextPlayerId;
     const newPlayer = {
-      id: this.nextPlayerId++,
+      id,
       name: trimmed
     };
+
+    if (!(Number.isFinite(forcedId) && forcedId > 0)) {
+      this.nextPlayerId += 1;
+    } else if (forcedId >= this.nextPlayerId) {
+      this.nextPlayerId = forcedId + 1;
+    }
 
     category.players.push(newPlayer);
     this.savePlayers();
