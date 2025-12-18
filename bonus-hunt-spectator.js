@@ -23,37 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
     }
 
-    initializeTheme();
+    // Theme is now handled by the centralized theme-manager.js
     initializeSpectatorMode();
-});
-
-function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'dark';
-    document.documentElement.className = savedTheme;
-    
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        const icon = themeToggle.querySelector('i');
-        if (icon) {
-            icon.setAttribute('data-lucide', savedTheme === 'dark' ? 'sun' : 'moon');
-        }
-        
-        themeToggle.addEventListener('click', () => {
-            const currentTheme = document.documentElement.className;
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.className = newTheme;
-            localStorage.setItem('theme', newTheme);
-            
-            const icon = themeToggle.querySelector('i');
-            if (icon) {
-                icon.setAttribute('data-lucide', newTheme === 'dark' ? 'sun' : 'moon');
-                if (typeof lucide !== 'undefined') {
-                    lucide.createIcons();
-                }
-            }
-        });
-    }
-}
+})
 
 async function initializeSpectatorMode() {
     // Get sessionId from URL

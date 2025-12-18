@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="/admin-styles.css">
   <script src="/theme-init.js"></script>
   <script src="/admin-guard.js"></script>
+  <script src="/theme-manager.js" defer></script>
   <style>
     body {
       padding: 0;
@@ -47,6 +48,10 @@
   </style>
 </head>
 <body>
+  <button class="theme-toggle" id="themeToggle" aria-label="Changer de thème">
+    <img id="themeIcon" src="/lune.png" alt="Lune" class="theme-icon">
+  </button>
+
   <div class="admin-login-wrapper">
     <div class="admin-auth-container">
       <div class="admin-auth-header">
