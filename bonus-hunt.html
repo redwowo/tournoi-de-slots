@@ -1,499 +1,483 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bonus Hunt Tracker - Mode Séquentiel</title>
-    <link rel="icon" type="image/png" href="/fly.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
-    <link rel="stylesheet" href="/admin-styles.css">
-    <link rel="stylesheet" href="/styles-gaming-animations.css">
-    <script src="/theme-init.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/theme-manager.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonus Hunt Tracker - Mode Séquentiel</title>
+<link rel="icon" type="image/png" href="/fly.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="stylesheet" href="/admin-styles.css">
+<link rel="stylesheet" href="/styles-gaming-animations.css">
+<script src="/theme-init.js"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/theme-manager.js" defer></script>
 </head>
 <body class="bonus-hunt-body">
+<div class="bonus-hunt-layout">
 
-    <div class="bonus-hunt-layout">
-        <aside class="hunt-sidebar" id="huntSidebar">
-            <div class="sidebar-brand">
-                <div>
-                    <p class="eyebrow">Mode casino</p>
-                    <h2>Sessions récentes</h2>
-                </div>
-                <button class="icon-button ghost" id="sidebarClose" aria-label="Fermer la sidebar">
-                    <i data-lucide="x"></i>
-                </button>
-            </div>
+  <aside class="hunt-sidebar" id="huntSidebar">
+    <div class="sidebar-brand">
+      <div>
+        <p class="eyebrow">Mode casino</p>
+        <h2>Sessions récentes</h2>
+      </div>
+      <button class="icon-button ghost" id="sidebarClose" aria-label="Fermer la sidebar">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="session-history" id="sessionHistoryList">
+      <div class="empty-state compact">
+        <i data-lucide="clock-3"></i>
+        <p>Aucune session enregistrée</p>
+      </div>
+    </div>
+    <div class="history-details" id="sessionHistoryDetails">
+      <h4>Aperçu</h4>
+      <p>Sélectionnez une session pour afficher les détails et revivre vos gains.</p>
+    </div>
+  </aside>
 
-            <div class="session-history" id="sessionHistoryList">
-                <div class="empty-state compact">
-                    <i data-lucide="clock-3"></i>
-                    <p>Aucune session enregistrée</p>
-                </div>
-            </div>
-
-            <div class="history-details" id="sessionHistoryDetails">
-                <h4>Aperçu</h4>
-                <p>Sélectionnez une session pour afficher les détails et revivre vos gains.</p>
-            </div>
-        </aside>
-
-        <div class="hunt-main">
-            <header class="bonus-hunt-header">
-                <div class="header-left">
-                    <a href="/" class="back-button neon-glow" aria-label="Retour à l'accueil">
-                        <i data-lucide="chevron-left"></i>
-                    </a>
-                    <div>
-                        <p class="eyebrow gaming-text">Bonus Hunt</p>
-                        <h1 id="sessionTitle" class="gaming-title">Nouvelle session</h1>
-                        <div id="shareCodeDisplay" class="share-code-display" style="display: none;">
-                            <span class="share-code-label">Code de partage:</span>
-                            <span id="shareCode" class="share-code">ABC123</span>
-                            <button class="copy-code-btn" id="copyCodeButton" aria-label="Copier le code">
-                                <i data-lucide="copy"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <button class="icon-button neon-button" id="shareSessionButton" aria-label="Partager la session" style="display:none;">
-                        <i data-lucide="share-2"></i>
-                    </button>
-                    <button class="icon-button neon-button" id="mobileSidebarToggle" aria-label="Afficher les sessions">
-                        <i data-lucide="panel-left"></i>
-                    </button>
-                    <button class="theme-toggle neon-button" id="themeToggle" aria-label="Changer de thème">
-                        <img id="themeIcon" src="/lune.png" alt="Lune" class="theme-icon">
-                    </button>
-                </div>
-            </header>
-
-            <section class="session-hero">
-                <div>
-                    <p class="eyebrow" id="sessionStageLabel">Étape 1 • Création</p>
-                    <h2 id="sessionSubtitle">Définissez votre budget et donnez un nom à votre chasse aux bonus.</h2>
-                </div>
-                <div class="session-meta">
-                    <span class="session-chip">
-                        <i data-lucide="shield"></i>
-                        Mode séquentiel
-                    </span>
-                    <span class="session-chip">
-                        <i data-lucide="zap"></i>
-                        Gains en direct
-                    </span>
-                </div>
-            </section>
-
-            <div class="stepper neon-stepper">
-                <div class="step active" id="step-1">
-                    <i data-lucide="sparkles"></i>
-                    <span>Création</span>
-                </div>
-                <div class="step" id="step-2">
-                    <i data-lucide="folder-plus"></i>
-                    <span>Collection</span>
-                </div>
-                <div class="step" id="step-3">
-                    <i data-lucide="play"></i>
-                    <span>Ouverture</span>
-                </div>
-            </div>
-
-            <section class="kpi-dashboard neon-panel">
-                <div class="kpi-grid">
-                    <article class="stat-card">
-                        <p class="stat-label">Mise de départ</p>
-                        <h3 id="statHuntPrice">0,00€</h3>
-                    </article>
-                    <article class="stat-card">
-                        <p class="stat-label">Nombre de bonus</p>
-                        <h3 id="bonusCount">0</h3>
-                    </article>
-                    <article class="stat-card">
-                        <p class="stat-label">Breakeven</p>
-                        <h3 id="statBreakeven">--</h3>
-                    </article>
-                    <article class="stat-card">
-                        <p class="stat-label">Résultat net</p>
-                        <h3 id="statNetResult">--</h3>
-                    </article>
-                </div>
-            </section>
-
-            <section id="view-creation" class="game-view active">
-                <div class="config-card glass-card">
-                    <div class="card-icon">
-                        <i data-lucide="target"></i>
-                    </div>
-                    <h2>Démarrer une session</h2>
-                    <p class="text-muted">Configurez votre session Bonus Hunt avec une ambiance gaming sombre.</p>
-
-                    <form id="createHuntForm" class="config-form">
-                        <div class="form-group">
-                            <label for="huntName">Nom du Bonus Hunt</label>
-                            <input type="text" id="huntName" placeholder="Ex: Run nocturne" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="huntPrice">Prix / Budget (€)</label>
-                            <input type="number" id="huntPrice" placeholder="100.00" step="0.01" required>
-                        </div>
-                        <button type="button" class="btn btn-primary" onclick="app.goToCollection()">
-                            <i data-lucide="arrow-right"></i>
-                            Passer à la collection
-                        </button>
-                    </form>
-                </div>
-            </section>
-
-            <section id="view-collection" class="game-view">
-                <div class="collection-layout">
-                    <div class="config-card glass-card">
-                        <div class="card-header">
-                            <div>
-                                <p class="eyebrow">Étape 2</p>
-                                <h3 id="bonusFormTitle">Ajouter un bonus</h3>
-                            </div>
-                        </div>
-
-                        <form id="bonusForm" class="config-form">
-                            <div class="form-group">
-                                <label for="bonusName">Nom du Bonus</label>
-                                <input type="text" id="bonusName" placeholder="Ex: Wanted Dead or a Wild" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="bonusStake">Prix du spin (€)</label>
-                                <input type="number" id="bonusStake" placeholder="0.10" step="0.01" min="0" required>
-                            </div>
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <i data-lucide="plus"></i>
-                                    <span id="bonusFormSubmitLabel">Ajouter</span>
-                                </button>
-                                <button type="button" class="btn btn-outline" id="cancelEditButton">
-                                    <i data-lucide="x-circle"></i>
-                                    Annuler
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="form-nav">
-                            <button type="button" class="btn btn-outline" onclick="app.goToCreation()">
-                                <i data-lucide="arrow-left"></i>
-                                Retour
-                            </button>
-                            <button type="button" class="btn btn-success" onclick="app.goToOpening()">
-                                <i data-lucide="play"></i>
-                                Phase d'ouverture
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="games-panel glass-card">
-                        <div class="panel-header">
-                            <div>
-                                <p class="eyebrow">Machines</p>
-                                <h3>Bonus collectés</h3>
-                            </div>
-                            <span class="session-chip" id="collectionBonusCount">0</span>
-                        </div>
-                        <div class="breakeven-chip" id="compactBreakevenDisplay" style="display: none;"></div>
-                        <div class="bonus-list games-list" id="bonusListContainer">
-                            <div class="empty-state">
-                                <i data-lucide="inbox"></i>
-                                <p>Aucun bonus ajouté. Commencez par ajouter un bonus !</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="view-opening" class="game-view">
-                <div class="opening-toolbar">
-                    <button class="btn btn-outline" type="button" onclick="app.goToCollection()">
-                        <i data-lucide="arrow-left"></i>
-                        Retour à la collection
-                    </button>
-                    <button class="btn btn-primary" type="button" onclick="app.finishSession()">
-                        <i data-lucide="flag"></i>
-                        Terminer la session
-                    </button>
-                </div>
-
-                <div class="opening-layout">
-                    <div class="opening-phase-panel current-machine glass-card">
-                        <div class="machine-visual">
-                            <img id="openingBonusImage" src="/slot.png" alt="Machine en cours">
-                        </div>
-                        <div class="machine-info">
-                            <p class="eyebrow" id="openingBonusProvider">Provider en attente</p>
-                            <h2 id="openingBonusName">Nom du Bonus</h2>
-                            <p class="machine-bet">Valeur du bonus: <span id="openingBetAmount">0,00€</span></p>
-                        </div>
-                        <form id="gainForm" class="gain-form">
-                            <div class="form-group">
-                                <label for="gainAmount">Gain (€)</label>
-                                <input type="number" id="gainAmount" placeholder="0.00" step="0.01" oninput="app.updateMultiplier()">
-                            </div>
-                            <div class="form-group">
-                                <label for="gainMultiplier">Multiplicateur</label>
-                                <input type="text" id="gainMultiplier" readonly>
-                            </div>
-                            <div class="opening-actions">
-                                <button type="button" class="btn btn-danger" onclick="app.recordLoss()">0€ (RIP)</button>
-                                <button type="submit" class="btn btn-success">Valider</button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="results-panel glass-card">
-                        <div class="panel-header">
-                            <div>
-                                <p class="eyebrow">Étape finale</p>
-                                <h3>Avancement</h3>
-                            </div>
-                        </div>
-                        <div class="bonus-list" id="openingListContainer">
-                            <div class="empty-state">
-                                <i data-lucide="list"></i>
-                                <p>Aucun résultat enregistré pour le moment.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  <div class="hunt-main">
+    <header class="bonus-hunt-header">
+      <div class="header-left">
+        <a href="/" class="back-button neon-glow" aria-label="Retour à l'accueil">
+          <i data-lucide="chevron-left"></i>
+        </a>
+        <div>
+          <p class="eyebrow gaming-text">Bonus Hunt</p>
+          <h1 id="sessionTitle" class="gaming-title">Nouvelle session</h1>
+          <div id="shareCodeDisplay" class="share-code-display" style="display: none;">
+            <span class="share-code-label">Code de partage:</span>
+            <span id="shareCode" class="share-code">ABC123</span>
+            <button class="copy-code-btn" id="copyCodeButton" aria-label="Copier le code">
+              <i data-lucide="copy"></i>
+            </button>
+          </div>
         </div>
+      </div>
+      <div class="header-right">
+        <button class="icon-button neon-button" id="shareSessionButton" aria-label="Partager la session" style="display:none;">
+          <i data-lucide="share-2"></i>
+        </button>
+        <button class="icon-button neon-button" id="mobileSidebarToggle" aria-label="Afficher les sessions">
+          <i data-lucide="panel-left"></i>
+        </button>
+        <button class="theme-toggle neon-button" id="themeToggle" aria-label="Changer de thème">
+          <img id="themeIcon" src="/lune.png" alt="Lune" class="theme-icon">
+        </button>
+      </div>
+    </header>
+
+    <section class="session-hero">
+      <div>
+        <p class="eyebrow" id="sessionStageLabel">Étape 1 • Création</p>
+        <h2 id="sessionSubtitle">Définissez votre budget et donnez un nom à votre chasse aux bonus.</h2>
+      </div>
+      <div class="session-meta">
+        <span class="session-chip">
+          <i data-lucide="shield"></i>
+          Mode séquentiel
+        </span>
+        <span class="session-chip">
+          <i data-lucide="zap"></i>
+          Gains en direct
+        </span>
+      </div>
+    </section>
+
+    <div class="stepper neon-stepper">
+      <div class="step active" id="step-1">
+        <i data-lucide="sparkles"></i>
+        <span>Création</span>
+      </div>
+      <div class="step" id="step-2">
+        <i data-lucide="folder-plus"></i>
+        <span>Collection</span>
+      </div>
+      <div class="step" id="step-3">
+        <i data-lucide="play"></i>
+        <span>Ouverture</span>
+      </div>
     </div>
 
-    <div id="sidebarOverlay" class="sidebar-overlay"></div>
-    <div id="toastContainer" class="toast-container"></div>
+    <section class="kpi-dashboard neon-panel">
+      <div class="kpi-grid">
+        <article class="stat-card">
+          <p class="stat-label">Mise de départ</p>
+          <h3 id="statHuntPrice">0,00€</h3>
+        </article>
+        <article class="stat-card">
+          <p class="stat-label">Nombre de bonus</p>
+          <h3 id="bonusCount">0</h3>
+        </article>
+        <article class="stat-card">
+          <p class="stat-label">Breakeven</p>
+          <h3 id="statBreakeven">--</h3>
+        </article>
+        <article class="stat-card">
+          <p class="stat-label">Résultat net</p>
+          <h3 id="statNetResult">--</h3>
+        </article>
+      </div>
+    </section>
 
-    <script>
-        // Check for shareable code in URL and redirect if needed
-        function checkShareableCodeRedirect() {
-            const pathParts = window.location.pathname.split('/');
-            const lastPart = pathParts[pathParts.length - 1];
-            
-            // If we're on /bonus-hunt/ with a 6-char code
-            if (pathParts[1] === 'bonus-hunt' && lastPart && lastPart.length === 6 && /^[A-Z0-9]+$/.test(lastPart)) {
-                // Redirect to spectator mode - use the proper route
-                window.location.href = `/bonus-hunt/${lastPart}`;
-                return true;
-            }
-            
-            return false;
+    <section id="view-creation" class="game-view active">
+      <div class="config-card glass-card">
+        <div class="card-icon">
+          <i data-lucide="target"></i>
+        </div>
+        <h2>Démarrer une session</h2>
+        <p class="text-muted">Configurez votre session Bonus Hunt avec une ambiance gaming sombre.</p>
+        <form id="createHuntForm" class="config-form">
+          <div class="form-group">
+            <label for="huntName">Nom du Bonus Hunt</label>
+            <input type="text" id="huntName" placeholder="Ex: Run nocturne" required>
+          </div>
+          <div class="form-group">
+            <label for="huntPrice">Prix / Budget (€)</label>
+            <input type="number" id="huntPrice" placeholder="100.00" step="0.01" required>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="app.goToCollection()">
+            <i data-lucide="arrow-right"></i>
+            Passer à la collection
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section id="view-collection" class="game-view">
+      <div class="collection-layout">
+        <div class="config-card glass-card">
+          <div class="card-header">
+            <div>
+              <p class="eyebrow">Étape 2</p>
+              <h3 id="bonusFormTitle">Ajouter un bonus</h3>
+            </div>
+          </div>
+          <form id="bonusForm" class="config-form">
+            <div class="form-group">
+              <label for="bonusName">Nom du Bonus</label>
+              <input type="text" id="bonusName" placeholder="Ex: Wanted Dead or a Wild" required>
+            </div>
+            <div class="form-group">
+              <label for="bonusStake">Prix du spin (€)</label>
+              <input type="number" id="bonusStake" placeholder="0.10" step="0.01" min="0" required>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i>
+                <span id="bonusFormSubmitLabel">Ajouter</span>
+              </button>
+              <button type="button" class="btn btn-outline" id="cancelEditButton">
+                <i data-lucide="x-circle"></i>
+                Annuler
+              </button>
+            </div>
+          </form>
+          <div class="form-nav">
+            <button type="button" class="btn btn-outline" onclick="app.goToCreation()">
+              <i data-lucide="arrow-left"></i>
+              Retour
+            </button>
+            <button type="button" class="btn btn-success" onclick="app.goToOpening()">
+              <i data-lucide="play"></i>
+              Phase d'ouverture
+            </button>
+          </div>
+        </div>
+
+        <div class="games-panel glass-card">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Machines</p>
+              <h3>Bonus collectés</h3>
+            </div>
+            <span class="session-chip" id="collectionBonusCount">0</span>
+          </div>
+          <div class="breakeven-chip" id="compactBreakevenDisplay" style="display: none;"></div>
+          <div class="bonus-list games-list" id="bonusListContainer">
+            <div class="empty-state">
+              <i data-lucide="inbox"></i>
+              <p>Aucun bonus ajouté. Commencez par ajouter un bonus !</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-opening" class="game-view">
+      <div class="opening-toolbar">
+        <button class="btn btn-outline" type="button" onclick="app.goToCollection()">
+          <i data-lucide="arrow-left"></i>
+          Retour à la collection
+        </button>
+        <button class="btn btn-primary" type="button" onclick="app.finishSession()">
+          <i data-lucide="flag"></i>
+          Terminer la session
+        </button>
+      </div>
+
+      <div class="opening-layout">
+        <div class="opening-phase-panel current-machine glass-card">
+          <div class="machine-visual">
+            <img id="openingBonusImage" src="/slot.png" alt="Machine en cours">
+          </div>
+          <div class="machine-info">
+            <p class="eyebrow" id="openingBonusProvider">Provider en attente</p>
+            <h2 id="openingBonusName">Nom du Bonus</h2>
+            <p class="machine-bet">Valeur du bonus: <span id="openingBetAmount">0,00€</span></p>
+          </div>
+          <form id="gainForm" class="gain-form">
+            <div class="form-group">
+              <label for="gainAmount">Gain (€)</label>
+              <input type="number" id="gainAmount" placeholder="0.00" step="0.01" oninput="app.updateMultiplier()">
+            </div>
+            <div class="form-group">
+              <label for="gainMultiplier">Multiplicateur</label>
+              <input type="text" id="gainMultiplier" readonly>
+            </div>
+            <div class="opening-actions">
+              <button type="button" class="btn btn-danger" onclick="app.recordLoss()">0€ (RIP)</button>
+              <button type="submit" class="btn btn-success">Valider</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="results-panel glass-card">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Étape finale</p>
+              <h3>Avancement</h3>
+            </div>
+          </div>
+          <div class="bonus-list" id="openingListContainer">
+            <div class="empty-state">
+              <i data-lucide="list"></i>
+              <p>Aucun résultat enregistré pour le moment.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div id="sidebarOverlay" class="sidebar-overlay"></div>
+<div id="toastContainer" class="toast-container"></div>
+
+<script>
+    // ─── FIX : Boucle de redirection infinie corrigée ─────────────────────────
+    // AVANT : redirigait vers /bonus-hunt/ABC123 → même URL → boucle infinie
+    // APRÈS : redirige vers la page spectateur avec le code en paramètre
+    function checkShareableCodeRedirect() {
+        const pathParts = window.location.pathname.split('/').filter(Boolean);
+
+        // Détecte /bonus-hunt/ABC123 (code de 6 caractères majuscules/chiffres)
+        if (
+            pathParts[0] === 'bonus-hunt' &&
+            pathParts[1] &&
+            pathParts[1].length === 6 &&
+            /^[A-Z0-9]+$/.test(pathParts[1])
+        ) {
+            // Redirection vers le mode spectateur (sans boucle)
+            window.location.replace('/bonus-hunt-spectator?code=' + pathParts[1]);
+            return true;
         }
+        return false;
+    }
 
-        // Check on page load
-        if (!checkShareableCodeRedirect()) {
-            // Définir l'objet app avant de charger les autres scripts
-            var app = window.app = {
-                currentStep: 1,
-                editingBonusId: null,
-                sessionData: {
-                    name: '',
-                    huntPrice: 0,
-                    bonuses: []
-                },
+    // Vérifie au chargement de la page
+    if (!checkShareableCodeRedirect()) {
 
-                goToCreation: function() {
-                    this.currentStep = 1;
-                    this.switchView('view-creation', 1);
-                },
-
-                goToCollection: function() {
-                    const huntName = document.getElementById('huntName').value;
-                    const huntPrice = parseFloat(document.getElementById('huntPrice').value);
-
-                    if (!huntName.trim()) {
-                        alert('Veuillez entrer un nom pour le bonus hunt');
-                        return;
-                    }
-                    if (!huntPrice || huntPrice <= 0) {
-                        alert('Veuillez entrer un prix/budget valide');
-                        return;
-                    }
-
-                    this.sessionData.name = huntName;
-                    this.sessionData.huntPrice = huntPrice;
-                    this.updateSessionHeader();
-                    if (typeof updateKeyStats === 'function') {
-                        updateKeyStats();
-                    }
-                    this.currentStep = 2;
-                    this.switchView('view-collection', 2);
-                },
-
-                goToOpening: function() {
-                    if (!this.sessionData.bonuses || this.sessionData.bonuses.length === 0) {
-                        alert('Veuillez ajouter au moins un bonus');
-                        return;
-                    }
-
-                    if (typeof openingPhaseState !== 'undefined') {
-                        openingPhaseState.bonuses = this.sessionData.bonuses;
-                        openingPhaseState.currentBonusIndex = 0;
-                        openingPhaseState.results = [];
-                        openingPhaseState.summarySaved = false;
-                    }
-
-                    const openingList = document.getElementById('openingListContainer');
-                    if (openingList) {
-                        openingList.innerHTML = `
-                            <div class="empty-state">
-                                <i data-lucide="list"></i>
-                                <p>Aucun résultat enregistré pour le moment.</p>
-                            </div>`;
-                        if (typeof lucide !== 'undefined') {
-                            lucide.createIcons();
-                        }
-                    }
-
-                    this.currentStep = 3;
-                    this.switchView('view-opening', 3);
-
-                    if (typeof displayCurrentBonus !== 'undefined') {
-                        displayCurrentBonus();
-                    }
-
-                    if (typeof updateKeyStats === 'function') {
-                        updateKeyStats();
-                    }
-                },
-
-                recordLoss: function() {
-                    const gainInput = document.getElementById('gainAmount');
-                    gainInput.value = '0';
-                    const form = document.getElementById('gainForm');
-                    form.dispatchEvent(new Event('submit'));
-                },
-
-                updateMultiplier: function() {
-                    const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
-                    const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
-                    if (!currentBonus) {
-                        document.getElementById('gainMultiplier').value = '';
-                        return;
-                    }
-
-                    const stakeAmount = currentBonus.stake;
-                    if (!stakeAmount || stakeAmount <= 0) {
-                        document.getElementById('gainMultiplier').value = '';
-                        return;
-                    }
-
-                    const multiplier = (gainAmount / stakeAmount).toFixed(2);
-                    document.getElementById('gainMultiplier').value = '×' + multiplier;
-                },
-
-                finishSession: function() {
-                    alert('Session terminée ! Bravo.');
-                    location.reload();
-                },
-
-                switchView: function(viewId, stepNumber) {
-                    document.querySelectorAll('.game-view').forEach(el => {
-                        el.classList.remove('active');
-                        void el.offsetWidth;
-                    });
-
-                    setTimeout(() => {
-                        const targetView = document.getElementById(viewId);
-                        targetView.classList.add('active');
-                    }, 10);
-
-                    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
-                    document.getElementById('step-' + stepNumber).classList.add('active');
-                    this.updateStageLabel(stepNumber);
-                    window.scrollTo(0, 0);
-                },
-
-                updateSessionHeader: function() {
-                    const title = document.getElementById('sessionTitle');
-                    if (title) {
-                        title.textContent = this.sessionData.name || 'Nouvelle session';
-                    }
-                },
-
-                updateStageLabel: function(stepNumber) {
-                    const stageLabel = document.getElementById('sessionStageLabel');
-                    const subtitle = document.getElementById('sessionSubtitle');
-                    const stageCopy = {
-                        1: 'Étape 1 • Création',
-                        2: 'Étape 2 • Collection',
-                        3: 'Étape 3 • Ouverture'
-                    };
-                    const subtitleCopy = {
-                        1: 'Définissez votre budget et donnez un nom à votre chasse aux bonus.',
-                        2: 'Ajoutez vos machines favorites et préparez la session.',
-                        3: 'Ouvrez vos bonus et suivez vos gains en direct.'
-                    };
-
-                    if (stageLabel) {
-                        stageLabel.textContent = stageCopy[stepNumber] || 'Bonus Hunt';
-                    }
-                    if (subtitle) {
-                        subtitle.textContent = subtitleCopy[stepNumber] || '';
-                    }
-                },
-
-                beginBonusEdit: function(bonusId) {
-                    const bonus = this.sessionData.bonuses.find(b => b.id === bonusId);
-                    if (!bonus) return;
-
-                    document.getElementById('bonusName').value = bonus.name || '';
-                    document.getElementById('bonusStake').value = bonus.stake || '';
-                    this.editingBonusId = bonusId;
-                    this.setBonusFormState('edit');
-                    document.getElementById('bonusForm').scrollIntoView({ behavior: 'smooth' });
-                },
-
-                cancelBonusEdit: function() {
-                    this.editingBonusId = null;
-                    document.getElementById('bonusForm').reset();
-                    this.setBonusFormState('add');
-                },
-
-                setBonusFormState: function(mode) {
-                    const title = document.getElementById('bonusFormTitle');
-                    const buttonLabel = document.getElementById('bonusFormSubmitLabel');
-                    const cancelBtn = document.getElementById('cancelEditButton');
-                    if (mode === 'edit') {
-                        if (title) title.textContent = 'Modifier un bonus';
-                        if (buttonLabel) buttonLabel.textContent = 'Mettre à jour';
-                        if (cancelBtn) cancelBtn.style.display = 'inline-flex';
-                    } else {
-                        if (title) title.textContent = 'Ajouter un bonus';
-                        if (buttonLabel) buttonLabel.textContent = 'Ajouter';
-                        if (cancelBtn) cancelBtn.style.display = 'none';
+        // Définir l'objet app avant de charger les autres scripts
+        var app = window.app = {
+            currentStep: 1,
+            editingBonusId: null,
+            sessionData: {
+                name: '',
+                huntPrice: 0,
+                bonuses: []
+            },
+            goToCreation: function() {
+                this.currentStep = 1;
+                this.switchView('view-creation', 1);
+            },
+            goToCollection: function() {
+                const huntName = document.getElementById('huntName').value;
+                const huntPrice = parseFloat(document.getElementById('huntPrice').value);
+                if (!huntName.trim()) {
+                    alert('Veuillez entrer un nom pour le bonus hunt');
+                    return;
+                }
+                if (!huntPrice || huntPrice <= 0) {
+                    alert('Veuillez entrer un prix/budget valide');
+                    return;
+                }
+                this.sessionData.name = huntName;
+                this.sessionData.huntPrice = huntPrice;
+                this.updateSessionHeader();
+                if (typeof updateKeyStats === 'function') {
+                    updateKeyStats();
+                }
+                this.currentStep = 2;
+                this.switchView('view-collection', 2);
+            },
+            goToOpening: function() {
+                if (!this.sessionData.bonuses || this.sessionData.bonuses.length === 0) {
+                    alert('Veuillez ajouter au moins un bonus');
+                    return;
+                }
+                if (typeof openingPhaseState !== 'undefined') {
+                    openingPhaseState.bonuses = this.sessionData.bonuses;
+                    openingPhaseState.currentBonusIndex = 0;
+                    openingPhaseState.results = [];
+                    openingPhaseState.summarySaved = false;
+                }
+                const openingList = document.getElementById('openingListContainer');
+                if (openingList) {
+                    openingList.innerHTML = `
+                        <div class="empty-state">
+                            <i data-lucide="list"></i>
+                            <p>Aucun résultat enregistré pour le moment.</p>
+                        </div>`;
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
                     }
                 }
-            };
-        }
-    </script>
+                this.currentStep = 3;
+                this.switchView('view-opening', 3);
+                if (typeof displayCurrentBonus !== 'undefined') {
+                    displayCurrentBonus();
+                }
+                if (typeof updateKeyStats === 'function') {
+                    updateKeyStats();
+                }
+            },
+            // ─── FIX : recordLoss n'utilise plus dispatchEvent (peu fiable) ──────
+            // AVANT : form.dispatchEvent(new Event('submit')) → événement non fiable
+            // APRÈS : appel direct de la fonction de soumission
+            recordLoss: function() {
+                const gainInput = document.getElementById('gainAmount');
+                if (gainInput) gainInput.value = '0';
+                if (typeof handleOpeningGainSubmit === 'function') {
+                    handleOpeningGainSubmit({ preventDefault: function() {} });
+                }
+            },
+            updateMultiplier: function() {
+                const gainAmount = parseFloat(document.getElementById('gainAmount').value) || 0;
+                if (typeof openingPhaseState === 'undefined') return;
+                const currentBonus = openingPhaseState.bonuses[openingPhaseState.currentBonusIndex];
+                if (!currentBonus) {
+                    document.getElementById('gainMultiplier').value = '';
+                    return;
+                }
+                const stakeAmount = currentBonus.stake;
+                if (!stakeAmount || stakeAmount <= 0) {
+                    document.getElementById('gainMultiplier').value = '';
+                    return;
+                }
+                const multiplier = (gainAmount / stakeAmount).toFixed(2);
+                document.getElementById('gainMultiplier').value = '×' + multiplier;
+            },
+            finishSession: function() {
+                alert('Session terminée ! Bravo.');
+                location.reload();
+            },
+            switchView: function(viewId, stepNumber) {
+                document.querySelectorAll('.game-view').forEach(el => {
+                    el.classList.remove('active');
+                    void el.offsetWidth;
+                });
+                setTimeout(() => {
+                    const targetView = document.getElementById(viewId);
+                    if (targetView) targetView.classList.add('active');
+                }, 10);
+                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                const stepEl = document.getElementById('step-' + stepNumber);
+                if (stepEl) stepEl.classList.add('active');
+                this.updateStageLabel(stepNumber);
+                window.scrollTo(0, 0);
+            },
+            updateSessionHeader: function() {
+                const title = document.getElementById('sessionTitle');
+                if (title) {
+                    title.textContent = this.sessionData.name || 'Nouvelle session';
+                }
+            },
+            updateStageLabel: function(stepNumber) {
+                const stageLabel = document.getElementById('sessionStageLabel');
+                const subtitle = document.getElementById('sessionSubtitle');
+                const stageCopy = {
+                    1: 'Étape 1 • Création',
+                    2: 'Étape 2 • Collection',
+                    3: 'Étape 3 • Ouverture'
+                };
+                const subtitleCopy = {
+                    1: 'Définissez votre budget et donnez un nom à votre chasse aux bonus.',
+                    2: 'Ajoutez vos machines favorites et préparez la session.',
+                    3: 'Ouvrez vos bonus et suivez vos gains en direct.'
+                };
+                if (stageLabel) stageLabel.textContent = stageCopy[stepNumber] || 'Bonus Hunt';
+                if (subtitle) subtitle.textContent = subtitleCopy[stepNumber] || '';
+            },
+            beginBonusEdit: function(bonusId) {
+                const bonus = this.sessionData.bonuses.find(b => b.id === bonusId);
+                if (!bonus) return;
+                document.getElementById('bonusName').value = bonus.name || '';
+                document.getElementById('bonusStake').value = bonus.stake || '';
+                this.editingBonusId = bonusId;
+                this.setBonusFormState('edit');
+                document.getElementById('bonusForm').scrollIntoView({ behavior: 'smooth' });
+            },
+            cancelBonusEdit: function() {
+                this.editingBonusId = null;
+                document.getElementById('bonusForm').reset();
+                this.setBonusFormState('add');
+            },
+            setBonusFormState: function(mode) {
+                const title = document.getElementById('bonusFormTitle');
+                const buttonLabel = document.getElementById('bonusFormSubmitLabel');
+                const cancelBtn = document.getElementById('cancelEditButton');
+                if (mode === 'edit') {
+                    if (title) title.textContent = 'Modifier un bonus';
+                    if (buttonLabel) buttonLabel.textContent = 'Mettre à jour';
+                    if (cancelBtn) cancelBtn.style.display = 'inline-flex';
+                } else {
+                    if (title) title.textContent = 'Ajouter un bonus';
+                    if (buttonLabel) buttonLabel.textContent = 'Ajouter';
+                    if (cancelBtn) cancelBtn.style.display = 'none';
+                }
+            }
+        };
+
+    }
+</script>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="/bonus-hunt-firebase.js"></script>
+<script src="/bonus-hunt-app.js"></script>
+<script src="/bonus-hunt-enhanced.js"></script>
+<script src="/admin-auth.js"></script>
 
-    <script src="/bonus-hunt-app.js"></script>
-    <script src="/bonus-hunt-enhanced.js"></script>
-    <script src="/admin-auth.js"></script>
-    <script>
-        // Initialisation des icônes
-        lucide.createIcons();
+<script>
+    // ─── FIX : lucide.createIcons() déplacé dans DOMContentLoaded ────────────
+    // AVANT : appelé immédiatement, avant que bonus-hunt-app.js soit chargé
+    // APRÈS : appelé une fois le DOM et les scripts prêts
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+        if (window.app && typeof window.app.setBonusFormState === 'function') {
+            window.app.setBonusFormState('add');
+        }
+    });
+</script>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.app && typeof window.app.setBonusFormState === 'function') {
-                window.app.setBonusFormState('add');
-            }
-        });
-    </script>
 </body>
 </html>
