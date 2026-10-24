@@ -3850,52 +3850,32 @@ h1 img {
 
 /* Bonus Hunt Dark Theme Redesign - Enhanced Gaming Experience */
 .bonus-hunt-body {
-  --bonus-bg: #000000;
-  --bonus-panel: rgba(15, 20, 40, 0.95);
-  --bonus-sidebar: rgba(10, 15, 30, 0.95);
-  --bonus-border: rgba(255, 255, 255, 0.12);
-  --bonus-highlight: #ffd700;
-  --bonus-cyan: #00ffff;
-  --bonus-purple: #ff00ff;
-  --bonus-danger: #ff3366;
-  --bonus-success: #00ff88;
-  --bonus-muted: rgba(255, 255, 255, 0.7);
+  --bonus-bg: #0f212e;
+  --bonus-panel: #1a2c38;
+  --bonus-sidebar: #132431;
+  --bonus-card: #213743;
+  --bonus-border: #2f4553;
+  --bonus-highlight: #ffc700;
+  --bonus-cyan: #1475e1;
+  --bonus-purple: #5c53f4;
+  --bonus-danger: #e9113c;
+  --bonus-success: #00e701;
+  --bonus-muted: #b1bad3;
   --bonus-text: #ffffff;
-  --bonus-neon-glow: 0 0 20px rgba(0, 255, 255, 0.5);
-  --bonus-neon-border: 2px solid #00ffff;
+  --bonus-neon-glow: 0 4px 15px rgba(0, 231, 1, 0.2);
+  --bonus-neon-border: 1px solid var(--bonus-border);
   padding: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 15% 25%, rgba(0, 255, 255, 0.15), transparent 50%),
-    radial-gradient(circle at 85% 15%, rgba(255, 0, 255, 0.12), transparent 45%),
-    radial-gradient(circle at 50% 100%, rgba(255, 215, 0, 0.08), transparent 60%),
-    #000000;
+  background: #0f212e;
   color: var(--bonus-text);
-  font-family: 'Orbitron', 'Space Grotesk', 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   position: relative;
   isolation: isolate;
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-.bonus-hunt-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 255, 255, 0.03) 2px,
-      rgba(0, 255, 255, 0.03) 4px
-    );
-  pointer-events: none;
-  z-index: -1;
-}
+.bonus-hunt-body::before { display: none !important; }
 
 .bonus-hunt-body .toast-container {
   top: calc(env(safe-area-inset-top) + 5rem);
@@ -3963,7 +3943,7 @@ h1 img {
 
 .sidebar-brand h2 {
   margin: 0;
-  font-family: 'Orbitron', 'Space Grotesk', sans-serif;
+  font-family: 'Space Grotesk', 'Plus Jakarta Sans', sans-serif; font-weight: 800; color: #ffffff;
   letter-spacing: 0.04em;
 }
 
@@ -4253,37 +4233,24 @@ h1 img {
 }
 
 .stat-card {
-  border-radius: 16px;
-  border: 2px solid var(--bonus-border);
-  padding: 0.6rem 0.8rem;
-  background: linear-gradient(135deg, rgba(15, 20, 40, 0.95), rgba(10, 15, 30, 0.95));
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  border: 1px solid var(--bonus-border);
+  padding: 0.85rem 1rem;
+  background: var(--bonus-card);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
 .stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.stat-card:hover::before {
-  left: 100%;
+  display: none !important;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px) scale(1.01);
-  box-shadow: 
-    0 30px 60px rgba(0, 255, 255, 0.2),
-    0 0 20px rgba(0, 255, 255, 0.1);
-  border-color: var(--bonus-cyan);
+  border-color: #3b5364;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 .stat-card h3 {
@@ -4320,34 +4287,23 @@ h1 img {
 }
 
 .glass-card {
-  border: 2px solid var(--bonus-border);
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(15, 20, 40, 0.9), rgba(10, 15, 30, 0.9));
-  padding: 1.2rem;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--bonus-border);
+  border-radius: 14px;
+  background: var(--bonus-panel);
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   position: relative;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
   z-index: 4;
 }
 
 .glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, var(--bonus-cyan), var(--bonus-purple));
-  opacity: 0.6;
+  display: none !important;
 }
 
 .glass-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 
-    0 35px 80px rgba(0, 255, 255, 0.2),
-    0 0 25px rgba(0, 255, 255, 0.1);
-  border-color: var(--bonus-cyan);
+  border-color: #3b5364;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
 }
 
 .card-icon {
@@ -4565,31 +4521,44 @@ h1 img {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1px solid transparent;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  padding: 0.75rem 1.25rem;
-  transition: box-shadow 0.2s ease;
+  padding: 0.75rem 1.4rem;
+  font-size: 0.95rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   z-index: 6;
 }
 
 .bonus-hunt-body .btn-primary {
-  background: linear-gradient(135deg, var(--bonus-purple), var(--bonus-cyan));
+  background: var(--bonus-cyan);
   color: #fff;
-  box-shadow: 0 20px 35px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 14px rgba(20, 117, 225, 0.3);
+}
+.bonus-hunt-body .btn-primary:hover {
+  background: #1062be;
+  box-shadow: 0 6px 18px rgba(20, 117, 225, 0.45);
 }
 
 .bonus-hunt-body .btn-success {
-  background: linear-gradient(135deg, #059669, #34d399);
-  color: #fff;
-  box-shadow: 0 15px 25px rgba(5, 150, 105, 0.35);
+  background: var(--bonus-success);
+  color: #011707;
+  box-shadow: 0 4px 14px rgba(0, 231, 1, 0.3);
+}
+.bonus-hunt-body .btn-success:hover {
+  background: #00ff01;
+  box-shadow: 0 6px 20px rgba(0, 231, 1, 0.5);
 }
 
 .bonus-hunt-body .btn-danger {
-  background: linear-gradient(135deg, #b91c1c, #f43f5e);
+  background: var(--bonus-danger);
   color: #fff;
+  box-shadow: 0 4px 14px rgba(233, 17, 60, 0.3);
+}
+.bonus-hunt-body .btn-danger:hover {
+  background: #c70e33;
 }
 
 .bonus-hunt-body .btn-outline {
