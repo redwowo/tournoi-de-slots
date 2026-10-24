@@ -5192,3 +5192,28 @@ button, .btn, .btn-primary, .btn-outline, .btn-add, .btn-success, .btn-danger, .
 button:active, .btn:active, .btn-primary:active, .btn-outline:active, .btn-add:active, .mode-card:active {
   transform: scale(0.97) !important;
 }
+/* Modern centered layout for Bonus Hunt creation */
+#view-creation .config-card {
+  max-width: 480px;
+  margin: 2rem auto;
+  border-radius: 16px;
+  background: var(--bonus-panel);
+  border: 1px solid var(--bonus-border);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+}
+
+#view-creation h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 800;
+  text-align: center;
+  color: #ffffff;
+}
+
+#view-creation .btn-primary {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.9rem 1.5rem;
+  font-size: 1rem;
+}

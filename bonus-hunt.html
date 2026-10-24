@@ -25,9 +25,7 @@
         <p class="eyebrow">Mode casino</p>
         <h2>Sessions récentes</h2>
       </div>
-      <button class="icon-button ghost" id="sidebarClose" aria-label="Fermer la sidebar">
-        <i data-lucide="x"></i>
-      </button>
+      
     </div>
     <div class="session-history" id="sessionHistoryList">
       <div class="empty-state compact">
@@ -77,16 +75,7 @@
         <p class="eyebrow" id="sessionStageLabel">Étape 1 • Création</p>
         <h2 id="sessionSubtitle">Définissez votre budget et donnez un nom à votre chasse aux bonus.</h2>
       </div>
-      <div class="session-meta">
-        <span class="session-chip">
-          <i data-lucide="shield"></i>
-          Mode séquentiel
-        </span>
-        <span class="session-chip">
-          <i data-lucide="zap"></i>
-          Gains en direct
-        </span>
-      </div>
+      
     </section>
 
     <div class="stepper neon-stepper">
@@ -104,7 +93,7 @@
       </div>
     </div>
 
-    <section class="kpi-dashboard neon-panel">
+    <section class="kpi-dashboard neon-panel" style="display: none;">
       <div class="kpi-grid">
         <article class="stat-card">
           <p class="stat-label">Mise de départ</p>
@@ -127,11 +116,7 @@
 
     <section id="view-creation" class="game-view active">
       <div class="config-card glass-card">
-        <div class="card-icon">
-          <i data-lucide="target"></i>
-        </div>
-        <h2>Démarrer une session</h2>
-        <p class="text-muted">Configurez votre session Bonus Hunt avec une ambiance gaming sombre.</p>
+        <h2>Nouvelle session</h2>
         <form id="createHuntForm" class="config-form">
           <div class="form-group">
             <label for="huntName">Nom du Bonus Hunt</label>
