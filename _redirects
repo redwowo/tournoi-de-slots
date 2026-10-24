@@ -16,9 +16,14 @@
 /bonus-hunt/:sessionId /bonus-hunt-spectator.html 200
 /bonus-hunt-spectator/:code /bonus-hunt-spectator.html 200
 /bonus-hunt /bonus-hunt.html 200
+/bonus-hunt-history /bonus-hunt-history.html 200
+/bonus-hunt-spectator /bonus-hunt-spectator.html 200
+/admin-panel /admin-panel.html 200
+/admin-login /admin-login.html 200
 /accueil /index.html 200
-/styles.css /styles.css 200
-/tournament-app.js /tournament-app.js 200
+/*.js /:splat 200
+/*.css /:splat 200
 /*.png /:splat 200
 /*.svg /:splat 200
+/*.json /:splat 200
 /* /index.html 200

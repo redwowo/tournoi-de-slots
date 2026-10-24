@@ -81,8 +81,38 @@
   status = 200
 
 [[redirects]]
+  from = "/bonus-hunt/:sessionId"
+  to = "/bonus-hunt-spectator.html"
+  status = 200
+
+[[redirects]]
+  from = "/bonus-hunt-spectator/:code"
+  to = "/bonus-hunt-spectator.html"
+  status = 200
+
+[[redirects]]
   from = "/bonus-hunt"
   to = "/bonus-hunt.html"
+  status = 200
+
+[[redirects]]
+  from = "/bonus-hunt-history"
+  to = "/bonus-hunt-history.html"
+  status = 200
+
+[[redirects]]
+  from = "/bonus-hunt-spectator"
+  to = "/bonus-hunt-spectator.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-panel"
+  to = "/admin-panel.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-login"
+  to = "/admin-login.html"
   status = 200
 
 [[redirects]]
@@ -91,13 +121,13 @@
   status = 200
 
 [[redirects]]
-  from = "/styles.css"
-  to = "/styles.css"
+  from = "/*.js"
+  to = "/:splat"
   status = 200
 
 [[redirects]]
-  from = "/tournament-app.js"
-  to = "/tournament-app.js"
+  from = "/*.css"
+  to = "/:splat"
   status = 200
 
 [[redirects]]
@@ -107,6 +137,11 @@
 
 [[redirects]]
   from = "/*.svg"
+  to = "/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*.json"
   to = "/:splat"
   status = 200
 

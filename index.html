@@ -62,5 +62,22 @@
     <div class="legal-notice-slide" id="legalNoticeSlide">
         Site créé avec IA.<br>Appartenant à Redwo.<br>Patouche Lamouche Inc.
     </div>
+    <script>
+        const legalNoticeIcon = document.getElementById('legalNoticeIcon');
+        const legalNoticeSlide = document.getElementById('legalNoticeSlide');
+        if (legalNoticeIcon && legalNoticeSlide) {
+            legalNoticeIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                legalNoticeSlide.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (legalNoticeSlide.classList.contains('active')) {
+                    if (!legalNoticeSlide.contains(e.target) && !legalNoticeIcon.contains(e.target)) {
+                        legalNoticeSlide.classList.remove('active');
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 </html>
