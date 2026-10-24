@@ -5564,3 +5564,15 @@ button:active, .btn:active, .btn-primary:active, .btn-outline:active, .btn-add:a
 .summary-net.negative {
   color: var(--bonus-danger);
 }
+
+/* =========================================
+   PERMANENT 100% DARK THEME EVERYWHERE
+   ========================================= */
+html, body {
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #0f172a 45%, #090d16 100%) fixed !important;
+  color: #e6edf3 !important;
+}
+
+.theme-toggle {
+  display: none !important;
+}
