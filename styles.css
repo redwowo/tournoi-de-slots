@@ -5217,3 +5217,350 @@ button:active, .btn:active, .btn-primary:active, .btn-outline:active, .btn-add:a
   padding: 0.9rem 1.5rem;
   font-size: 1rem;
 }
+
+/* ========================================================
+   CRYPTO CASINO / STAKE LAYOUT - PERFECT CENTERING & ALIGNMENT
+   ======================================================== */
+
+.bonus-hunt-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  min-height: 100vh;
+  position: relative;
+}
+
+.hunt-main {
+  background: var(--bonus-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.bonus-hunt-header {
+  background: #132431;
+  border-bottom: 1px solid var(--bonus-border);
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-left .back-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #213743;
+  border: 1px solid var(--bonus-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.header-left .back-button:hover {
+  background: #2f4553;
+  border-color: #3e5a6d;
+}
+
+.share-code-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #0f212e;
+  border: 1px solid var(--bonus-border);
+  padding: 0.3rem 0.75rem;
+  border-radius: 8px;
+  margin-left: 1rem;
+}
+
+.share-code {
+  font-family: 'Space Grotesk', monospace;
+  font-weight: 700;
+  color: var(--bonus-cyan);
+  letter-spacing: 0.08em;
+}
+
+.copy-code-btn {
+  background: transparent;
+  border: none;
+  color: var(--bonus-muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  box-shadow: none !important;
+}
+
+.copy-code-btn:hover {
+  color: #ffffff;
+}
+
+/* Hero & Centered Stepper */
+.session-hero {
+  padding: 1.5rem 2rem 0.5rem;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.session-hero h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0.25rem 0 0 0;
+}
+
+.neon-stepper {
+  display: flex;
+  gap: 0.75rem;
+  max-width: 540px;
+  margin: 1.25rem auto 1.5rem;
+  padding: 0;
+  background: transparent;
+}
+
+.neon-stepper .step {
+  flex: 1;
+  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--bonus-border);
+  background: #1a2c38;
+  color: var(--bonus-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: none !important;
+}
+
+.neon-stepper .step.active {
+  background: #213743;
+  border-color: var(--bonus-cyan);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(20, 117, 225, 0.25);
+}
+
+/* KPI Dashboard (when active) */
+.kpi-dashboard {
+  max-width: 1100px;
+  margin: 0 auto 1.5rem;
+  width: calc(100% - 4rem);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+/* ========================================================
+   ETAPE 2 : COLLECTION LAYOUT (CENTERED)
+   ======================================================== */
+.collection-layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+#view-collection .config-card {
+  background: var(--bonus-panel);
+  border: 1px solid var(--bonus-border);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.games-panel {
+  background: var(--bonus-panel);
+  border: 1px solid var(--bonus-border);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.games-panel .panel-header {
+  border-bottom: 1px solid var(--bonus-border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent !important;
+}
+
+.games-panel .panel-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #ffffff;
+}
+
+/* Game item list */
+.game-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #213743;
+  border: 1px solid var(--bonus-border);
+  margin-bottom: 0.5rem;
+}
+
+.game-thumb img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+}
+
+.game-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: #1a2c38;
+  border: 1px solid var(--bonus-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--bonus-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-button svg {
+  width: 15px;
+  height: 15px;
+  stroke: currentColor;
+}
+
+.icon-button:hover {
+  background: #2f4553;
+  color: #ffffff;
+}
+
+.icon-button.danger:hover {
+  background: rgba(233, 17, 60, 0.2);
+  border-color: var(--bonus-danger);
+  color: var(--bonus-danger);
+}
+
+.form-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+/* ========================================================
+   ETAPE 3 : OUVERTURE LAYOUT (CENTERED)
+   ======================================================== */
+.opening-toolbar {
+  max-width: 1100px;
+  margin: 0 auto 1.5rem;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.opening-layout {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+  display: grid;
+  grid-template-columns: minmax(360px, 420px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  box-sizing: border-box;
+}
+
+/* Quand la session est terminée ou la machine masquée : centrer la carte de bilan */
+.opening-phase-panel[style*="display: none"] ~ .results-panel,
+.opening-layout:has(.opening-phase-panel[style*="display: none"]) .results-panel {
+  grid-column: 1 / -1;
+  max-width: 650px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.results-panel {
+  background: var(--bonus-panel);
+  border: 1px solid var(--bonus-border);
+  border-radius: 14px;
+  padding: 1.5rem;
+}
+
+.results-panel .panel-header {
+  border-bottom: 1px solid var(--bonus-border);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  background: transparent !important;
+}
+
+.session-summary-card {
+  background: #213743;
+  border: 1px solid var(--bonus-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.session-summary-card h3 {
+  margin: 0 0 0.75rem 0;
+  color: #ffffff;
+  font-size: 1.25rem;
+}
+
+.summary-pills {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.summary-pills span {
+  background: #1a2c38;
+  border: 1px solid var(--bonus-border);
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--bonus-muted);
+}
+
+.summary-net {
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0;
+}
+.summary-net.positive {
+  color: var(--bonus-success);
+}
+.summary-net.negative {
+  color: var(--bonus-danger);
+}
